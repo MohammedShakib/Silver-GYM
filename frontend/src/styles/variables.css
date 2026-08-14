@@ -96,8 +96,8 @@
   --shadow-green: 0 8px 24px rgba(34,197,94,.25);
 
   /* ─── Layout ─── */
-  --header-h:      68px;
+  --header-h:      76px;
   --sidebar-w:     260px;
-  --content-max:   1280px;
+  --content-max:   1320px;
   --page-px:       clamp(1.5rem, 5vw, 4.5rem);
 }

@@ -21,7 +21,7 @@ export default function DigitalPass() {
         <Link to="/member" style={{ color: 'white' }}>
           <ArrowLeft size={24} />
         </Link>
-        <h2 style={{ fontSize: '18px', margin: 0 }}>My FitPass</h2>
+        <h2 style={{ fontSize: '18px', margin: 0 }}>Digital Pass</h2>
         <div style={{ width: '24px' }}></div> {/* Spacer */}
       </div>
 
@@ -40,7 +40,7 @@ export default function DigitalPass() {
         }}>
           {/* Pass Header */}
           <div style={{ backgroundColor: 'var(--color-brand-primary)', padding: 'var(--space-6)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontFamily: 'var(--font-family-heading)', fontWeight: 800, fontSize: '24px' }}>FitPass</span>
+            <span style={{ fontFamily: 'var(--font-family-heading)', fontWeight: 800, fontSize: '24px' }}>Silver GYM</span>
             <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '4px 12px', borderRadius: 'var(--radius-full)', fontSize: '12px', fontWeight: 600 }}>
               ACTIVE
             </div>
