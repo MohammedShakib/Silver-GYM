@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Users, Building, Activity, DollarSign, FileText, AlertCircle, TrendingUp, UserCheck } from 'lucide-react';
+import { Users, Building, Activity, DollarSign, AlertCircle, UserCheck } from 'lucide-react';
 import { adminData } from '../../services/mockData';
 
 function MetricCard({ icon: Icon, value, label, sub, color }) {

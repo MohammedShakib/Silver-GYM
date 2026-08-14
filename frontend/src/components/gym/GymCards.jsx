@@ -1,4 +1,4 @@
-import { MapPin, Star, Clock, Users, CheckCircle, Heart, Zap } from 'lucide-react';
+import { MapPin, Star, Clock, CheckCircle, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const CROWD_COLORS = {

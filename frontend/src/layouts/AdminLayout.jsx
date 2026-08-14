@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Building, FileText, CreditCard, Activity, DollarSign, HeadphonesIcon, BarChart3, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, Building, FileText, CreditCard, Activity, DollarSign, BarChart3, Settings, LogOut } from 'lucide-react';
 import BrandLogo from '../components/brand/BrandLogo';
 
 const ADMIN_LINKS = [

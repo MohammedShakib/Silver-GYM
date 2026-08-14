@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, MapPin, Clock, Users, ArrowRight, Zap, ChevronRight } from 'lucide-react';
+import { Search, MapPin, ArrowRight, Zap, ChevronRight } from 'lucide-react';
 import { mockUser, mockGyms, mockActivity, weeklyData } from '../../services/mockData';
 import { GymCardLarge } from '../../components/gym/GymCards';
 import DigitalPassCard from '../../components/pass/DigitalPassCard';
@@ -172,7 +172,7 @@ export default function MemberHome() {
 
               {/* Bar chart */}
               <div style={{ display: 'flex', alignItems: 'flex-end', height: 80, gap: 8 }}>
-                {weeklyData.map((d, i) => (
+                {weeklyData.map((d) => (
                   <div key={d.day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
                     <div style={{ width: '100%', height: d.min ? `${(d.min / 100) * 80}px` : 4, background: d.min ? 'var(--sg-green)' : 'var(--bg-muted)', borderRadius: '3px 3px 0 0', minHeight: 4, transition: 'height .3s' }} />
                     <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{d.day}</span>

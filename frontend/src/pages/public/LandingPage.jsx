@@ -7,10 +7,8 @@ import {
   MapPin,
   Clock,
   Users,
-  Zap,
   ChevronRight,
   Shield,
-  TrendingUp,
   Dumbbell,
   QrCode,
   Activity,
@@ -19,21 +17,17 @@ import {
   Compass,
   Award,
   Sparkles,
-  PauseCircle,
   Check,
   Navigation,
-  Layers,
   Search,
-  CheckCircle,
 } from 'lucide-react';
-import { GYM_IMAGES, mockGyms, plans, AREAS, mockUser, ownerData } from '../../services/mockData';
-import heroAppShowcase from '../../assets/landing/silver-gym-hero-app-showcase.png';
+import { GYM_IMAGES, mockGyms, AREAS, ownerData } from '../../services/mockData';
+import heroPhoneMockup from '../../assets/landing/silver-gym-hero-phone-mockup.webp';
 
 const SHOW_LEGACY_HERO_VISUAL = false;
 
 export default function LandingPage() {
   const [selectedArea, setSelectedArea] = useState('Mirpur');
-  const [activeTab, setActiveTab] = useState('active');
 
   const featuredGyms = mockGyms.slice(0, 3);
 
@@ -129,7 +123,7 @@ export default function LandingPage() {
             className="hero-grid"
           >
             {/* Left Content Column */}
-            <div style={{ maxWidth: '560px' }}>
+            <div style={{ maxWidth: '560px', position: 'relative', zIndex: 3 }}>
               {/* Eyebrow badge */}
               <div
                 style={{
@@ -151,27 +145,33 @@ export default function LandingPage() {
 
               {/* Main Headline (64-70px bold) */}
               <h1
+                className="hero-title"
                 style={{
-                  fontSize: 'clamp(2.75rem, 4.2vw, 4.25rem)',
+                  fontSize: 'clamp(3rem, 4.2vw, 4.35rem)',
                   fontWeight: 900,
-                  letterSpacing: '-0.035em',
-                  lineHeight: 1.06,
+                  letterSpacing: '-0.026em',
+                  lineHeight: 1.08,
                   marginBottom: 'var(--sp-6)',
                   color: '#0F172A',
                 }}
               >
-                One membership.{' '}
-                <span
-                  style={{
-                    background: 'linear-gradient(135deg, #16A34A 0%, #22C55E 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    display: 'inline-block',
-                  }}
-                >
-                  Every gym
-                </span>{' '}
-                you need.
+                <span style={{ display: 'block' }}>One</span>
+                <span style={{ display: 'block' }}>membership.</span>
+                <span className="hero-title-nowrap" style={{ display: 'block', whiteSpace: 'nowrap' }}>
+                  <span
+                    style={{
+                      background: 'linear-gradient(135deg, #16A34A 0%, #22C55E 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      display: 'inline-block',
+                      marginRight: '0.12em',
+                    }}
+                  >
+                    Every gym
+                  </span>
+                  you
+                </span>
+                <span style={{ display: 'block' }}>need.</span>
               </h1>
 
               {/* Subtitle */}
@@ -193,8 +193,8 @@ export default function LandingPage() {
                   to="/member/explore"
                   className="btn btn-primary btn-lg"
                   style={{
-                    padding: '0.9rem 1.85rem',
-                    fontSize: '1rem',
+                  padding: '0.9rem 1.85rem',
+                  fontSize: '1rem',
                     fontWeight: 700,
                     borderRadius: 'var(--r-lg)',
                     boxShadow: '0 6px 20px rgba(34, 197, 94, 0.35)',
@@ -203,7 +203,7 @@ export default function LandingPage() {
                     gap: 8,
                   }}
                 >
-                  Explore 120+ Gyms
+                  Find Gyms Near You
                   <ArrowRight size={18} />
                 </Link>
                 <Link
@@ -213,13 +213,13 @@ export default function LandingPage() {
                     padding: '0.9rem 1.65rem',
                     fontSize: '1rem',
                     fontWeight: 600,
-                    borderRadius: 'var(--r-lg)',
-                    background: 'white',
-                    border: '1.5px solid #CBD5E1',
+                  borderRadius: 'var(--r-lg)',
+                  background: 'white',
+                  border: '1.5px solid #CBD5E1',
                     color: '#1E293B',
                   }}
                 >
-                  View Plans & Pricing
+                  Compare Plans
                 </Link>
               </div>
 
@@ -255,20 +255,32 @@ export default function LandingPage() {
             </div>
 
             {/* Right Layered Interactive Visual Composition */}
-            <div style={{ position: 'relative', height: '580px', width: '100%' }} className="hero-visual-col">
+            <div style={{ position: 'relative', height: '580px', width: '100%', isolation: 'isolate' }} className="hero-visual-col">
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: '-24% -14% -18% -18%',
+                  zIndex: 0,
+                  background:
+                    'radial-gradient(circle at 52% 48%, rgba(34, 197, 94, 0.18) 0%, rgba(34, 197, 94, 0.07) 36%, transparent 72%)',
+                  filter: 'blur(42px)',
+                  pointerEvents: 'none',
+                }}
+              />
               <img
-                src={heroAppShowcase}
+                src={heroPhoneMockup}
                 alt="Silver GYM mobile app preview"
                 style={{
                   position: 'absolute',
-                  inset: 0,
-                  zIndex: 50,
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'center',
-                  borderRadius: '24px',
-                  boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(226, 232, 240, 0.8)',
+                  inset: '-74px -42px -80px -18px',
+                  zIndex: 1,
+                  width: 'calc(100% + 74px)',
+                  height: 'calc(100% + 154px)',
+                  objectFit: 'contain',
+                  objectPosition: '58% 52%',
+                  opacity: 1,
+                  filter: 'drop-shadow(0 30px 36px rgba(15, 23, 42, 0.22))',
+                  pointerEvents: 'none',
                 }}
               />
               {SHOW_LEGACY_HERO_VISUAL && (
@@ -667,6 +679,13 @@ export default function LandingPage() {
             }
           }
           @media (max-width: 600px) {
+            .hero-title {
+              font-size: clamp(2.35rem, 14vw, 3.1rem) !important;
+              line-height: 1.08 !important;
+            }
+            .hero-title-nowrap {
+              white-space: normal !important;
+            }
             .hero-visual-col {
               display: none !important;
             }
@@ -682,7 +701,7 @@ export default function LandingPage() {
         style={{
           background: 'linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)',
           borderBottom: '1px solid #E2E8F0',
-          padding: 'var(--sp-6) 0',
+          padding: 'var(--sp-8) 0',
         }}
       >
         <div className="container">
@@ -708,17 +727,17 @@ export default function LandingPage() {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 14,
-                    padding: '8px 16px',
+                    gap: 16,
+                    padding: '14px 20px',
                     borderRight: i < 3 ? '1px solid #E2E8F0' : 'none',
                   }}
                   className="trust-stat-item"
                 >
                   <div
                     style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 12,
+                      width: 52,
+                      height: 52,
+                      borderRadius: 14,
                       background: `${stat.color}15`,
                       display: 'flex',
                       alignItems: 'center',
@@ -726,13 +745,13 @@ export default function LandingPage() {
                       flexShrink: 0,
                     }}
                   >
-                    <Icon size={22} color={stat.color} />
+                    <Icon size={25} color={stat.color} />
                   </div>
                   <div>
                     <div
                       style={{
                         fontFamily: 'var(--font-heading)',
-                        fontSize: '1.45rem',
+                        fontSize: '1.7rem',
                         fontWeight: 900,
                         color: '#0F172A',
                         lineHeight: 1.1,
@@ -741,10 +760,10 @@ export default function LandingPage() {
                     >
                       {stat.number}
                     </div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155' }}>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#334155' }}>
                       {stat.label}
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748B' }}>
+                    <div style={{ fontSize: '0.82rem', color: '#64748B' }}>
                       {stat.desc}
                     </div>
                   </div>
@@ -798,7 +817,7 @@ export default function LandingPage() {
               <Sparkles size={13} /> Product Workflow
             </div>
             <h2 style={{ fontSize: 'clamp(2rem, 3.2vw, 2.75rem)', fontWeight: 900, letterSpacing: '-0.025em', color: '#0F172A' }}>
-              One membership. A simpler way to train.
+              Your pass. A simpler way to train.
             </h2>
             <p style={{ fontSize: '1.05rem', color: '#64748B', maxWidth: '560px', margin: '0.5rem auto 0' }}>
               No tedious paper forms, no lock-in contracts per gym. Start training across Dhaka in 4 frictionless steps.
@@ -1509,7 +1528,16 @@ export default function LandingPage() {
       {/* ══════════════════════════════════════════════════════════════════════════
           6. "YOUR MEMBERSHIP MOVES WITH YOU" (Lifestyle Narrative Route Timeline)
           ══════════════════════════════════════════════════════════════════════════ */}
-      <section style={{ padding: 'var(--sp-24) 0', background: '#0F172A', color: 'white', position: 'relative', overflow: 'hidden' }}>
+      <section
+        style={{
+          padding: 'var(--sp-24) 0',
+          background: '#0F172A',
+          color: 'white',
+          position: 'relative',
+          overflow: 'hidden',
+          borderTop: '1px solid rgba(15, 23, 42, 0.08)',
+        }}
+      >
         {/* Ambient background glow */}
         <div
           style={{
@@ -1545,10 +1573,10 @@ export default function LandingPage() {
             <Navigation size={13} /> The Silver GYM Lifestyle
           </div>
           <h2 style={{ fontSize: 'clamp(2.2rem, 3.5vw, 3rem)', fontWeight: 900, color: 'white', letterSpacing: '-0.025em', marginBottom: 'var(--sp-4)' }}>
-            Your membership moves with you.
+            Train across Dhaka without switching plans.
           </h2>
           <p style={{ color: '#94A3B8', fontSize: '1.2rem', maxWidth: '640px', margin: '0 auto var(--sp-16)' }}>
-            <strong style={{ color: '#22C55E' }}>One membership. Three locations. Zero new contracts.</strong><br />
+            <strong style={{ color: '#22C55E' }}>Three neighborhoods. One digital pass. Zero duplicate fees.</strong><br />
             Train wherever your day takes you across Dhaka without paying double.
           </p>
 
@@ -1593,7 +1621,7 @@ export default function LandingPage() {
                 image: GYM_IMAGES.block35,
                 badgeColor: '#8B5CF6',
               },
-            ].map((scene, idx) => (
+            ].map((scene) => (
               <div
                 key={scene.gym}
                 style={{
@@ -1718,7 +1746,7 @@ export default function LandingPage() {
               <Activity size={13} /> Member App Experience
             </div>
             <h2 style={{ fontSize: 'clamp(2rem, 3.2vw, 2.75rem)', fontWeight: 900, letterSpacing: '-0.025em', color: '#0F172A' }}>
-              Everything you need before your next workout.
+              Know more before every workout.
             </h2>
             <p style={{ fontSize: '1.05rem', color: '#64748B', maxWidth: '600px', margin: '0.5rem auto 0' }}>
               Designed for speed on any mobile phone or browser. Instant check-ins, live crowd checks, and workout streak logging.
@@ -1876,7 +1904,7 @@ export default function LandingPage() {
               <Shield size={13} /> Transparent Memberships
             </div>
             <h2 style={{ fontSize: 'clamp(2.2rem, 3.5vw, 3rem)', fontWeight: 900, letterSpacing: '-0.025em', color: '#0F172A' }}>
-              Flexible plans for every trainer
+              Flexible plans for every training rhythm
             </h2>
             <p style={{ fontSize: '1.05rem', color: '#64748B', maxWidth: '520px', margin: '0.5rem auto 0' }}>
               No admission fees. No long-term lock-in. Upgrade, downgrade, or pause anytime in 1 tap.
@@ -1959,7 +1987,7 @@ export default function LandingPage() {
                 background: 'white',
                 borderRadius: '24px',
                 border: '2.5px solid #16A34A',
-                padding: 'var(--sp-10) var(--sp-8)',
+                padding: 'var(--sp-12) var(--sp-8) var(--sp-10)',
                 boxShadow: '0 25px 50px -12px rgba(34, 197, 94, 0.25), 0 0 0 1px rgba(34, 197, 94, 0.1)',
                 display: 'flex',
                 flexDirection: 'column',
@@ -1969,17 +1997,22 @@ export default function LandingPage() {
               }}
             >
               {/* Most popular badge */}
-              <div style={{ position: 'absolute', top: -15, left: '50%', transform: 'translateX(-50%)' }}>
+              <div style={{ position: 'absolute', top: -18, left: '50%', transform: 'translateX(-50%)', zIndex: 2 }}>
                 <span
                   style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     background: '#16A34A',
                     color: 'white',
                     fontSize: '0.78rem',
                     fontWeight: 900,
-                    padding: '5px 16px',
+                    padding: '7px 18px',
                     borderRadius: 'var(--r-full)',
                     boxShadow: '0 4px 12px rgba(34, 197, 94, 0.4)',
                     letterSpacing: '0.06em',
+                    lineHeight: 1,
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   ★ MOST POPULAR CHOICE
@@ -2513,7 +2546,7 @@ export default function LandingPage() {
               marginBottom: 'var(--sp-5)',
             }}
           >
-            Ready to make <span style={{ color: '#22C55E' }}>Dhaka</span> your gym?
+            Ready to train anywhere in <span style={{ color: '#22C55E' }}>Dhaka</span>?
           </h2>
 
           <p
@@ -2543,7 +2576,7 @@ export default function LandingPage() {
                 gap: 8,
               }}
             >
-              Join Silver GYM Today <ArrowRight size={18} />
+              Start Your Silver GYM Pass <ArrowRight size={18} />
             </Link>
             <Link
               to="/member/explore"

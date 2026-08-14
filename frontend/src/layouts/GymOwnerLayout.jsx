@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ScanLine, Users, BarChart3, DollarSign, Star, Building, Settings, LogOut, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, ScanLine, Users, BarChart3, DollarSign, Star, Building, Settings, LogOut } from 'lucide-react';
 import BrandLogo from '../components/brand/BrandLogo';
 
 const SIDEBAR_LINKS = [

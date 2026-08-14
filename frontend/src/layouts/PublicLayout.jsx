@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Dumbbell, ArrowRight, Menu, X, Shield, Sparkles, MapPin, CheckCircle2, Phone, Mail, Globe, MessageCircle } from 'lucide-react';
+import { Outlet, Link } from 'react-router-dom';
+import { ArrowRight, Menu, X } from 'lucide-react';
 import BrandLogo from '../components/brand/BrandLogo';
 
 const NAV_LINKS = [
@@ -65,7 +65,6 @@ const FOOTER_COLS = [
 ];
 
 export default function PublicLayout() {
-  const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { mockActivity, weeklyData, rewards, mockGyms, mockUser } from '../../services/mockData';
-import { Trophy, Flame, Dumbbell, Clock, MapPin, ChevronRight } from 'lucide-react';
+import { Flame, Dumbbell, Clock, MapPin } from 'lucide-react';
 
 const TABS = ['History', 'Rewards'];
 const PERIODS = ['Week', 'Month', '3 Months', 'Year'];
@@ -143,7 +143,7 @@ export default function Activity() {
       {tab === 'History' && (
         <div className="anim-fade">
           <h2 style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--sp-5)' }}>Workout history</h2>
-          {mockActivity.map((item, i) => (
+          {mockActivity.map((item) => (
             <div key={item.id} className="timeline-item">
               <div className="timeline-dot">
                 {item.type === 'checkin' ? '🏋️' : '🏆'}

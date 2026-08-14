@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { RefreshCw, Info, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { mockUser, mockActivity } from '../../services/mockData';
+import { mockActivity } from '../../services/mockData';
 import DigitalPassCard from '../../components/pass/DigitalPassCard';
 
 export default function MyPass() {

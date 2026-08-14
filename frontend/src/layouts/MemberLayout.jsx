@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Home, Compass, Activity, CreditCard, User, Bell, MapPin, QrCode } from 'lucide-react';
 import { mockUser } from '../services/mockData';
 import BrandLogo from '../components/brand/BrandLogo';
@@ -20,7 +20,6 @@ const BOT_NAV = [
 
 export default function MemberLayout() {
   const { pathname } = useLocation();
-  const navigate = useNavigate();
 
   const isActive = (to) => {
     if (to === '/member') return pathname === '/member';

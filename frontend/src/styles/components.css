@@ -17,31 +17,31 @@
 }
 
 .brand-logo-full img {
-  height: 46px;
+  height: 54px;
 }
 
 .brand-logo-wordmark img {
-  height: 28px;
+  height: 31px;
 }
 
 .brand-logo-icon img {
-  height: 34px;
+  height: 38px;
 }
 
 .brand-logo-sm.brand-logo-full img {
-  height: 36px;
+  height: 44px;
 }
 
 .brand-logo-sm.brand-logo-wordmark img {
-  height: 23px;
+  height: 26px;
 }
 
 .brand-logo-sm.brand-logo-icon img {
-  height: 28px;
+  height: 32px;
 }
 
 .brand-logo-lg.brand-logo-full img {
-  height: 54px;
+  height: 62px;
 }
 
 .brand-logo[data-dark='true'] img {
@@ -58,6 +58,16 @@
   line-height: 1;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+.landing-page .card p,
+.landing-page article p {
+  line-height: 1.58;
+}
+
+.landing-page .section-copy {
+  font-size: 1rem;
+  line-height: 1.65;
 }
 
 .btn {
