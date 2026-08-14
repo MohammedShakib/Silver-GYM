@@ -1,49 +1,77 @@
-import { RouterProvider, createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-import PublicLayout from './layouts/PublicLayout';
-import MemberLayout from './layouts/MemberLayout';
-import GymOwnerLayout from './layouts/GymOwnerLayout';
-import AdminLayout from './layouts/AdminLayout';
+// Layouts
+import PublicLayout    from './layouts/PublicLayout';
+import MemberLayout    from './layouts/MemberLayout';
+import GymOwnerLayout  from './layouts/GymOwnerLayout';
+import AdminLayout     from './layouts/AdminLayout';
 
-import LandingPage from './pages/public/LandingPage';
-import Onboarding from './pages/public/Onboarding';
-import MemberHome from './pages/member/MemberHome';
-import ExploreGyms from './pages/member/ExploreGyms';
-import GymDetails from './pages/member/GymDetails';
-import DigitalPass from './pages/member/DigitalPass';
-import CheckInFlow from './pages/member/CheckInFlow';
-import Activity from './pages/member/Activity';
+// Public
+import LandingPage     from './pages/public/LandingPage';
+
+// Auth
+import SignIn  from './pages/auth/SignIn';
+import SignUp  from './pages/auth/SignUp';
+
+// Onboarding
+import Onboarding from './pages/onboarding/Onboarding';
+
+// Member
+import MemberHome    from './pages/member/MemberHome';
+import ExploreGyms   from './pages/member/ExploreGyms';
+import GymDetails    from './pages/member/GymDetails';
+import CheckInFlow   from './pages/member/CheckInFlow';
+import MyPass        from './pages/member/MyPass';
+import Activity      from './pages/member/Activity';
+import Membership    from './pages/member/Membership';
+
+// Partner
 import GymOwnerDashboard from './pages/partner/GymOwnerDashboard';
+import ReceptionScanner  from './pages/partner/ReceptionScanner';
+
+// Admin
 import AdminDashboard from './pages/admin/AdminDashboard';
 
 const router = createBrowserRouter([
+  // ── Public routes ──
   {
-    path: '/',
     element: <PublicLayout />,
     children: [
-      { index: true, element: <LandingPage /> },
-      { path: 'onboarding', element: <Onboarding /> },
+      { path: '/',          element: <LandingPage /> },
     ],
   },
+
+  // ── Auth (no shell layout) ──
+  { path: '/sign-in',    element: <SignIn /> },
+  { path: '/join',       element: <SignUp /> },
+  { path: '/onboarding', element: <Onboarding /> },
+
+  // ── Member routes ──
   {
     path: '/member',
     element: <MemberLayout />,
     children: [
-      { index: true, element: <MemberHome /> },
-      { path: 'explore', element: <ExploreGyms /> },
-      { path: 'gym/:id', element: <GymDetails /> },
-      { path: 'pass', element: <DigitalPass /> },
-      { path: 'check-in/:id', element: <CheckInFlow /> },
-      { path: 'activity', element: <Activity /> },
+      { index: true,                    element: <MemberHome /> },
+      { path: 'explore',               element: <ExploreGyms /> },
+      { path: 'gym/:id',               element: <GymDetails /> },
+      { path: 'check-in/:id',          element: <CheckInFlow /> },
+      { path: 'pass',                  element: <MyPass /> },
+      { path: 'activity',              element: <Activity /> },
+      { path: 'membership',            element: <Membership /> },
     ],
   },
+
+  // ── Partner routes ──
   {
     path: '/partner',
     element: <GymOwnerLayout />,
     children: [
-      { index: true, element: <GymOwnerDashboard /> },
+      { index: true,              element: <GymOwnerDashboard /> },
+      { path: 'reception',       element: <ReceptionScanner /> },
     ],
   },
+
+  // ── Admin routes ──
   {
     path: '/admin',
     element: <AdminLayout />,
@@ -51,14 +79,8 @@ const router = createBrowserRouter([
       { index: true, element: <AdminDashboard /> },
     ],
   },
-  {
-    path: '*',
-    element: <Navigate to="/" replace />
-  }
 ]);
 
-function App() {
+export default function App() {
   return <RouterProvider router={router} />;
 }
-
-export default App;

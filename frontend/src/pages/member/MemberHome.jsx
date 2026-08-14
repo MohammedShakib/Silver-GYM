@@ -1,184 +1,248 @@
-import { Search, MapPin, QrCode, ArrowRight, Activity as ActivityIcon, Star } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { mockUser, mockGyms, mockActivity } from '../../services/mockData';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Badge from '../../components/ui/Badge';
-import GymCard from '../../components/gym/GymCard';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Search, MapPin, Clock, Users, ArrowRight, Zap, ChevronRight } from 'lucide-react';
+import { mockUser, mockGyms, mockActivity, weeklyData } from '../../services/mockData';
+import { GymCardLarge } from '../../components/gym/GymCards';
+import DigitalPassCard from '../../components/pass/DigitalPassCard';
+
+const HOUR = new Date().getHours();
+const GREETING = HOUR < 12 ? 'Good morning' : HOUR < 18 ? 'Good afternoon' : 'Good evening';
+
+const QUICK_FILTERS = ['Near Me', 'Open Now', 'Low Crowd', 'Included in My Plan'];
 
 export default function MemberHome() {
-  const navigate = useNavigate();
+  const [filter, setFilter] = useState('');
+  const bestMatch = mockGyms[0]; // Iron House
 
   return (
-    <div className="container animate-fade-in" style={{ paddingTop: 'var(--space-8)', paddingBottom: 'var(--space-8)' }}>
-      {/* Header */}
-      <div style={{ marginBottom: 'var(--space-8)' }}>
-        <h1 style={{ fontSize: 'var(--font-size-3xl)', marginBottom: 'var(--space-2)' }}>Good evening, {mockUser.name.split(' ')[0]} 👋</h1>
-        <p style={{ fontSize: 'var(--font-size-lg)', color: 'var(--color-text-secondary)' }}>Where do you want to train today?</p>
-      </div>
+    <div className="anim-fade">
+      {/* ── Greeting Banner ── */}
+      <div style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-subtle)', padding: 'var(--sp-8) 0 var(--sp-6)' }}>
+        <div className="container">
+          <div className="flex-between" style={{ flexWrap: 'wrap', gap: 'var(--sp-4)', marginBottom: 'var(--sp-6)' }}>
+            <div>
+              <h1 style={{ fontSize: 'var(--text-4xl)', fontWeight: 800, marginBottom: 4 }}>
+                {GREETING}, {mockUser.firstName} 👋
+              </h1>
+              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--text-lg)' }}>Where do you want to train today?</p>
+            </div>
+            <button style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '.45rem .875rem', background: 'var(--bg-subtle)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-full)', fontSize: 'var(--text-sm)', fontWeight: 500, cursor: 'pointer', color: 'var(--text-secondary)' }}>
+              <MapPin size={14} color="var(--sg-green)" /> {mockUser.location} <ChevronRight size={13} />
+            </button>
+          </div>
 
-      {/* Search Bar */}
-      <div className="search-input-wrapper" style={{ marginBottom: 'var(--space-8)' }}>
-        <Search className="lucide" />
-        <input 
-          type="text" 
-          className="input-field" 
-          placeholder="Search gyms, areas or facilities..." 
-          style={{ height: '60px', fontSize: 'var(--font-size-lg)', boxShadow: 'var(--shadow-sm)' }}
-          onFocus={() => navigate('/member/explore')}
-        />
-        <div style={{ position: 'absolute', right: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Badge variant="neutral" style={{ padding: '8px 12px', fontSize: '14px', display: 'flex', gap: '4px', cursor: 'pointer' }}>
-            <MapPin size={16} /> {mockUser.location}
-          </Badge>
+          {/* Search */}
+          <div className="input-group" style={{ position: 'relative', maxWidth: 680, marginBottom: 'var(--sp-4)' }}>
+            <Search size={18} className="input-icon" />
+            <input type="text" className="input search-bar input-with-icon" placeholder="Search gym, area or facility" />
+            <div className="input-icon-right" style={{ right: 12 }}>
+              <button style={{ background: 'var(--sg-charcoal)', border: 'none', borderRadius: 'var(--r-full)', padding: '6px 14px', fontSize: 'var(--text-xs)', fontWeight: 700, color: 'white', cursor: 'pointer' }}>Search</button>
+            </div>
+          </div>
+
+          {/* Quick filters */}
+          <div style={{ display: 'flex', gap: 'var(--sp-2)', flexWrap: 'wrap' }}>
+            {QUICK_FILTERS.map(f => (
+              <button key={f} className={`filter-chip ${filter === f ? 'active' : ''}`} onClick={() => setFilter(f === filter ? '' : f)}>
+                {f}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'var(--space-6)', marginBottom: 'var(--space-10)' }}>
-        {/* Pass Action Card */}
-        <Card style={{ 
-          background: 'linear-gradient(135deg, #1A1D20 0%, #2C3136 100%)', 
-          color: 'white',
-          padding: 'var(--space-6)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 'var(--space-6)'
-        }}>
+      <div className="container" style={{ paddingTop: 'var(--sp-8)', paddingBottom: 'var(--sp-12)' }}>
+
+        {/* ── ROW 1: Best Match + Digital Pass ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 'var(--sp-6)', marginBottom: 'var(--sp-8)' }}>
+
+          {/* Best Match */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-              <span style={{ fontSize: '20px', fontWeight: 800, color: 'var(--color-brand-primary)' }}>Digital FitPass</span>
-              <Badge variant="success" style={{ backgroundColor: 'rgba(25, 195, 106, 0.2)' }}>{mockUser.tier} Plan</Badge>
+            <div className="flex-between" style={{ marginBottom: 'var(--sp-4)' }}>
+              <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700 }}>Best match right now</h2>
+              <span className="badge badge-green" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <Zap size={11} /> 92% match
+              </span>
             </div>
-            <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-              <div>
-                <span style={{ display: 'block', fontSize: '12px', color: '#868E96', marginBottom: '4px' }}>Member ID</span>
-                <span style={{ fontFamily: 'monospace', fontSize: '18px', letterSpacing: '2px' }}>{mockUser.id}</span>
-              </div>
-              <div style={{ width: '1px', height: '30px', backgroundColor: '#495057' }}></div>
-              <div>
-                <span style={{ display: 'block', fontSize: '12px', color: '#868E96', marginBottom: '4px' }}>Visits Used</span>
-                <span style={{ fontSize: '18px', fontWeight: 600 }}>{mockUser.totalVisits - mockUser.visitsRemaining} <span style={{ color: '#868E96', fontSize: '14px' }}>/ {mockUser.totalVisits}</span></span>
+
+            <div className="card card-shadow" style={{ overflow: 'hidden' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr' }}>
+                <div style={{ position: 'relative', height: 240 }}>
+                  <img src={bestMatch.image} alt={bestMatch.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, transparent, rgba(0,0,0,.4))' }} />
+                </div>
+                <div style={{ padding: 'var(--sp-6)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <h3 style={{ fontSize: 'var(--text-2xl)', fontWeight: 800, marginBottom: 4 }}>{bestMatch.name}</h3>
+                    <div style={{ display: 'flex', gap: 12, fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-4)', flexWrap: 'wrap' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={13} /> {bestMatch.area}</span>
+                      <span>·</span>
+                      <span>{bestMatch.distance} km · {bestMatch.eta} min</span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-3)', marginBottom: 'var(--sp-5)' }}>
+                      <div style={{ padding: '10px 12px', background: 'var(--sg-green-light)', borderRadius: 'var(--r-md)', border: '1px solid var(--sg-green-muted)' }}>
+                        <p style={{ margin: '0 0 2px', fontSize: 'var(--text-xs)', color: 'var(--sg-green-active)', fontWeight: 600 }}>ACCESS</p>
+                        <p style={{ margin: 0, fontWeight: 700, fontSize: 'var(--text-sm)' }}>Included ✓</p>
+                      </div>
+                      <div style={{ padding: '10px 12px', background: 'var(--bg-subtle)', borderRadius: 'var(--r-md)' }}>
+                        <p style={{ margin: '0 0 2px', fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600 }}>CROWD</p>
+                        <p style={{ margin: 0, fontWeight: 700, fontSize: 'var(--text-sm)', color: 'var(--status-success)' }}>Low · Great now</p>
+                      </div>
+                      <div style={{ padding: '10px 12px', background: 'var(--bg-subtle)', borderRadius: 'var(--r-md)' }}>
+                        <p style={{ margin: '0 0 2px', fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600 }}>HOURS</p>
+                        <p style={{ margin: 0, fontWeight: 700, fontSize: 'var(--text-sm)' }}>Until {bestMatch.closesAt}</p>
+                      </div>
+                      <div style={{ padding: '10px 12px', background: 'var(--bg-subtle)', borderRadius: 'var(--r-md)' }}>
+                        <p style={{ margin: '0 0 2px', fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600 }}>DISTANCE</p>
+                        <p style={{ margin: 0, fontWeight: 700, fontSize: 'var(--text-sm)' }}>{bestMatch.distance} km away</p>
+                      </div>
+                    </div>
+
+                    <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', background: 'var(--bg-subtle)', padding: '10px 14px', borderRadius: 'var(--r-md)', margin: '0 0 var(--sp-5)' }}>
+                      <strong>Why this gym?</strong> Close to your location, low crowd right now, and has your preferred strength equipment.
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 'var(--sp-3)' }}>
+                    <Link to={`/member/gym/${bestMatch.id}`} className="btn btn-dark btn-lg" style={{ flex: 1 }}>View Gym</Link>
+                    <button className="btn btn-secondary btn-lg">Directions</button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-          <Link to="/member/pass">
-            <Button variant="primary" size="lg" icon={QrCode} style={{ backgroundColor: 'white', color: 'var(--color-text-primary)' }}>
-              Open My Pass
-            </Button>
-          </Link>
-        </Card>
-      </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 'var(--space-8)', alignItems: 'start' }}>
-        {/* Left Column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-10)' }}>
-          
-          {/* Smart Recommendation */}
-          <section>
-            <div className="flex-row-between" style={{ marginBottom: 'var(--space-4)' }}>
-              <h2>Best match right now</h2>
-            </div>
-            <Card style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 'var(--space-6)', padding: 'var(--space-4)' }}>
-              <div style={{ width: '160px', height: '160px', borderRadius: '12px', overflow: 'hidden' }}>
-                <img src={mockGyms[1].image} alt="Gym" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                  <Badge variant="success">92% Match</Badge>
-                  <span style={{ color: 'var(--color-status-success)', fontWeight: 600, fontSize: '14px' }}>Low Crowd</span>
+          {/* Digital Pass */}
+          <div>
+            <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, marginBottom: 'var(--sp-4)' }}>My Silver GYM Pass</h2>
+            <DigitalPassCard compact onOpen={() => window.location.href = '/member/pass'} />
+
+            {/* Smart suggestion */}
+            <div style={{ marginTop: 'var(--sp-4)', padding: 'var(--sp-4)', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-xl)' }}>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <div style={{ width: 8, height: 8, background: 'var(--sg-green)', borderRadius: '50%', marginTop: 6, flexShrink: 0 }} />
+                <div>
+                  <p style={{ margin: '0 0 6px', fontWeight: 600, fontSize: 'var(--text-sm)' }}>Good time to train</p>
+                  <p style={{ margin: '0 0 8px', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
+                    Iron House Fitness is 35% less crowded than usual right now.
+                  </p>
+                  <Link to={`/member/gym/${bestMatch.id}`} style={{ fontSize: 'var(--text-sm)', color: 'var(--sg-green)', fontWeight: 600 }}>
+                    View Gym →
+                  </Link>
                 </div>
-                <h3 style={{ marginBottom: '8px' }}>{mockGyms[1].name}</h3>
-                <p className="text-muted" style={{ fontSize: '14px', marginBottom: '16px' }}>
-                  Only {mockGyms[1].distance}km away. Has your preferred Strength equipment and is open until {mockGyms[1].closesAt}.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── ROW 2: Nearby Gyms ── */}
+        <div style={{ marginBottom: 'var(--sp-8)' }}>
+          <div className="flex-between" style={{ marginBottom: 'var(--sp-5)' }}>
+            <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700 }}>Nearby gyms</h2>
+            <Link to="/member/explore" className="btn btn-ghost btn-sm" style={{ gap: 5 }}>View all <ArrowRight size={14} /></Link>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--sp-5)' }}>
+            {mockGyms.slice(0, 3).map(gym => <GymCardLarge key={gym.id} gym={gym} />)}
+          </div>
+        </div>
+
+        {/* ── ROW 3: Activity + Membership ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 'var(--sp-6)', marginBottom: 'var(--sp-8)' }}>
+
+          {/* Weekly Activity */}
+          <div>
+            <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, marginBottom: 'var(--sp-5)' }}>Weekly activity</h2>
+            <div className="card card-shadow" style={{ padding: 'var(--sp-6)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--sp-4)', marginBottom: 'var(--sp-6)' }}>
+                <div>
+                  <p style={{ margin: '0 0 2px', fontSize: 'var(--text-xs)', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>This Week</p>
+                  <p style={{ margin: 0, fontSize: 'var(--text-2xl)', fontWeight: 800 }}>4 <span style={{ fontSize: 'var(--text-base)', color: 'var(--text-muted)', fontWeight: 400 }}>/ 5 goal</span></p>
+                </div>
+                <div>
+                  <p style={{ margin: '0 0 2px', fontSize: 'var(--text-xs)', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Streak</p>
+                  <p style={{ margin: 0, fontSize: 'var(--text-2xl)', fontWeight: 800, color: '#F59E0B' }}>{mockUser.streak} 🔥</p>
+                </div>
+                <div>
+                  <p style={{ margin: '0 0 2px', fontSize: 'var(--text-xs)', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Training Time</p>
+                  <p style={{ margin: 0, fontSize: 'var(--text-2xl)', fontWeight: 800 }}>4h 35m</p>
+                </div>
+              </div>
+
+              {/* Bar chart */}
+              <div style={{ display: 'flex', alignItems: 'flex-end', height: 80, gap: 8 }}>
+                {weeklyData.map((d, i) => (
+                  <div key={d.day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                    <div style={{ width: '100%', height: d.min ? `${(d.min / 100) * 80}px` : 4, background: d.min ? 'var(--sg-green)' : 'var(--bg-muted)', borderRadius: '3px 3px 0 0', minHeight: 4, transition: 'height .3s' }} />
+                    <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{d.day}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Membership Usage */}
+          <div>
+            <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, marginBottom: 'var(--sp-5)' }}>Membership usage</h2>
+            <div className="card card-shadow" style={{ padding: 'var(--sp-6)', height: 'calc(100% - 50px)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--sp-5)' }}>
+                <div>
+                  <p style={{ margin: '0 0 4px', fontWeight: 700, fontSize: 'var(--text-lg)' }}>{mockUser.plan} Plan</p>
+                  <span className="badge badge-green">Active</span>
+                </div>
+                <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>Renews {mockUser.renewalDate}</p>
+              </div>
+
+              <div style={{ marginBottom: 'var(--sp-3)' }}>
+                <div className="flex-between" style={{ marginBottom: 8 }}>
+                  <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>Visits used</span>
+                  <span style={{ fontWeight: 700 }}>{mockUser.visitsUsed} / {mockUser.visitsTotal}</span>
+                </div>
+                <div className="progress-track">
+                  <div className="progress-fill" style={{ width: `${(mockUser.visitsUsed / mockUser.visitsTotal) * 100}%` }} />
+                </div>
+                <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 6 }}>
+                  {mockUser.visitsRemaining} visits remaining this month
                 </p>
-                <div>
-                  <Link to={`/member/gym/${mockGyms[1].id}`}><Button variant="secondary" size="sm">View Gym</Button></Link>
-                </div>
               </div>
-            </Card>
-          </section>
 
-          {/* Nearby Gyms */}
-          <section>
-            <div className="flex-row-between" style={{ marginBottom: 'var(--space-4)' }}>
-              <h2>Nearby Gyms</h2>
-              <Link to="/member/explore" style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>See all <ArrowRight size={16} /></Link>
+              <Link to="/member/membership" className="btn btn-secondary btn-sm btn-full" style={{ marginTop: 'auto' }}>
+                Manage Membership
+              </Link>
             </div>
-            <div className="grid-cols-auto">
-              {mockGyms.slice(0, 2).map(gym => (
-                <GymCard key={gym.id} gym={gym} />
-              ))}
-            </div>
-          </section>
+          </div>
         </div>
 
-        {/* Right Column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
-          {/* Weekly Progress */}
-          <Card style={{ padding: 'var(--space-6)' }}>
-            <h3 style={{ marginBottom: 'var(--space-6)' }}>Weekly Progress</h3>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-6)' }}>
-              {/* Fake Circular Progress */}
-              <div style={{ width: '100px', height: '100px', borderRadius: '50%', border: '8px solid var(--color-bg-subtle)', borderTopColor: 'var(--color-brand-primary)', borderRightColor: 'var(--color-brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'rotate(-45deg)' }}>
-                <div style={{ transform: 'rotate(45deg)', textAlign: 'center' }}>
-                  <span style={{ display: 'block', fontSize: '24px', fontWeight: 800, lineHeight: 1 }}>4</span>
-                  <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>/ 5 goal</span>
-                </div>
-              </div>
-              <div>
-                <div style={{ marginBottom: '12px' }}>
-                  <span style={{ display: 'block', fontSize: '14px', color: 'var(--color-text-secondary)' }}>Current Streak</span>
-                  <span style={{ fontSize: '18px', fontWeight: 600, color: '#F59F00' }}>🔥 {mockUser.streak} days</span>
-                </div>
-                <div>
-                  <span style={{ display: 'block', fontSize: '14px', color: 'var(--color-text-secondary)' }}>Time Active</span>
-                  <span style={{ fontSize: '18px', fontWeight: 600 }}>4h 35m</span>
-                </div>
-              </div>
-            </div>
-          </Card>
+        {/* ── ROW 4: Recent Activity ── */}
+        <div>
+          <div className="flex-between" style={{ marginBottom: 'var(--sp-5)' }}>
+            <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700 }}>Recent activity</h2>
+            <Link to="/member/activity" className="btn btn-ghost btn-sm" style={{ gap: 5 }}>View all <ArrowRight size={14} /></Link>
+          </div>
 
-          {/* Recent Activity */}
-          <Card style={{ padding: 'var(--space-6)' }}>
-            <div className="flex-row-between" style={{ marginBottom: 'var(--space-6)' }}>
-              <h3 style={{ fontSize: '18px' }}>Recent Activity</h3>
-              <Link to="/member/activity" style={{ fontSize: '14px', fontWeight: 600 }}>View all</Link>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {mockActivity.map((activity, index) => (
-                <div key={activity.id} style={{ display: 'flex', gap: '16px', position: 'relative' }}>
-                  {index !== mockActivity.length - 1 && (
-                    <div style={{ position: 'absolute', left: '20px', top: '40px', bottom: '-16px', width: '2px', backgroundColor: 'var(--color-border-subtle)' }}></div>
-                  )}
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--color-bg-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, zIndex: 1 }}>
-                    {activity.type === 'checkin' && <QrCode size={20} color="var(--color-brand-primary)" />}
-                    {activity.type === 'workout' && <ActivityIcon size={20} color="var(--color-brand-primary)" />}
-                    {activity.type === 'achievement' && <Star size={20} color="#F59F00" />}
-                  </div>
-                  <div>
-                    <p style={{ margin: 0, fontWeight: 500, fontSize: '15px' }}>
-                      {activity.type === 'checkin' && `Checked in at ${activity.gym}`}
-                      {activity.type === 'workout' && `Workout completed at ${activity.gym}`}
-                      {activity.type === 'achievement' && activity.title}
-                    </p>
-                    <span style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>{activity.date}</span>
-                  </div>
+          <div className="card card-shadow" style={{ padding: 'var(--sp-6)' }}>
+            {mockActivity.slice(0, 4).map((item, i) => (
+              <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-4)', paddingBottom: i < 3 ? 'var(--sp-4)' : 0, marginBottom: i < 3 ? 'var(--sp-4)' : 0, borderBottom: i < 3 ? '1px solid var(--border-subtle)' : 'none' }}>
+                <div style={{ width: 40, height: 40, background: item.type === 'checkin' ? 'var(--sg-green-light)' : 'var(--status-warning-bg)', borderRadius: 'var(--r-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {item.type === 'checkin' ? '🏋️' : '🏆'}
                 </div>
-              ))}
-            </div>
-          </Card>
+                <div style={{ flex: 1 }}>
+                  <p style={{ margin: '0 0 2px', fontWeight: 600, fontSize: 'var(--text-sm)' }}>
+                    {item.type === 'checkin' ? `Checked in at ${item.gym}` : item.title}
+                  </p>
+                  <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+                    {item.date} · {item.time} {item.duration ? `· ${item.duration}` : ''}
+                  </p>
+                </div>
+                {item.type === 'checkin' && (
+                  <Link to={`/member/gym/${item.gymId}`} style={{ fontSize: 'var(--text-xs)', color: 'var(--sg-green)', fontWeight: 600 }}>View</Link>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-
-      <style>{`
-        @media (max-width: 1024px) {
-          .container > div:nth-child(4) {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

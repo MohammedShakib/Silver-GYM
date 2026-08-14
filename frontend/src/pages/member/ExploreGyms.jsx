@@ -1,144 +1,155 @@
 import { useState } from 'react';
-import { Search, MapPin, SlidersHorizontal, ChevronDown } from 'lucide-react';
-import { mockGyms, mockUser } from '../../services/mockData';
-import GymCard from '../../components/gym/GymCard';
-import Badge from '../../components/ui/Badge';
+import { Search, SlidersHorizontal, MapPin, ChevronDown } from 'lucide-react';
+import { mockGyms } from '../../services/mockData';
+import { GymCardCompact } from '../../components/gym/GymCards';
+
+const FILTERS = ['Near Me', 'Open Now', 'Within 2 km', 'Low Crowd', 'Included In My Plan', '4.5+'];
+
+const GYM_PINS = [
+  { id: '1', x: '38%', y: '55%', label: 'Iron House', gym: mockGyms[0] },
+  { id: '2', x: '28%', y: '65%', label: 'PowerFit',   gym: mockGyms[1] },
+  { id: '3', x: '70%', y: '30%', label: 'Block 35',   gym: mockGyms[2] },
+  { id: '4', x: '62%', y: '42%', label: 'Urban Strength', gym: mockGyms[3] },
+];
+
+function MapPinComponent({ pin, active, onSelect }) {
+  return (
+    <div
+      className="map-pin"
+      style={{ left: pin.x, top: pin.y, zIndex: active ? 20 : 10 }}
+      onClick={() => onSelect(pin.id)}
+    >
+      <div className={`map-pin-dot ${active ? 'active' : ''}`} style={{ width: 32, height: 32 }}>
+        <span style={{ fontSize: 9, fontWeight: 900 }}>SG</span>
+      </div>
+      <div className="map-pin-label">{pin.label}</div>
+
+      {/* Selected popup */}
+      {active && (
+        <div style={{
+          position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)', marginBottom: 12,
+          background: 'white', borderRadius: 'var(--r-xl)', padding: 'var(--sp-4)', boxShadow: 'var(--shadow-xl)',
+          width: 230, border: '1px solid var(--border-subtle)', zIndex: 30,
+        }}>
+          <img src={pin.gym.image} alt={pin.gym.name} style={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 'var(--r-lg)', marginBottom: 8 }} />
+          <p style={{ margin: '0 0 2px', fontWeight: 700, fontSize: 'var(--text-sm)' }}>{pin.gym.name}</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{pin.gym.distance} km · {pin.gym.crowd} crowd</span>
+            <span className={`badge ${pin.gym.plans.includes('Active') ? 'badge-green' : 'badge-neutral'}`} style={{ fontSize: 9 }}>
+              {pin.gym.plans.includes('Active') ? 'Included ✓' : 'Upgrade'}
+            </span>
+          </div>
+          <a href={`/member/gym/${pin.gym.id}`} className="btn btn-dark btn-sm btn-full">View Gym</a>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function ExploreGyms() {
-  const [activeFilter, setActiveFilter] = useState('All');
-  const filters = ['All', 'Open Now', 'Within 2 km', 'Low Crowd', 'Included in My Plan', 'Rating 4.5+'];
+  const [activeFilter, setActiveFilter] = useState('');
+  const [hoveredGym, setHoveredGym] = useState(null);
+  const [selectedPin, setSelectedPin] = useState(null);
+
+  const handleSelectPin = (id) => {
+    setSelectedPin(prev => prev === id ? null : id);
+    setHoveredGym(id);
+  };
 
   return (
-    <div style={{ display: 'flex', height: 'calc(100vh - var(--header-height))', overflow: 'hidden' }} className="explore-layout animate-fade-in">
-      
-      {/* Left Sidebar - List */}
-      <div style={{ width: '45%', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg-base)', borderRight: '1px solid var(--color-border-subtle)' }} className="explore-list-panel">
-        
-        {/* Search & Filters */}
-        <div style={{ padding: 'var(--space-6)', backgroundColor: 'var(--color-bg-surface)', borderBottom: '1px solid var(--color-border-subtle)', zIndex: 10 }}>
-          <div className="search-input-wrapper" style={{ marginBottom: 'var(--space-4)' }}>
-            <Search className="lucide" />
-            <input 
-              type="text" 
-              className="input-field" 
-              placeholder="Gym, area, landmark or facility" 
-              style={{ borderRadius: 'var(--radius-lg)' }}
-            />
-            <div style={{ position: 'absolute', right: '12px' }}>
-              <Badge variant="neutral" style={{ padding: '6px 10px', fontSize: '12px', display: 'flex', gap: '4px', cursor: 'pointer' }}>
-                <MapPin size={14} /> {mockUser.location.split(',')[0]}
-              </Badge>
+    <div style={{ display: 'flex', height: 'calc(100vh - var(--header-h))', overflow: 'hidden' }} className="anim-fade">
+
+      {/* ── Left panel ── */}
+      <div style={{ width: '42%', display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--border-subtle)', background: 'var(--bg-base)' }}>
+
+        {/* Search header */}
+        <div style={{ padding: 'var(--sp-5)', background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-subtle)', flexShrink: 0 }}>
+          <div className="input-group" style={{ position: 'relative', marginBottom: 'var(--sp-3)' }}>
+            <Search size={16} className="input-icon" />
+            <input type="text" className="input input-with-icon" style={{ borderRadius: 'var(--r-full)', fontSize: 'var(--text-sm)', padding: '.6rem 3rem' }} placeholder="Gym, area, landmark or facility" />
+            <div className="input-icon-right" style={{ right: 12 }}>
+              <button style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'var(--bg-subtle)', border: '1px solid var(--border-default)', borderRadius: 'var(--r-full)', padding: '4px 10px', fontSize: 11, fontWeight: 600, cursor: 'pointer', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                <MapPin size={11} color="var(--sg-green)" /> Mirpur 10
+              </button>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 'var(--space-2)', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none' }} className="hide-scrollbar">
-            {filters.map(filter => (
-              <button 
-                key={filter}
-                onClick={() => setActiveFilter(filter)}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: 'var(--radius-full)',
-                  border: '1px solid',
-                  borderColor: activeFilter === filter ? 'var(--color-brand-primary)' : 'var(--color-border-default)',
-                  backgroundColor: activeFilter === filter ? 'var(--color-brand-primary-light)' : 'var(--color-bg-surface)',
-                  color: activeFilter === filter ? 'var(--color-brand-primary-active)' : 'var(--color-text-secondary)',
-                  fontSize: '14px',
-                  fontWeight: activeFilter === filter ? 600 : 500,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.2s'
-                }}
-              >
-                {filter}
+          <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2, scrollbarWidth: 'none' }}>
+            {FILTERS.map(f => (
+              <button key={f} className={`filter-chip ${activeFilter === f ? 'active' : ''}`} style={{ fontSize: 12 }} onClick={() => setActiveFilter(f === activeFilter ? '' : f)}>
+                {f}
               </button>
             ))}
-            <button style={{
-                  padding: '6px 14px',
-                  borderRadius: 'var(--radius-full)',
-                  border: '1px solid var(--color-border-default)',
-                  backgroundColor: 'var(--color-bg-surface)',
-                  color: 'var(--color-text-secondary)',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}>
-              <SlidersHorizontal size={14} /> More Filters
+            <button className="filter-chip" style={{ fontSize: 12, gap: 4 }}>
+              <SlidersHorizontal size={11} /> More
             </button>
           </div>
-          
-          <div className="flex-row-between" style={{ marginTop: 'var(--space-4)', fontSize: '14px', color: 'var(--color-text-muted)' }}>
-            <span>Showing {mockGyms.length} gyms</span>
-            <button style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-text-primary)', fontWeight: 600, cursor: 'pointer' }}>
-              Sort: Recommended <ChevronDown size={14} />
+
+          <div className="flex-between" style={{ marginTop: 'var(--sp-3)' }}>
+            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{mockGyms.length} gyms near Mirpur 10</span>
+            <button style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--text-xs)', fontWeight: 600, cursor: 'pointer', color: 'var(--text-secondary)' }}>
+              Sort: Recommended <ChevronDown size={12} />
             </button>
           </div>
         </div>
 
-        {/* Gym List */}
-        <div style={{ padding: 'var(--space-6)', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+        {/* Gym list */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--sp-4)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
           {mockGyms.map(gym => (
-            <GymCard key={gym.id} gym={gym} />
+            <GymCardCompact
+              key={gym.id}
+              gym={gym}
+              selected={hoveredGym === gym.id}
+              onHover={() => { setHoveredGym(gym.id); setSelectedPin(gym.id); }}
+              onLeave={() => setHoveredGym(null)}
+            />
           ))}
         </div>
       </div>
 
-      {/* Right Sidebar - Map */}
-      <div style={{ width: '55%', position: 'relative', backgroundColor: '#E9ECEF' }} className="explore-map-panel">
-        <img 
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCdCcHSyJ5meOw19OhgNsU7Sqn9zY8PLzeIDNQdb73Xn0YcGRxPnq42sCWcbhGZgkxjK57pR4bN09A8JDbhp3KCOofHBADyc70NyfmNFVkbekxeLrqSVMeHniv145NSLLh6uHuKE_elEFH5PGsZJX-JxAEl67_MYJO00LNrUunoVmLumn6cwMVLew0Nndd3uOsixIHORQRU65bT5OSSqs6x95UCkVKf1gKf-delCarR2IK3GsH2m1T" 
-          alt="Map" 
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-        />
-        
-        {/* Mock Map Pins */}
-        <div style={{ position: 'absolute', top: '30%', left: '40%', transform: 'translate(-50%, -50%)' }}>
-          <div style={{ width: '36px', height: '36px', backgroundColor: 'var(--color-brand-primary)', borderRadius: '50%', border: '3px solid white', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            <div style={{ width: '12px', height: '12px', backgroundColor: 'white', borderRadius: '50%' }}></div>
-          </div>
-        </div>
-        
-        <div style={{ position: 'absolute', top: '55%', left: '60%', transform: 'translate(-50%, -50%)' }}>
-          <div style={{ width: '48px', height: '48px', backgroundColor: 'white', borderRadius: '50%', border: '3px solid var(--color-brand-primary)', boxShadow: 'var(--shadow-lg)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10 }}>
-            <span style={{ fontWeight: 800, color: 'var(--color-brand-primary)' }}>1</span>
-          </div>
-          {/* Mock selected state tooltip */}
-          <div style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translate(-50%, -100%)', backgroundColor: 'white', padding: '12px', borderRadius: '12px', boxShadow: 'var(--shadow-lg)', width: '240px', zIndex: 11 }}>
-            <h4 style={{ fontSize: '14px', marginBottom: '4px' }}>Iron House Fitness</h4>
-            <p style={{ margin: 0, fontSize: '12px', color: 'var(--color-text-secondary)' }}>0.7 km • Low Crowd</p>
-          </div>
-        </div>
+      {/* ── Map ── */}
+      <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+        <div className="map-surface" style={{ width: '100%', height: '100%' }}>
+          {/* Map image */}
+          <img
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAW1VIhpQI3RKs-ZZyXPMMuVEhv9YntXyKw3h2VyD2cNRZ46cmKGRo3_f6nKp1oNZzTybULzbWdJBky6ksIyHwl1wfe6IVgCAwMLtS6EaqnQRMYJh_HDGisidQ1a4dQR1vJ8GlsGh2mxorJ0ppt-uDCq7W0kmWHwtZ1r5iJg6Yz_9cjl5Fp_-bh9Jim_ggGuoRk45ho2g8sHOq6Gzk68orIZ12r6SlwV4Ir5h0qEXhzrQQdpheasY6g"
+            alt="Dhaka map"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: .9 }}
+          />
 
-        <div style={{ position: 'absolute', bottom: '24px', right: '24px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <button className="btn-icon" style={{ backgroundColor: 'white', border: 'none', boxShadow: 'var(--shadow-md)', width: '40px', height: '40px' }}>+</button>
-          <button className="btn-icon" style={{ backgroundColor: 'white', border: 'none', boxShadow: 'var(--shadow-md)', width: '40px', height: '40px' }}>-</button>
+          {/* User pin */}
+          <div className="user-pin" style={{ left: '42%', top: '60%' }} />
+
+          {/* Gym pins */}
+          {GYM_PINS.map(pin => (
+            <MapPinComponent
+              key={pin.id}
+              pin={pin}
+              active={selectedPin === pin.id}
+              onSelect={handleSelectPin}
+            />
+          ))}
+
+          {/* Map controls */}
+          <div style={{ position: 'absolute', bottom: 24, right: 16, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {['+', '−'].map(c => (
+              <button key={c} style={{ width: 36, height: 36, background: 'white', border: '1px solid var(--border-default)', borderRadius: 'var(--r-md)', fontWeight: 700, fontSize: 18, cursor: 'pointer', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-primary)' }}>
+                {c}
+              </button>
+            ))}
+            <button style={{ width: 36, height: 36, background: 'white', border: '1px solid var(--border-default)', borderRadius: 'var(--r-md)', cursor: 'pointer', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <MapPin size={16} color="var(--status-info)" />
+            </button>
+          </div>
+
+          {/* Search this area chip */}
+          <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)' }}>
+            <button style={{ background: 'white', border: '1px solid var(--border-default)', borderRadius: 'var(--r-full)', padding: '8px 18px', fontWeight: 600, fontSize: 'var(--text-sm)', cursor: 'pointer', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Search size={13} /> Search this area
+            </button>
+          </div>
         </div>
       </div>
-
-      <style>{`
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        @media (max-width: 992px) {
-          .explore-layout {
-            flex-direction: column-reverse;
-          }
-          .explore-list-panel {
-            width: 100% !important;
-            height: 60%;
-            border-right: none !important;
-            border-top: 1px solid var(--color-border-subtle);
-          }
-          .explore-map-panel {
-            width: 100% !important;
-            height: 40%;
-          }
-        }
-      `}</style>
     </div>
   );
 }

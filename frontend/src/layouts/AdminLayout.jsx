@@ -1,39 +1,76 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, LogOut, Settings, Building } from 'lucide-react';
+import { LayoutDashboard, Users, Building, FileText, CreditCard, Activity, DollarSign, HeadphonesIcon, BarChart3, Settings, LogOut } from 'lucide-react';
+
+const ADMIN_LINKS = [
+  { to: '/admin',                  label: 'Overview',      icon: LayoutDashboard },
+  { to: '/admin/users',            label: 'Users',         icon: Users },
+  { to: '/admin/gyms',             label: 'Gyms',          icon: Building },
+  { to: '/admin/applications',     label: 'Applications',  icon: FileText },
+  { to: '/admin/memberships',      label: 'Memberships',   icon: CreditCard },
+  { to: '/admin/checkins',         label: 'Check-Ins',    icon: Activity },
+  { to: '/admin/transactions',     label: 'Transactions',  icon: DollarSign },
+  { to: '/admin/payouts',          label: 'Payouts',       icon: DollarSign },
+  { to: '/admin/reports',          label: 'Reports',       icon: BarChart3 },
+  { to: '/admin/settings',         label: 'Settings',      icon: Settings },
+];
 
 export default function AdminLayout() {
-  const location = useLocation();
-  const menu = [
-    { name: 'Overview', path: '/admin', icon: LayoutDashboard },
-    { name: 'Users', path: '/admin/users', icon: Users },
-    { name: 'Gyms', path: '/admin/gyms', icon: Building },
-    { name: 'Settings', path: '/admin/settings', icon: Settings },
-  ];
+  const { pathname } = useLocation();
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--color-bg-base)' }}>
-      {/* Sidebar */}
-      <aside style={{ width: '280px', backgroundColor: '#1A1D20', color: 'white', display: 'flex', flexDirection: 'column', padding: 'var(--space-6)' }}>
-        <h2 style={{ color: 'var(--color-brand-primary)', marginBottom: 'var(--space-8)', fontSize: '20px' }}>FitPass Admin</h2>
-        
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-          {menu.map(item => (
-            <Link key={item.name} to={item.path} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', color: location.pathname === item.path ? 'white' : '#868E96', backgroundColor: location.pathname === item.path ? '#2C3136' : 'transparent', fontWeight: 500 }}>
-              <item.icon size={20} />
-              {item.name}
-            </Link>
-          ))}
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-base)' }}>
+      <aside style={{
+        width: 'var(--sidebar-w)',
+        flexShrink: 0,
+        background: '#0D1117',
+        display: 'flex', flexDirection: 'column',
+        padding: 'var(--sp-6) 0',
+        position: 'fixed', top: 0, bottom: 0, left: 0,
+        zIndex: 50, overflowY: 'auto',
+      }}>
+        <div style={{ padding: '0 var(--sp-5) var(--sp-8)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 28, height: 28, background: 'var(--sg-green)', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ color: 'white', fontWeight: 900, fontSize: 12, fontFamily: 'var(--font-heading)' }}>SG</span>
+            </div>
+            <div>
+              <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 'var(--text-base)', color: 'white' }}>Silver GYM</span>
+              <span className="badge badge-silver" style={{ marginLeft: 8, fontSize: 9 }}>ADMIN</span>
+            </div>
+          </div>
+        </div>
+
+        <nav style={{ flex: 1, padding: '0 var(--sp-3)' }}>
+          {ADMIN_LINKS.map(({ to, label, icon: Icon }) => {
+            const active = to === '/admin' ? pathname === '/admin' : pathname.startsWith(to);
+            return (
+              <Link key={to} to={to} style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '9px 14px', borderRadius: 'var(--r-md)', marginBottom: 2,
+                fontSize: 'var(--text-sm)', fontWeight: 500,
+                color: active ? 'white' : '#6B7280',
+                background: active ? 'rgba(255,255,255,.06)' : 'transparent',
+                textDecoration: 'none', transition: 'all .15s',
+              }}>
+                <Icon size={15} color={active ? 'var(--sg-green)' : 'currentColor'} />
+                {label}
+              </Link>
+            );
+          })}
         </nav>
 
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', color: 'var(--color-text-muted)', fontWeight: 500 }}>
-          <LogOut size={20} /> Exit Admin
-        </Link>
+        <div style={{ padding: 'var(--sp-5)', borderTop: '1px solid rgba(255,255,255,.06)' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 'var(--text-sm)', color: '#6B7280', textDecoration: 'none' }}>
+            <LogOut size={14} /> Exit Admin
+          </Link>
+        </div>
       </aside>
 
-      {/* Main Content */}
-      <main style={{ flex: 1, padding: 'var(--space-8)', overflowY: 'auto' }}>
-        <Outlet />
-      </main>
+      <div style={{ marginLeft: 'var(--sidebar-w)', flex: 1 }}>
+        <main style={{ padding: 'var(--sp-8)', maxWidth: 1200 }}>
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }

@@ -1,99 +1,134 @@
 @import './variables.css';
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html, body {
-  height: 100%;
-  width: 100%;
-  font-family: var(--font-family-primary);
-  font-size: 16px;
-  line-height: 1.5;
-  color: var(--color-text-primary);
-  background-color: var(--color-bg-base);
+/* ─── Reset ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--bg-base);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
 }
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-family-heading);
+img, video, svg { display: block; max-width: 100%; }
+button, input, select, textarea { font: inherit; }
+ul, ol { list-style: none; }
+a { text-decoration: none; color: inherit; }
+p { color: var(--text-secondary); }
+h1,h2,h3,h4,h5,h6 {
+  font-family: var(--font-heading);
   font-weight: 700;
   line-height: 1.2;
-  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
 }
+h1 { font-size: var(--text-6xl); letter-spacing: -0.025em; }
+h2 { font-size: var(--text-4xl); letter-spacing: -0.02em; }
+h3 { font-size: var(--text-3xl); }
+h4 { font-size: var(--text-xl); }
+h5 { font-size: var(--text-lg); font-weight: 600; }
 
-h1 { font-size: var(--font-size-5xl); letter-spacing: -0.02em; }
-h2 { font-size: var(--font-size-3xl); letter-spacing: -0.01em; }
-h3 { font-size: var(--font-size-2xl); }
-h4 { font-size: var(--font-size-xl); }
-h5 { font-size: var(--font-size-lg); }
-
-p {
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-4);
-}
-
-a {
-  color: var(--color-brand-primary);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-a:hover {
-  color: var(--color-brand-primary-hover);
-}
-
-ul, ol {
-  list-style: none;
-}
-
-img, picture, video, canvas, svg {
-  display: block;
-  max-width: 100%;
-}
-
-button, input, select, textarea {
-  font: inherit;
-}
-
-/* Typography Utility */
-.text-muted {
-  color: var(--color-text-muted);
-}
-.text-primary {
-  color: var(--color-brand-primary);
-}
-
-/* Container */
+/* ─── Utility Layout ─── */
 .container {
   width: 100%;
-  max-width: var(--layout-content-width);
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: var(--space-4);
-  padding-right: var(--space-4);
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 var(--page-px);
 }
 
-@media (min-width: 768px) {
-  .container {
-    padding-left: var(--space-8);
-    padding-right: var(--space-8);
-  }
-}
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-gap-2 { gap: var(--sp-2); }
+.flex-gap-3 { gap: var(--sp-3); }
+.flex-gap-4 { gap: var(--sp-4); }
+.flex-gap-6 { gap: var(--sp-6); }
+.items-center { align-items: center; }
+.flex-wrap { flex-wrap: wrap; }
 
-/* Animations */
+/* ─── Typography Utilities ─── */
+.text-xs    { font-size: var(--text-xs); }
+.text-sm    { font-size: var(--text-sm); }
+.text-base  { font-size: var(--text-base); }
+.text-lg    { font-size: var(--text-lg); }
+.text-xl    { font-size: var(--text-xl); }
+.text-2xl   { font-size: var(--text-2xl); }
+.text-3xl   { font-size: var(--text-3xl); }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold  { font-weight: 700; }
+.font-extrabold { font-weight: 800; }
+.text-muted { color: var(--text-muted); }
+.text-secondary { color: var(--text-secondary); }
+.text-green { color: var(--sg-green); }
+.text-center { text-align: center; }
+.uppercase { text-transform: uppercase; letter-spacing: 0.06em; }
+.font-mono { font-family: 'SF Mono', 'Fira Code', monospace; }
+
+/* ─── Spacing Utilities ─── */
+.mt-2 { margin-top: var(--sp-2); }
+.mt-3 { margin-top: var(--sp-3); }
+.mt-4 { margin-top: var(--sp-4); }
+.mt-6 { margin-top: var(--sp-6); }
+.mt-8 { margin-top: var(--sp-8); }
+.mb-2 { margin-bottom: var(--sp-2); }
+.mb-3 { margin-bottom: var(--sp-3); }
+.mb-4 { margin-bottom: var(--sp-4); }
+.mb-6 { margin-bottom: var(--sp-6); }
+.mb-8 { margin-bottom: var(--sp-8); }
+
+/* ─── Animations ─── */
 @keyframes fadeIn {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
-
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+@keyframes scanLine {
+  0%, 100% { top: 10%; }
+  50%       { top: 85%; }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .5; }
 }
 
-.animate-fade-in { animation: fadeIn 0.3s ease-out; }
-.animate-slide-up { animation: slideUp 0.4s ease-out; }
+.anim-fade    { animation: fadeIn .3s ease-out; }
+.anim-up      { animation: slideUp .4s ease-out; }
+.anim-scale   { animation: scaleIn .5s cubic-bezier(.175,.885,.32,1.275); }
+.anim-spin    { animation: spin 1.2s linear infinite; }
+.anim-pulse   { animation: pulse 1.5s ease infinite; }
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar        { width: 5px; height: 5px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: var(--border-default); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--sg-silver); }
+
+/* ─── Focus ring ─── */
+:focus-visible {
+  outline: 2px solid var(--sg-green);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+/* ─── Responsive show/hide ─── */
+@media (max-width: 767px) { .hide-mobile { display: none !important; } }
+@media (min-width: 768px) { .show-mobile { display: none !important; } }
+@media (max-width: 1023px) { .hide-tablet { display: none !important; } }
