@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Compass, Activity, CreditCard, User, Bell, MapPin, QrCode } from 'lucide-react';
 import { mockUser } from '../services/mockData';
+import BrandLogo from '../components/brand/BrandLogo';
 
 const TOP_NAV = [
   { to: '/member',            label: 'Home',       icon: Home },
@@ -41,12 +42,8 @@ export default function MemberLayout() {
           {/* Logo + Nav */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-10)' }}>
             <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ width: 30, height: 30, background: 'var(--sg-charcoal)', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ color: 'var(--sg-green)', fontWeight: 900, fontSize: 12, fontFamily: 'var(--font-heading)' }}>SG</span>
-              </div>
-              <span className="hide-tablet" style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 'var(--text-xl)', letterSpacing: '-.02em', color: 'var(--text-primary)' }}>
-                Silver GYM
-              </span>
+              <BrandLogo variant="icon" size="sm" />
+              <BrandLogo variant="wordmark" size="sm" className="hide-tablet" />
             </Link>
 
             <nav style={{ display: 'flex', gap: 2 }} className="hide-mobile">

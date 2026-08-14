@@ -1,5 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, Building, FileText, CreditCard, Activity, DollarSign, HeadphonesIcon, BarChart3, Settings, LogOut } from 'lucide-react';
+import BrandLogo from '../components/brand/BrandLogo';
 
 const ADMIN_LINKS = [
   { to: '/admin',                  label: 'Overview',      icon: LayoutDashboard },
@@ -30,11 +31,9 @@ export default function AdminLayout() {
       }}>
         <div style={{ padding: '0 var(--sp-5) var(--sp-8)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 28, height: 28, background: 'var(--sg-green)', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: 'white', fontWeight: 900, fontSize: 12, fontFamily: 'var(--font-heading)' }}>SG</span>
-            </div>
+            <BrandLogo variant="icon" size="sm" dark />
             <div>
-              <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 'var(--text-base)', color: 'white' }}>Silver GYM</span>
+              <BrandLogo variant="wordmark" size="sm" dark />
               <span className="badge badge-silver" style={{ marginLeft: 8, fontSize: 9 }}>ADMIN</span>
             </div>
           </div>

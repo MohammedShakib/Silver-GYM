@@ -27,6 +27,9 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { GYM_IMAGES, mockGyms, plans, AREAS, mockUser, ownerData } from '../../services/mockData';
+import heroAppShowcase from '../../assets/landing/silver-gym-hero-app-showcase.png';
+
+const SHOW_LEGACY_HERO_VISUAL = false;
 
 export default function LandingPage() {
   const [selectedArea, setSelectedArea] = useState('Mirpur');
@@ -253,6 +256,23 @@ export default function LandingPage() {
 
             {/* Right Layered Interactive Visual Composition */}
             <div style={{ position: 'relative', height: '580px', width: '100%' }} className="hero-visual-col">
+              <img
+                src={heroAppShowcase}
+                alt="Silver GYM mobile app preview"
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  zIndex: 50,
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center',
+                  borderRadius: '24px',
+                  boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(226, 232, 240, 0.8)',
+                }}
+              />
+              {SHOW_LEGACY_HERO_VISUAL && (
+              <>
               {/* Main Base Card: Interactive Dhaka Map Simulation */}
               <div
                 style={{
@@ -629,6 +649,8 @@ export default function LandingPage() {
                   </p>
                 </div>
               </div>
+              </>
+              )}
             </div>
           </div>
         </div>

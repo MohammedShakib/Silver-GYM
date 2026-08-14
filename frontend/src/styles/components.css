@@ -3,6 +3,63 @@
    ════════════════════════════════════════ */
 
 /* ─── Buttons ─── */
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.brand-logo img {
+  display: block;
+  width: auto;
+  object-fit: contain;
+}
+
+.brand-logo-full img {
+  height: 46px;
+}
+
+.brand-logo-wordmark img {
+  height: 28px;
+}
+
+.brand-logo-icon img {
+  height: 34px;
+}
+
+.brand-logo-sm.brand-logo-full img {
+  height: 36px;
+}
+
+.brand-logo-sm.brand-logo-wordmark img {
+  height: 23px;
+}
+
+.brand-logo-sm.brand-logo-icon img {
+  height: 28px;
+}
+
+.brand-logo-lg.brand-logo-full img {
+  height: 54px;
+}
+
+.brand-logo[data-dark='true'] img {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.24));
+}
+
+.brand-logo-tagline {
+  display: block;
+  margin-left: 10px;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

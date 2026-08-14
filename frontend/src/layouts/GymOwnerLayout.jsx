@@ -1,5 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, ScanLine, Users, BarChart3, DollarSign, Star, Building, Settings, LogOut, ChevronRight } from 'lucide-react';
+import BrandLogo from '../components/brand/BrandLogo';
 
 const SIDEBAR_LINKS = [
   { to: '/partner',           label: 'Overview',     icon: LayoutDashboard },
@@ -30,9 +31,7 @@ export default function GymOwnerLayout() {
       }}>
         <div style={{ padding: '0 var(--sp-5) var(--sp-8)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 28, height: 28, background: 'var(--sg-green)', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: 'white', fontWeight: 900, fontSize: 12, fontFamily: 'var(--font-heading)' }}>SG</span>
-            </div>
+            <BrandLogo variant="icon" size="sm" dark />
             <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 'var(--text-lg)', color: 'white', letterSpacing: '-.01em' }}>Partner</span>
           </div>
         </div>

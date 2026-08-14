@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Dumbbell, ArrowRight, Menu, X, Shield, Sparkles, MapPin, CheckCircle2, Phone, Mail, Globe, MessageCircle } from 'lucide-react';
+import BrandLogo from '../components/brand/BrandLogo';
 
 const NAV_LINKS = [
   { to: '/member/explore', label: 'Explore Gyms' },
@@ -106,69 +107,7 @@ export default function PublicLayout() {
               textDecoration: 'none',
             }}
           >
-            <div
-              style={{
-                width: 42,
-                height: 42,
-                background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
-                borderRadius: 12,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(15, 23, 42, 0.15)',
-                position: 'relative',
-                border: '1px solid rgba(255,255,255,0.1)',
-              }}
-            >
-              <span
-                style={{
-                  color: 'var(--sg-green)',
-                  fontWeight: 900,
-                  fontSize: 17,
-                  fontFamily: 'var(--font-heading)',
-                  letterSpacing: '-0.03em',
-                }}
-              >
-                SG
-              </span>
-              <span
-                style={{
-                  position: 'absolute',
-                  top: -2,
-                  right: -2,
-                  width: 8,
-                  height: 8,
-                  background: 'var(--sg-green)',
-                  borderRadius: '50%',
-                  boxShadow: '0 0 8px var(--sg-green)',
-                }}
-              />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span
-                style={{
-                  fontFamily: 'var(--font-heading)',
-                  fontWeight: 900,
-                  fontSize: '1.35rem',
-                  color: 'var(--text-primary)',
-                  letterSpacing: '-0.03em',
-                  lineHeight: 1.1,
-                }}
-              >
-                Silver <span style={{ color: 'var(--sg-green)' }}>GYM</span>
-              </span>
-              <span
-                style={{
-                  fontSize: '0.68rem',
-                  fontWeight: 600,
-                  letterSpacing: '0.08em',
-                  color: 'var(--text-muted)',
-                  textTransform: 'uppercase',
-                }}
-              >
-                Dhaka Network
-              </span>
-            </div>
+            <BrandLogo variant="full" size="sm" />
           </Link>
 
           {/* Nav links (Desktop) */}
@@ -333,25 +272,7 @@ export default function PublicLayout() {
             {/* Brand column */}
             <div style={{ paddingRight: 'var(--sp-4)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 'var(--sp-4)' }}>
-                <div
-                  style={{
-                    width: 36,
-                    height: 36,
-                    background: 'var(--sg-green)',
-                    borderRadius: 10,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(34, 197, 94, 0.4)',
-                  }}
-                >
-                  <span style={{ color: 'white', fontWeight: 900, fontSize: 15, fontFamily: 'var(--font-heading)' }}>
-                    SG
-                  </span>
-                </div>
-                <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 900, fontSize: '1.3rem', color: 'white' }}>
-                  Silver <span style={{ color: 'var(--sg-green)' }}>GYM</span>
-                </span>
+                <BrandLogo variant="full" size="sm" dark />
               </div>
               <p
                 style={{
@@ -557,4 +478,3 @@ export default function PublicLayout() {
     </div>
   );
 }
-
