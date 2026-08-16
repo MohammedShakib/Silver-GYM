@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
-import { Search, SlidersHorizontal, MapPin, ChevronDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Search, SlidersHorizontal, MapPin, ChevronDown, Check, LocateFixed, Navigation, Star } from 'lucide-react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { mockGyms } from '../../services/mockData';
 import { GymCardCompact } from '../../components/gym/GymCards';
 
-const FILTERS = ['Near Me', 'Open Now', 'Within 2 km', 'Low Crowd', 'Included In My Plan', '4.5+'];
+const PRIMARY_FILTERS = ['Near Me', 'Open Now', 'Within 2 km', 'Low Crowd', 'Included In My Plan', '4.5+'];
+const EXTRA_FILTERS = ['Women Friendly', 'Pool', 'Trainer'];
+const SORT_OPTIONS = ['Recommended', 'Nearest', 'Highest Rated', 'Least Crowded'];
 
 const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 const MAP_CENTER = [90.3994, 23.7928];
@@ -25,29 +28,21 @@ const GYM_PINS = mockGyms
     gym,
     label: GYM_COORDINATES[gym.id].label,
     coordinates: [GYM_COORDINATES[gym.id].lng, GYM_COORDINATES[gym.id].lat],
+    included: gym.plans.includes('Active'),
   }));
 
-function getPopupHtml(gym) {
-  const included = gym.plans.includes('Active') ? 'Included' : 'Upgrade';
-  const badgeClass = gym.plans.includes('Active') ? 'sg-map-popup-badge-green' : 'sg-map-popup-badge-neutral';
+const CROWD_ORDER = { low: 0, moderate: 1, busy: 2, full: 3 };
 
-  return `
-    <div class="sg-map-popup-card">
-      <img src="${gym.image}" alt="${gym.name}" class="sg-map-popup-image" />
-      <p class="sg-map-popup-title">${gym.name}</p>
-      <div class="sg-map-popup-meta">
-        <span>${gym.distance} km • ${gym.crowd} crowd</span>
-        <span class="sg-map-popup-badge ${badgeClass}">${included}</span>
-      </div>
-      <a href="/member/gym/${gym.id}" class="sg-map-popup-link">View Gym</a>
-    </div>
-  `;
+function distanceBetween(pointA, pointB) {
+  const dx = pointA[0] - pointB[0];
+  const dy = pointA[1] - pointB[1];
+  return Math.sqrt(dx * dx + dy * dy);
 }
 
 function createMarkerElement(pin, onSelect, onHover, onLeave) {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = 'sg-map-marker';
+  button.className = `sg-map-marker ${pin.included ? 'is-included' : 'is-upgrade'}`;
   button.setAttribute('aria-label', pin.gym.name);
   button.innerHTML = `
     <span class="sg-map-marker-dot">SG</span>
@@ -64,22 +59,132 @@ function createMarkerElement(pin, onSelect, onHover, onLeave) {
   return button;
 }
 
+function getNearestVisibleGym(center, visiblePins) {
+  if (!visiblePins.length) {
+    return null;
+  }
+
+  return visiblePins.reduce((closest, pin) => {
+    if (!closest) {
+      return pin;
+    }
+
+    return distanceBetween(center, pin.coordinates) < distanceBetween(center, closest.coordinates) ? pin : closest;
+  }, null);
+}
+
 export default function ExploreGyms() {
-  const [activeFilter, setActiveFilter] = useState('');
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilters, setActiveFilters] = useState(['Near Me']);
   const [hoveredGym, setHoveredGym] = useState(null);
-  const [selectedPin, setSelectedPin] = useState(null);
+  const [selectedPin, setSelectedPin] = useState(mockGyms[0]?.id ?? null);
   const [sortLabel, setSortLabel] = useState('Recommended');
   const [showExtraFilters, setShowExtraFilters] = useState(false);
+  const [showSortMenu, setShowSortMenu] = useState(false);
+  const [showSearchArea, setShowSearchArea] = useState(false);
+  const [previewAnchor, setPreviewAnchor] = useState(null);
 
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
-  const popupRef = useRef(null);
   const markerRefs = useRef({});
+  const userMarkerRef = useRef(null);
+  const cardRefs = useRef({});
+  const lastSearchedCenterRef = useRef(MAP_CENTER);
+  const dragMovedRef = useRef(false);
 
-  const handleSelectPin = (id) => {
-    setSelectedPin(prev => (prev === id ? null : id));
-    setHoveredGym(id);
+  const toggleFilter = (filter) => {
+    setActiveFilters(current => (
+      current.includes(filter)
+        ? current.filter(item => item !== filter)
+        : [...current, filter]
+    ));
   };
+
+  const query = searchQuery.trim().toLowerCase();
+  let filteredGyms = mockGyms.filter(gym => {
+    const matchesSearch = !query || [gym.name, gym.area, gym.address, ...gym.amenities]
+      .join(' ')
+      .toLowerCase()
+      .includes(query);
+
+    if (!matchesSearch) {
+      return false;
+    }
+
+    if (activeFilters.includes('Open Now') && gym.status !== 'open') {
+      return false;
+    }
+
+    if (activeFilters.includes('Within 2 km') && gym.distance > 2) {
+      return false;
+    }
+
+    if (activeFilters.includes('Low Crowd') && gym.crowd !== 'low') {
+      return false;
+    }
+
+    if (activeFilters.includes('Included In My Plan') && !gym.plans.includes('Active')) {
+      return false;
+    }
+
+    if (activeFilters.includes('4.5+') && gym.rating < 4.5) {
+      return false;
+    }
+
+    if (activeFilters.includes('Women Friendly') && !gym.amenities.includes('Women Friendly')) {
+      return false;
+    }
+
+    if (activeFilters.includes('Pool') && !gym.amenities.includes('Pool')) {
+      return false;
+    }
+
+    if (activeFilters.includes('Trainer') && !gym.amenities.includes('Trainer')) {
+      return false;
+    }
+
+    return true;
+  });
+
+  filteredGyms = filteredGyms.sort((left, right) => {
+    if (sortLabel === 'Nearest') {
+      return left.distance - right.distance;
+    }
+
+    if (sortLabel === 'Highest Rated') {
+      return right.rating - left.rating || left.distance - right.distance;
+    }
+
+    if (sortLabel === 'Least Crowded') {
+      return CROWD_ORDER[left.crowd] - CROWD_ORDER[right.crowd] || left.distance - right.distance;
+    }
+
+    const leftIncluded = left.plans.includes('Active') ? 1 : 0;
+    const rightIncluded = right.plans.includes('Active') ? 1 : 0;
+    return rightIncluded - leftIncluded || left.distance - right.distance || right.rating - left.rating;
+  });
+
+  const visiblePins = GYM_PINS.filter(pin => filteredGyms.some(gym => gym.id === pin.id));
+  const selectedGym = filteredGyms.find(gym => gym.id === selectedPin) || null;
+  const selectedMapPin = visiblePins.find(pin => pin.id === selectedPin) || null;
+  const extraFilterCount = activeFilters.filter(filter => EXTRA_FILTERS.includes(filter)).length;
+
+  const resultPrimaryCopy = searchQuery || activeFilters.length > 1
+    ? `${filteredGyms.length} gyms match your filters`
+    : `${filteredGyms.length} gyms near Mirpur 10`;
+  const resultSecondaryCopy = searchQuery || activeFilters.length > 1 ? 'Near Mirpur 10' : '';
+
+  useEffect(() => {
+    if (!filteredGyms.length) {
+      setSelectedPin(null);
+      return;
+    }
+
+    if (!filteredGyms.some(gym => gym.id === selectedPin)) {
+      setSelectedPin(filteredGyms[0].id);
+    }
+  }, [filteredGyms, selectedPin]);
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) {
@@ -96,16 +201,28 @@ export default function ExploreGyms() {
       attributionControl: false,
     });
 
-    const popup = new maplibregl.Popup({
-      closeButton: false,
-      closeOnClick: false,
-      offset: 28,
-      maxWidth: '240px',
-      className: 'sg-map-popup',
-    });
-
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
     map.scrollZoom.disable();
+
+    const updateSearchAreaState = () => {
+      const currentCenter = map.getCenter().toArray();
+      setShowSearchArea(distanceBetween(currentCenter, lastSearchedCenterRef.current) > 0.015);
+    };
+
+    const updatePreviewAnchor = () => {
+      if (!selectedMapPin || !mapContainerRef.current) {
+        setPreviewAnchor(null);
+        return;
+      }
+
+      const point = map.project(selectedMapPin.coordinates);
+      const width = mapContainerRef.current.clientWidth;
+      const height = mapContainerRef.current.clientHeight;
+      const safeX = Math.max(170, Math.min(width - 170, point.x));
+      const placeBelow = point.y < 190;
+      const safeY = Math.max(88, Math.min(height - 72, point.y));
+      setPreviewAnchor({ x: safeX, y: safeY, placeBelow });
+    };
 
     let sceneReady = false;
 
@@ -120,15 +237,12 @@ export default function ExploreGyms() {
       GYM_PINS.forEach(pin => {
         const element = createMarkerElement(
           pin,
-          handleSelectPin,
+          id => setSelectedPin(id),
           id => setHoveredGym(id),
           () => setHoveredGym(null),
         );
 
-        const marker = new maplibregl.Marker({
-          element,
-          anchor: 'bottom',
-        })
+        const marker = new maplibregl.Marker({ element, anchor: 'bottom' })
           .setLngLat(pin.coordinates)
           .addTo(map);
 
@@ -138,127 +252,273 @@ export default function ExploreGyms() {
 
       const userElement = document.createElement('div');
       userElement.className = 'sg-map-user-marker';
-      new maplibregl.Marker({ element: userElement })
+      userMarkerRef.current = new maplibregl.Marker({ element: userElement })
         .setLngLat(USER_LOCATION)
         .addTo(map);
 
       bounds.extend(USER_LOCATION);
       map.fitBounds(bounds, {
-        padding: { top: 120, right: 72, bottom: 72, left: 72 },
+        padding: { top: 90, right: 92, bottom: 72, left: 92 },
         duration: 0,
-        maxZoom: 12.9,
+        maxZoom: 12.8,
       });
+      lastSearchedCenterRef.current = map.getCenter().toArray();
+      setShowSearchArea(false);
+      updatePreviewAnchor();
     };
 
     map.once('style.load', setupMapScene);
     map.once('load', setupMapScene);
-
+    map.on('move', updatePreviewAnchor);
+    map.on('zoom', updatePreviewAnchor);
+    map.on('dragstart', () => {
+      dragMovedRef.current = true;
+    });
+    map.on('moveend', () => {
+      updatePreviewAnchor();
+      if (dragMovedRef.current) {
+        updateSearchAreaState();
+      }
+      dragMovedRef.current = false;
+    });
     map.on('click', () => {
       setSelectedPin(null);
+      setHoveredGym(null);
     });
 
     mapRef.current = map;
-    popupRef.current = popup;
 
     return () => {
-      popup.remove();
       Object.values(markerRefs.current).forEach(({ marker }) => marker.remove());
       markerRefs.current = {};
+      userMarkerRef.current?.remove();
+      userMarkerRef.current = null;
       map.remove();
       mapRef.current = null;
-      popupRef.current = null;
     };
-  }, []);
+  }, [selectedMapPin]);
 
   useEffect(() => {
-    const activeId = selectedPin || hoveredGym;
-
+    const visibleIds = new Set(visiblePins.map(pin => pin.id));
     Object.entries(markerRefs.current).forEach(([id, entry]) => {
-      entry.element.classList.toggle('is-active', activeId === id);
+      entry.element.style.display = visibleIds.has(id) ? '' : 'none';
+    });
+  }, [visiblePins]);
+
+  useEffect(() => {
+    Object.entries(markerRefs.current).forEach(([id, entry]) => {
+      entry.element.classList.toggle('is-selected', selectedPin === id);
+      entry.element.classList.toggle('is-hovered', hoveredGym === id);
     });
 
-    if (!selectedPin || !popupRef.current || !mapRef.current) {
-      popupRef.current?.remove();
+    if (selectedPin) {
+      const selectedNode = cardRefs.current[selectedPin];
+      selectedNode?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+      if (mapRef.current && selectedMapPin) {
+        mapRef.current.easeTo({
+          center: selectedMapPin.coordinates,
+          duration: 500,
+          zoom: Math.max(mapRef.current.getZoom(), 12.7),
+          offset: [0, 52],
+        });
+      }
+    }
+  }, [hoveredGym, selectedPin, selectedMapPin]);
+
+  useEffect(() => {
+    if (!mapRef.current || !selectedMapPin || !mapContainerRef.current) {
+      setPreviewAnchor(null);
       return;
     }
 
-    const activePin = GYM_PINS.find(pin => pin.id === selectedPin);
-    if (!activePin) {
-      popupRef.current.remove();
-      return;
-    }
-
-    popupRef.current
-      .setLngLat(activePin.coordinates)
-      .setHTML(getPopupHtml(activePin.gym))
-      .addTo(mapRef.current);
-
-    mapRef.current.easeTo({
-      center: activePin.coordinates,
-      duration: 550,
-      zoom: Math.max(mapRef.current.getZoom(), 12.7),
-      offset: [0, 80],
+    const point = mapRef.current.project(selectedMapPin.coordinates);
+    const width = mapContainerRef.current.clientWidth;
+    const height = mapContainerRef.current.clientHeight;
+    setPreviewAnchor({
+      x: Math.max(170, Math.min(width - 170, point.x)),
+      y: Math.max(88, Math.min(height - 72, point.y)),
+      placeBelow: point.y < 190,
     });
-  }, [hoveredGym, selectedPin]);
+  }, [selectedMapPin]);
 
   return (
     <div style={{ display: 'flex', height: 'calc(100vh - var(--header-h))', overflow: 'hidden' }} className="anim-fade">
-      <div style={{ width: '42%', display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--border-subtle)', background: 'var(--bg-base)' }}>
-        <div style={{ padding: 'var(--sp-5)', background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-subtle)', flexShrink: 0 }}>
-          <div className="input-group" style={{ position: 'relative', marginBottom: 'var(--sp-3)' }}>
+      <div style={{ width: '39%', minWidth: 420, display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--border-subtle)', background: 'var(--bg-base)' }}>
+        <div style={{ padding: '16px 20px 14px', background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-subtle)', flexShrink: 0 }}>
+          <div className="input-group" style={{ position: 'relative', marginBottom: 12 }}>
             <Search size={16} className="input-icon" />
-            <input type="text" className="input input-with-icon" style={{ borderRadius: 'var(--r-full)', fontSize: 'var(--text-sm)', padding: '.6rem 3rem' }} placeholder="Gym, area, landmark or facility" />
-            <div className="input-icon-right" style={{ right: 12 }}>
-              <button onClick={() => setActiveFilter('Near Me')} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'var(--bg-subtle)', border: '1px solid var(--border-default)', borderRadius: 'var(--r-full)', padding: '4px 10px', fontSize: 11, fontWeight: 600, cursor: 'pointer', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
-                <MapPin size={11} color="var(--sg-green)" /> Mirpur 10
-              </button>
-            </div>
+            <input
+              type="text"
+              className="input input-with-icon"
+              value={searchQuery}
+              onChange={event => setSearchQuery(event.target.value)}
+              style={{ borderRadius: 'var(--r-full)', fontSize: 'var(--text-sm)', padding: '.78rem 1rem .78rem 2.8rem', height: 54 }}
+              placeholder="Gym, area, landmark or facility"
+            />
           </div>
 
-          <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2, scrollbarWidth: 'none' }}>
-            {FILTERS.map(f => (
-              <button key={f} className={`filter-chip ${activeFilter === f ? 'active' : ''}`} style={{ fontSize: 12 }} onClick={() => setActiveFilter(f === activeFilter ? '' : f)}>
-                {f}
-              </button>
-            ))}
-            <button className="filter-chip" style={{ fontSize: 12, gap: 4 }} onClick={() => setShowExtraFilters(current => !current)}>
-              <SlidersHorizontal size={11} /> More
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2, scrollbarWidth: 'none' }}>
+            {PRIMARY_FILTERS.map(filter => {
+              const active = activeFilters.includes(filter);
+              return (
+                <button
+                  key={filter}
+                  onClick={() => toggleFilter(filter)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    height: 38,
+                    padding: '0 14px',
+                    borderRadius: 999,
+                    border: `1px solid ${active ? 'rgba(34, 197, 94, 0.45)' : 'var(--border-default)'}`,
+                    background: active ? 'rgba(34, 197, 94, 0.1)' : 'white',
+                    color: active ? '#166534' : 'var(--text-secondary)',
+                    fontSize: 12,
+                    fontWeight: active ? 700 : 600,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {active && <Check size={12} />}
+                  {filter}
+                </button>
+              );
+            })}
+            <button
+              onClick={() => setShowExtraFilters(current => !current)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                height: 38,
+                padding: '0 14px',
+                borderRadius: 999,
+                border: `1px solid ${showExtraFilters || extraFilterCount ? 'rgba(34, 197, 94, 0.45)' : 'var(--border-default)'}`,
+                background: showExtraFilters || extraFilterCount ? 'rgba(34, 197, 94, 0.1)' : 'white',
+                color: showExtraFilters || extraFilterCount ? '#166534' : 'var(--text-secondary)',
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <SlidersHorizontal size={12} />
+              {extraFilterCount ? `More (${extraFilterCount})` : 'More'}
             </button>
           </div>
 
           {showExtraFilters && (
-            <div style={{ display: 'flex', gap: 6, marginTop: 'var(--sp-3)', flexWrap: 'wrap' }}>
-              {['Women Friendly', 'Pool', 'Trainer'].map(filter => (
-                <button key={filter} className={`filter-chip ${activeFilter === filter ? 'active' : ''}`} style={{ fontSize: 12 }} onClick={() => setActiveFilter(filter)}>
-                  {filter}
-                </button>
-              ))}
+            <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+              {EXTRA_FILTERS.map(filter => {
+                const active = activeFilters.includes(filter);
+                return (
+                  <button
+                    key={filter}
+                    onClick={() => toggleFilter(filter)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      height: 36,
+                      padding: '0 14px',
+                      borderRadius: 999,
+                      border: `1px solid ${active ? 'rgba(34, 197, 94, 0.45)' : 'var(--border-default)'}`,
+                      background: active ? 'rgba(34, 197, 94, 0.1)' : 'white',
+                      color: active ? '#166534' : 'var(--text-secondary)',
+                      fontSize: 12,
+                      fontWeight: active ? 700 : 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {active && <Check size={12} />}
+                    {filter}
+                  </button>
+                );
+              })}
             </div>
           )}
 
-          <div className="flex-between" style={{ marginTop: 'var(--sp-3)' }}>
-            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{mockGyms.length} gyms near Mirpur 10</span>
-            <button
-              onClick={() => setSortLabel(current => (current === 'Recommended' ? 'Closest' : 'Recommended'))}
-              style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--text-xs)', fontWeight: 600, cursor: 'pointer', color: 'var(--text-secondary)' }}
-            >
-              Sort: {sortLabel} <ChevronDown size={12} />
-            </button>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, minHeight: 30 }}>
+            <div>
+              <div style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 700 }}>{resultPrimaryCopy}</div>
+              {resultSecondaryCopy ? (
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>{resultSecondaryCopy}</div>
+              ) : null}
+            </div>
+
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setShowSortMenu(current => !current)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  height: 32,
+                  padding: '0 12px',
+                  borderRadius: 999,
+                  border: '1px solid var(--border-default)',
+                  background: 'white',
+                  color: 'var(--text-secondary)',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                {sortLabel} <ChevronDown size={12} />
+              </button>
+
+              {showSortMenu && (
+                <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: 176, background: 'white', border: '1px solid var(--border-subtle)', borderRadius: 14, boxShadow: '0 16px 30px rgba(15, 23, 42, 0.12)', padding: 6, zIndex: 20 }}>
+                  {SORT_OPTIONS.map(option => (
+                    <button
+                      key={option}
+                      onClick={() => {
+                        setSortLabel(option);
+                        setShowSortMenu(false);
+                      }}
+                      style={{
+                        width: '100%',
+                        minHeight: 36,
+                        borderRadius: 10,
+                        border: 'none',
+                        background: sortLabel === option ? 'rgba(34, 197, 94, 0.1)' : 'transparent',
+                        color: sortLabel === option ? '#166534' : 'var(--text-secondary)',
+                        fontSize: 12,
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0 10px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {option}
+                      {sortLabel === option ? <Check size={12} /> : null}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--sp-4)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
-          {mockGyms.map(gym => (
-            <GymCardCompact
+        <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {filteredGyms.map(gym => (
+            <div
               key={gym.id}
-              gym={gym}
-              selected={hoveredGym === gym.id || selectedPin === gym.id}
-              onHover={() => {
-                setHoveredGym(gym.id);
-                setSelectedPin(gym.id);
+              ref={node => {
+                cardRefs.current[gym.id] = node;
               }}
-              onLeave={() => setHoveredGym(null)}
-            />
+            >
+              <GymCardCompact
+                gym={gym}
+                selected={selectedPin === gym.id || hoveredGym === gym.id}
+                onHover={() => setHoveredGym(gym.id)}
+                onLeave={() => setHoveredGym(null)}
+              />
+            </div>
           ))}
         </div>
       </div>
@@ -267,58 +527,153 @@ export default function ExploreGyms() {
         <div className="map-surface map-live-surface" style={{ width: '100%', height: '100%' }}>
           <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
 
-          <div style={{ position: 'absolute', bottom: 24, right: 16, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {['+', '-'].map(control => (
+          {showSearchArea && (
+            <div style={{ position: 'absolute', top: 18, left: '50%', transform: 'translateX(-50%)', zIndex: 8 }}>
               <button
-                key={control}
                 onClick={() => {
                   if (!mapRef.current) {
                     return;
                   }
 
-                  if (control === '+') {
-                    mapRef.current.zoomIn({ duration: 250 });
-                  } else {
-                    mapRef.current.zoomOut({ duration: 250 });
+                  lastSearchedCenterRef.current = mapRef.current.getCenter().toArray();
+                  setShowSearchArea(false);
+                  const nearest = getNearestVisibleGym(lastSearchedCenterRef.current, visiblePins);
+                  if (nearest) {
+                    setSelectedPin(nearest.id);
                   }
                 }}
-                style={{ width: 36, height: 36, background: 'white', border: '1px solid var(--border-default)', borderRadius: 'var(--r-md)', fontWeight: 700, fontSize: 18, cursor: 'pointer', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-primary)' }}
+                style={{ background: 'white', border: '1px solid var(--border-default)', borderRadius: 999, padding: '10px 18px', fontWeight: 700, fontSize: 14, cursor: 'pointer', boxShadow: '0 10px 26px rgba(15, 23, 42, 0.12)', display: 'flex', alignItems: 'center', gap: 8 }}
               >
-                {control}
+                <Search size={14} /> Search this area
               </button>
-            ))}
-            <button
-              onClick={() => {
-                if (!mapRef.current) {
-                  return;
-                }
+            </div>
+          )}
 
-                mapRef.current.easeTo({
-                  center: USER_LOCATION,
-                  zoom: 12.6,
-                  pitch: 42,
-                  bearing: -14,
-                  duration: 450,
-                });
-                setSelectedPin(null);
+          {selectedGym && previewAnchor && (
+            <div
+              style={{
+                position: 'absolute',
+                left: previewAnchor.x,
+                top: previewAnchor.placeBelow ? previewAnchor.y + 18 : previewAnchor.y - 176,
+                transform: 'translateX(-50%)',
+                zIndex: 7,
               }}
-              style={{ width: 36, height: 36, background: 'white', border: '1px solid var(--border-default)', borderRadius: 'var(--r-md)', cursor: 'pointer', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              <MapPin size={16} color="var(--status-info)" />
-            </button>
-          </div>
+              <div
+                style={{
+                  width: 320,
+                  background: 'white',
+                  borderRadius: 22,
+                  border: '1px solid rgba(226, 232, 240, 0.95)',
+                  boxShadow: '0 22px 48px rgba(15, 23, 42, 0.18)',
+                  padding: 12,
+                  display: 'grid',
+                  gridTemplateColumns: '96px 1fr',
+                  gap: 12,
+                }}
+              >
+                <img src={selectedGym.image} alt={selectedGym.name} style={{ width: 96, height: 96, borderRadius: 16, objectFit: 'cover' }} />
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, marginBottom: 6 }}>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0F172A' }}>{selectedGym.name}</h4>
+                      <div style={{ marginTop: 5, display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: '#64748B' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                          <Star size={11} fill="#F59E0B" color="#F59E0B" /> {selectedGym.rating}
+                        </span>
+                        <span>{selectedGym.distance} km</span>
+                        <span>{selectedGym.eta} min</span>
+                      </div>
+                    </div>
+                    <span className={selectedGym.plans.includes('Active') ? 'badge badge-green' : 'badge badge-warning'}>
+                      {selectedGym.plans.includes('Active') ? 'Included' : 'Upgrade'}
+                    </span>
+                  </div>
 
-          <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)' }}>
-            <button
-              onClick={() => {
-                setActiveFilter('Near Me');
-                setHoveredGym(mockGyms[0].id);
-                setSelectedPin(mockGyms[0].id);
-              }}
-              style={{ background: 'white', border: '1px solid var(--border-default)', borderRadius: 'var(--r-full)', padding: '8px 18px', fontWeight: 600, fontSize: 'var(--text-sm)', cursor: 'pointer', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', gap: 6 }}
-            >
-              <Search size={13} /> Search this area
-            </button>
+                  <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 10, fontSize: 11 }}>
+                    <span style={{ color: selectedGym.status === 'open' ? '#16A34A' : '#DC2626', fontWeight: 700 }}>
+                      {selectedGym.status === 'open' ? `Open until ${selectedGym.closesAt}` : 'Closed'}
+                    </span>
+                    <span style={{ color: '#CBD5E1' }}>·</span>
+                    <span style={{ color: selectedGym.crowd === 'low' ? '#16A34A' : selectedGym.crowd === 'moderate' ? '#D97706' : '#DC2626', fontWeight: 700 }}>
+                      {selectedGym.crowd === 'low' ? 'Low crowd' : selectedGym.crowd}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => navigate(`/member/gym/${selectedGym.id}`)} className="btn btn-dark btn-sm" style={{ flex: 1 }}>
+                      View Gym
+                    </button>
+                    <button
+                      onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedGym.address)}`, '_blank', 'noopener,noreferrer')}
+                      className="btn btn-secondary btn-sm"
+                    >
+                      <Navigation size={13} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  position: 'absolute',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  top: previewAnchor.placeBelow ? -18 : '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 0,
+                }}
+              >
+                <div style={{ width: 2, height: 16, background: 'rgba(34, 197, 94, 0.65)' }} />
+                <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--sg-green)', border: '2px solid white', boxShadow: '0 4px 14px rgba(34, 197, 94, 0.28)' }} />
+              </div>
+            </div>
+          )}
+
+          <div style={{ position: 'absolute', right: 18, bottom: 22, zIndex: 8 }}>
+            <div style={{ background: 'rgba(255, 255, 255, 0.96)', border: '1px solid rgba(226, 232, 240, 0.95)', borderRadius: 18, boxShadow: '0 16px 30px rgba(15, 23, 42, 0.14)', padding: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {['+', '-'].map(control => (
+                <button
+                  key={control}
+                  onClick={() => {
+                    if (!mapRef.current) {
+                      return;
+                    }
+
+                    if (control === '+') {
+                      mapRef.current.zoomIn({ duration: 220 });
+                    } else {
+                      mapRef.current.zoomOut({ duration: 220 });
+                    }
+                  }}
+                  style={{ width: 44, height: 44, background: 'white', border: '1px solid var(--border-default)', borderRadius: 14, fontWeight: 800, fontSize: 18, cursor: 'pointer', color: 'var(--text-primary)' }}
+                >
+                  {control}
+                </button>
+              ))}
+              <button
+                onClick={() => {
+                  if (!mapRef.current) {
+                    return;
+                  }
+
+                  mapRef.current.easeTo({
+                    center: USER_LOCATION,
+                    zoom: 12.6,
+                    pitch: 42,
+                    bearing: -14,
+                    duration: 420,
+                  });
+                  setSelectedPin(filteredGyms[0]?.id ?? null);
+                  setHoveredGym(null);
+                }}
+                style={{ width: 44, height: 44, background: 'white', border: '1px solid var(--border-default)', borderRadius: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <LocateFixed size={18} color="#2563EB" />
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -385,8 +385,8 @@
   cursor: pointer;
 }
 .sg-map-marker-dot {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 999px;
   border: 2.5px solid white;
   background: #0F172A;
@@ -397,7 +397,7 @@
   font-size: 9px;
   font-weight: 900;
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.22);
-  transition: transform 0.18s ease, background 0.18s ease;
+  transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 .sg-map-marker-label {
   padding: 4px 9px;
@@ -408,11 +408,31 @@
   font-weight: 700;
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
   white-space: nowrap;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+.sg-map-marker.is-included .sg-map-marker-dot {
+  border-color: rgba(34, 197, 94, 0.42);
+}
+.sg-map-marker.is-upgrade .sg-map-marker-dot {
+  background: #334155;
 }
 .sg-map-marker:hover .sg-map-marker-dot,
-.sg-map-marker.is-active .sg-map-marker-dot {
+.sg-map-marker.is-hovered .sg-map-marker-dot {
+  transform: scale(1.08);
+}
+.sg-map-marker.is-selected .sg-map-marker-dot {
   background: var(--sg-green);
-  transform: scale(1.12);
+  border-color: rgba(255, 255, 255, 0.95);
+  transform: scale(1.16);
+  box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.18), 0 12px 22px rgba(34, 197, 94, 0.26);
+}
+.sg-map-marker:hover .sg-map-marker-label,
+.sg-map-marker.is-hovered .sg-map-marker-label,
+.sg-map-marker.is-selected .sg-map-marker-label {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .sg-map-user-marker {
