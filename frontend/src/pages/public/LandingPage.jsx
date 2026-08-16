@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
@@ -28,7 +27,7 @@ import heroPhoneMockup from '../../assets/landing/silver-gym-hero-phone-mockup.w
 const SHOW_LEGACY_HERO_VISUAL = false;
 
 export default function LandingPage() {
-  const [selectedArea, setSelectedArea] = useState('Mirpur');
+  const coverageArea = 'Mirpur';
 
   const featuredGyms = mockGyms.slice(0, 3);
 
@@ -1033,7 +1032,7 @@ export default function LandingPage() {
           ══════════════════════════════════════════════════════════════════════════ */}
       <section id="areas" style={{ padding: 'var(--sp-24) 0', background: 'white', borderTop: '1px solid #E2E8F0' }}>
         <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: '48% 52%', gap: 'var(--sp-12)', alignItems: 'center' }} className="coverage-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: '45% 55%', gap: 'var(--sp-10)', alignItems: 'center' }} className="coverage-grid">
             {/* Left side: Interactive Area list */}
             <div>
               <div
@@ -1058,17 +1057,16 @@ export default function LandingPage() {
                 Train wherever<br />Dhaka takes you.
               </h2>
               <p style={{ fontSize: '1.05rem', color: '#64748B', lineHeight: 1.65, marginBottom: 'var(--sp-6)' }}>
-                Silver GYM partner facilities are strategically positioned across 8+ major hubs. Select an area below to inspect partner density and featured gyms:
+                Silver GYM partner facilities are strategically positioned across 8+ major hubs. Current partner density across major Dhaka zones:
               </p>
 
-              {/* Area buttons grid */}
+              {/* Static area cards */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem', marginBottom: 'var(--sp-8)' }}>
                 {AREAS.map(area => {
-                  const isSelected = selectedArea === area.name;
+                  const isSelected = coverageArea === area.name;
                   return (
-                    <button
+                    <div
                       key={area.name}
-                      onClick={() => setSelectedArea(area.name)}
                       style={{
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -1077,9 +1075,7 @@ export default function LandingPage() {
                         background: isSelected ? 'rgba(34, 197, 94, 0.08)' : '#F8FAFC',
                         borderRadius: '12px',
                         border: isSelected ? '2px solid #16A34A' : '1px solid #E2E8F0',
-                        cursor: 'pointer',
                         textAlign: 'left',
-                        transition: 'all 0.18s ease',
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1107,15 +1103,15 @@ export default function LandingPage() {
                       >
                         {area.gyms} gyms
                       </span>
-                    </button>
+                    </div>
                   );
                 })}
               </div>
 
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <Link to="/member/explore" className="btn btn-dark btn-lg" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                  Explore All {selectedArea} Gyms <ArrowRight size={16} />
-                </Link>
+                <div className="btn btn-dark btn-lg" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                  Explore All {coverageArea} Gyms <ArrowRight size={16} />
+                </div>
                 <span style={{ fontSize: '0.85rem', color: '#64748B' }}>
                   Total: <strong>124 gyms active today</strong>
                 </span>
@@ -1126,18 +1122,27 @@ export default function LandingPage() {
             <div
               style={{
                 position: 'relative',
-                height: '520px',
-                borderRadius: '24px',
+                height: '560px',
+                borderRadius: '22px',
                 overflow: 'hidden',
-                boxShadow: '0 20px 40px -8px rgba(0, 0, 0, 0.15)',
-                border: '1px solid #CBD5E1',
+                boxShadow: '0 24px 48px -20px rgba(15, 23, 42, 0.22)',
+                border: '1px solid rgba(148, 163, 184, 0.28)',
                 background: '#FFFFFF',
               }}
             >
               <img
                 src={coverageMapPreview}
                 alt="Silver GYM Mirpur coverage preview"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                style={{
+                  position: 'absolute',
+                  top: '-2.5%',
+                  left: '-2.5%',
+                  width: '105%',
+                  height: '105%',
+                  objectFit: 'cover',
+                  objectPosition: 'center',
+                  display: 'block',
+                }}
               />
             </div>
           </div>
