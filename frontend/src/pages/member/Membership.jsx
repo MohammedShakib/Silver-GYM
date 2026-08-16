@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle, CreditCard, Pause, X } from 'lucide-react';
 import { mockUser, plans } from '../../services/mockData';
 
 export default function Membership() {
   const pct = (mockUser.visitsUsed / mockUser.visitsTotal) * 100;
+  const [actionNotice, setActionNotice] = useState('');
 
   return (
     <div className="container anim-fade" style={{ paddingTop: 'var(--sp-8)', paddingBottom: 'var(--sp-16)', maxWidth: 900 }}>
@@ -67,7 +69,7 @@ export default function Membership() {
           <p style={{ margin: '0 0 2px', fontWeight: 700, color: 'var(--sg-green-active)' }}>Unlock all premium gyms</p>
           <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--sg-charcoal-light)' }}>Upgrade to Unlimited for access to Block 35 and other premium-tier gyms.</p>
         </div>
-        <Link to="#" className="btn btn-dark btn-sm" style={{ whiteSpace: 'nowrap', gap: 6 }}>Upgrade <ArrowRight size={14} /></Link>
+        <Link to="/member/membership#plan-options" className="btn btn-dark btn-sm" style={{ whiteSpace: 'nowrap', gap: 6 }}>Upgrade <ArrowRight size={14} /></Link>
       </div>
 
       {/* Billing history */}
@@ -91,11 +93,59 @@ export default function Membership() {
         ))}
       </div>
 
+      <div id="plan-options" className="card card-shadow" style={{ padding: 'var(--sp-6)', marginBottom: 'var(--sp-8)' }}>
+        <h3 style={{ marginBottom: 'var(--sp-5)' }}>Plan options</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--sp-5)' }}>
+          {plans.map(plan => {
+            const isCurrentPlan = plan.name === mockUser.plan;
+
+            return (
+              <div key={plan.id} style={{ border: `1.5px solid ${isCurrentPlan ? 'var(--sg-green)' : 'var(--border-subtle)'}`, borderRadius: 'var(--r-xl)', padding: 'var(--sp-5)', background: isCurrentPlan ? 'var(--sg-green-light)' : 'var(--bg-surface)' }}>
+                <div className="flex-between" style={{ marginBottom: 'var(--sp-4)', alignItems: 'flex-start' }}>
+                  <div>
+                    <p style={{ margin: '0 0 4px', fontWeight: 800, fontSize: 'var(--text-xl)' }}>{plan.name}</p>
+                    <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>{plan.gymTier}</p>
+                  </div>
+                  {isCurrentPlan && <span className="badge badge-green">Current</span>}
+                </div>
+                <p style={{ fontFamily: 'var(--font-heading)', fontSize: 'var(--text-4xl)', fontWeight: 900, margin: '0 0 var(--sp-4)' }}>
+                  ৳{plan.price.toLocaleString()}
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 'var(--sp-5)' }}>
+                  {plan.features.slice(0, 4).map(feature => (
+                    <div key={feature} style={{ display: 'flex', gap: 8, fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
+                      <CheckCircle size={14} color="var(--sg-green)" style={{ flexShrink: 0 }} />
+                      <span>{feature}</span>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  className={`btn ${isCurrentPlan ? 'btn-secondary' : 'btn-dark'} btn-full`}
+                  onClick={() => setActionNotice(
+                    isCurrentPlan
+                      ? 'You are already on this plan.'
+                      : `Plan switching UI is ready, but billing automation is not wired yet. Target plan: ${plan.name}.`
+                  )}
+                >
+                  {isCurrentPlan ? 'Current Plan' : `Request ${plan.name}`}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {actionNotice && (
+        <div className="card" style={{ padding: 'var(--sp-5)', marginBottom: 'var(--sp-8)', border: '1px solid var(--sg-green-muted)', background: 'var(--sg-green-light)' }}>
+          <p style={{ margin: 0, color: 'var(--sg-charcoal-light)', lineHeight: 1.7 }}>{actionNotice}</p>
+        </div>
+      )}
+
       {/* Actions */}
       <div style={{ display: 'flex', gap: 'var(--sp-3)', flexWrap: 'wrap' }}>
-        <button className="btn btn-secondary" style={{ gap: 6 }}><Pause size={15} /> Pause Membership</button>
-        <button className="btn btn-secondary" style={{ gap: 6 }}><CreditCard size={15} /> Change Payment Method</button>
-        <button className="btn btn-ghost" style={{ gap: 6, color: 'var(--status-error)' }}><X size={15} /> Cancel Plan</button>
+        <button className="btn btn-secondary" style={{ gap: 6 }} onClick={() => setActionNotice('Pause requests are not connected to backend billing yet.') }><Pause size={15} /> Pause Membership</button>
+        <button className="btn btn-secondary" style={{ gap: 6 }} onClick={() => setActionNotice('Payment method updates are not connected yet.') }><CreditCard size={15} /> Change Payment Method</button>
+        <button className="btn btn-ghost" style={{ gap: 6, color: 'var(--status-error)' }} onClick={() => setActionNotice('Cancellation flow is not wired yet. This button now reports that limitation instead of doing nothing.') }><X size={15} /> Cancel Plan</button>
       </div>
     </div>
   );

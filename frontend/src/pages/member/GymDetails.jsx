@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Heart, Share, MapPin, Clock, Users, Star, CheckCircle, Navigation, ChevronRight } from 'lucide-react';
 import { mockGyms, mockUser } from '../../services/mockData';
+import { useSavedGyms } from '../../hooks/useSavedGyms';
+import { openDirections, sharePage } from '../../utils/browserActions';
 
 const CROWD_LABELS = {
   low: { label: 'Low', color: 'var(--status-success)', bg: 'var(--sg-green-light)', desc: 'Usually quiet right now' },
@@ -14,8 +16,10 @@ export default function GymDetails() {
   const gym = mockGyms.find(g => g.id === id) || mockGyms[0];
   const crowd = CROWD_LABELS[gym.crowd];
   const included = gym.plans.includes(mockUser.plan);
-  const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState('about');
+  const [shareFeedback, setShareFeedback] = useState('');
+  const { isSaved, toggleSavedGym } = useSavedGyms();
+  const saved = isSaved(gym.id);
 
   const currentHour = new Date().getHours();
   const todayHour = Math.min(currentHour - 6, 23);
@@ -43,7 +47,7 @@ export default function GymDetails() {
           <div style={{ position: 'relative' }}>
             <img src={gym.images[2]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <button style={{ background: 'rgba(255,255,255,.95)', border: 'none', borderRadius: 'var(--r-md)', padding: '8px 16px', fontWeight: 700, fontSize: 'var(--text-sm)', cursor: 'pointer' }}>
+              <button onClick={() => window.open(gym.images[0], '_blank', 'noopener,noreferrer')} style={{ background: 'rgba(255,255,255,.95)', border: 'none', borderRadius: 'var(--r-md)', padding: '8px 16px', fontWeight: 700, fontSize: 'var(--text-sm)', cursor: 'pointer' }}>
                 View all photos
               </button>
             </div>
@@ -78,10 +82,25 @@ export default function GymDetails() {
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 'var(--sp-2)' }}>
-                <button onClick={() => setSaved(!saved)} className="btn btn-secondary btn-sm" style={{ gap: 5 }}>
+                <button onClick={() => toggleSavedGym(gym.id)} className="btn btn-secondary btn-sm" style={{ gap: 5 }}>
                   <Heart size={14} fill={saved ? 'var(--status-error)' : 'none'} color={saved ? 'var(--status-error)' : 'currentColor'} /> Save
                 </button>
-                <button className="btn btn-secondary btn-sm" style={{ gap: 5 }}><Share size={14} /> Share</button>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  style={{ gap: 5 }}
+                  onClick={async () => {
+                    const shared = await sharePage({
+                      title: gym.name,
+                      text: `Check out ${gym.name} on Silver GYM`,
+                      url: `${window.location.origin}/member/gym/${gym.id}`,
+                    });
+
+                    setShareFeedback(shared ? 'Link shared' : 'Share unavailable');
+                    window.setTimeout(() => setShareFeedback(''), 1800);
+                  }}
+                >
+                  <Share size={14} /> {shareFeedback || 'Share'}
+                </button>
               </div>
             </div>
 
@@ -229,7 +248,7 @@ export default function GymDetails() {
                     <div className="map-pin-dot active" style={{ width: 32, height: 32 }}><span style={{ fontSize: 9, fontWeight: 900 }}>SG</span></div>
                   </div>
                 </div>
-                <button className="btn btn-secondary" style={{ gap: 8 }}><Navigation size={16} /> Get Directions</button>
+                <button className="btn btn-secondary" style={{ gap: 8 }} onClick={() => openDirections(gym.address)}><Navigation size={16} /> Get Directions</button>
               </div>
             )}
           </div>
@@ -259,7 +278,7 @@ export default function GymDetails() {
                   <Link to={`/member/check-in/${gym.id}`} className="btn btn-primary btn-lg btn-full" style={{ marginBottom: 'var(--sp-3)' }}>
                     Check In
                   </Link>
-                  <button className="btn btn-secondary btn-full" style={{ gap: 8 }}>
+                  <button className="btn btn-secondary btn-full" style={{ gap: 8 }} onClick={() => openDirections(gym.address)}>
                     <Navigation size={16} /> Get Directions
                   </button>
                 </>

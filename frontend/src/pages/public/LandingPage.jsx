@@ -2152,7 +2152,7 @@ export default function LandingPage() {
       {/* ══════════════════════════════════════════════════════════════════════════
           9. GYM OWNER CTA (Expanded Layout with Mini Owner Dashboard Preview)
           ══════════════════════════════════════════════════════════════════════════ */}
-      <section style={{ padding: 'var(--sp-24) 0', background: '#F8FAFC', borderTop: '1px solid #E2E8F0' }}>
+      <section id="for-gyms" style={{ padding: 'var(--sp-24) 0', background: '#F8FAFC', borderTop: '1px solid #E2E8F0' }}>
         <div className="container">
           <div
             style={{
@@ -2212,7 +2212,7 @@ export default function LandingPage() {
 
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                 <Link
-                  to="/for-gyms"
+                  to="/#for-gyms"
                   className="btn btn-primary btn-lg"
                   style={{
                     padding: '0.85rem 1.75rem',
@@ -2341,6 +2341,88 @@ export default function LandingPage() {
       {/* ══════════════════════════════════════════════════════════════════════════
           10. TESTIMONIALS (3 High-Impact Real Stories: 2 Members, 1 Gym Owner)
           ══════════════════════════════════════════════════════════════════════════ */}
+      <section id="about" style={{ padding: 'var(--sp-24) 0', background: '#F8FAFC', borderTop: '1px solid #E2E8F0' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: 'var(--sp-12)' }}>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                background: 'rgba(34, 197, 94, 0.1)',
+                padding: '4px 12px',
+                borderRadius: 'var(--r-full)',
+                color: 'var(--sg-green-active)',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                marginBottom: 'var(--sp-3)',
+              }}
+            >
+              <Shield size={13} /> About Silver GYM
+            </div>
+            <h2 style={{ fontSize: 'clamp(2rem, 3.2vw, 2.75rem)', fontWeight: 900, letterSpacing: '-0.025em', color: '#0F172A' }}>
+              Built for flexible training across Dhaka.
+            </h2>
+            <p style={{ fontSize: '1.05rem', color: '#64748B', maxWidth: '680px', margin: '0.75rem auto 0', lineHeight: 1.7 }}>
+              Silver GYM is designed to remove duplicate memberships, surface trusted partner facilities, and keep access simple through one digital pass.
+            </p>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: 'var(--sp-6)',
+            }}
+            className="about-grid"
+          >
+            {[
+              {
+                title: 'Member-first access',
+                copy: 'One pass covers discovery, pass display, visit tracking, and membership visibility without forcing members through separate gym systems.',
+              },
+              {
+                title: 'Partner transparency',
+                copy: 'Gym partners get verified check-in flows, payout visibility, and a dedicated reception mode instead of informal walk-in tracking.',
+              },
+              {
+                title: 'Trust and clarity',
+                copy: 'The experience prioritizes verified facilities, visible crowd signals, and upfront membership checks before entry.',
+              },
+            ].map(item => (
+              <div
+                key={item.title}
+                style={{
+                  background: 'white',
+                  borderRadius: '20px',
+                  border: '1px solid #E2E8F0',
+                  padding: 'var(--sp-6)',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.03)',
+                }}
+              >
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0F172A', marginBottom: 'var(--sp-3)' }}>
+                  {item.title}
+                </h3>
+                <p style={{ margin: 0, color: '#64748B', lineHeight: 1.7, fontSize: '0.95rem' }}>
+                  {item.copy}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <style>{`
+          @media (max-width: 1024px) {
+            .about-grid {
+              grid-template-columns: 1fr !important;
+            }
+          }
+        `}</style>
+      </section>
+
+
       <section style={{ padding: 'var(--sp-24) 0', background: 'white' }}>
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: 'var(--sp-16)' }}>

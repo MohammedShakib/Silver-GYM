@@ -28,7 +28,7 @@ export default function SignIn() {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
               <label style={{ fontSize: 'var(--text-sm)', fontWeight: 500 }}>Password</label>
-              <Link to="#" style={{ fontSize: 'var(--text-sm)', color: 'var(--sg-green)' }}>Forgot password?</Link>
+              <Link to="/#about" style={{ fontSize: 'var(--text-sm)', color: 'var(--sg-green)' }}>Forgot password?</Link>
             </div>
             <div className="input-group" style={{ position: 'relative' }}>
               <input type={show ? 'text' : 'password'} className="input" placeholder="Your password" defaultValue="password123" style={{ paddingRight: 44 }} />

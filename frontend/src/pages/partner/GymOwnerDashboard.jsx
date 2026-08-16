@@ -2,6 +2,13 @@ import { Link } from 'react-router-dom';
 import { CheckCircle, ScanLine, Users, BarChart3, DollarSign, TrendingUp } from 'lucide-react';
 import { ownerData } from '../../services/mockData';
 
+const TODAY_LABEL = new Intl.DateTimeFormat('en-US', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+}).format(new Date());
+
 function KpiCard({ icon: Icon, value, label, color }) {
   return (
     <div className="card card-shadow" style={{ padding: 'var(--sp-6)', display: 'flex', gap: 16, alignItems: 'center' }}>
@@ -24,7 +31,7 @@ export default function GymOwnerDashboard() {
         <div>
           <p className="eyebrow" style={{ marginBottom: 'var(--sp-2)' }}>Partner Dashboard</p>
           <h1 style={{ marginBottom: 4 }}>Good morning, Iron House.</h1>
-          <p style={{ margin: 0 }}>Thursday, 14 August 2026</p>
+          <p style={{ margin: 0 }}>{TODAY_LABEL}</p>
         </div>
         <Link to="/partner/reception" className="btn btn-primary btn-lg" style={{ gap: 8 }}>
           <ScanLine size={18} /> Open Reception Mode

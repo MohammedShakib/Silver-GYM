@@ -1,5 +1,6 @@
 import { MapPin, Star, Clock, CheckCircle, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useSavedGyms } from '../../hooks/useSavedGyms';
 
 const CROWD_COLORS = {
   low:      { dot: 'crowd-low',      label: 'Low Crowd',      textColor: 'var(--status-success)' },
@@ -13,6 +14,8 @@ export function GymCardCompact({ gym, selected, onHover, onLeave }) {
   const crowd = CROWD_COLORS[gym.crowd] || CROWD_COLORS.low;
   const userPlan = 'Active';
   const included = gym.plans.includes(userPlan);
+  const { isSaved, toggleSavedGym } = useSavedGyms();
+  const saved = isSaved(gym.id);
 
   return (
     <article
@@ -53,10 +56,13 @@ export function GymCardCompact({ gym, selected, onHover, onLeave }) {
             </p>
           </div>
           <button
-            onClick={e => e.stopPropagation()}
+            onClick={e => {
+              e.stopPropagation();
+              toggleSavedGym(gym.id);
+            }}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--text-muted)' }}
           >
-            <Heart size={15} />
+            <Heart size={15} fill={saved ? 'var(--status-error)' : 'none'} color={saved ? 'var(--status-error)' : 'currentColor'} />
           </button>
         </div>
 
@@ -102,6 +108,8 @@ export function GymCardLarge({ gym }) {
   const crowd = CROWD_COLORS[gym.crowd] || CROWD_COLORS.low;
   const userPlan = 'Active';
   const included = gym.plans.includes(userPlan);
+  const { isSaved, toggleSavedGym } = useSavedGyms();
+  const saved = isSaved(gym.id);
 
   return (
     <article
@@ -112,10 +120,13 @@ export function GymCardLarge({ gym }) {
       <div style={{ position: 'relative', height: 190 }}>
         <img src={gym.image} alt={gym.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         <button
-          onClick={e => e.stopPropagation()}
+          onClick={e => {
+            e.stopPropagation();
+            toggleSavedGym(gym.id);
+          }}
           style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(255,255,255,.9)', border: 'none', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
         >
-          <Heart size={15} color="var(--text-secondary)" />
+          <Heart size={15} fill={saved ? 'var(--status-error)' : 'none'} color={saved ? 'var(--status-error)' : 'var(--text-secondary)'} />
         </button>
         {included && (
           <div style={{ position: 'absolute', bottom: 10, left: 10 }}>

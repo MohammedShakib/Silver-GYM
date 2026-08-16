@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { ArrowRight, Menu, X } from 'lucide-react';
 import BrandLogo from '../components/brand/BrandLogo';
 
@@ -7,8 +7,8 @@ const NAV_LINKS = [
   { to: '/member/explore', label: 'Explore Gyms' },
   { to: '/#how',            label: 'How It Works' },
   { to: '/#plans',          label: 'Membership' },
-  { to: '/for-gyms',        label: 'For Gym Owners' },
-  { to: '/about',           label: 'About' },
+  { to: '/#for-gyms',       label: 'For Gym Owners' },
+  { to: '/#about',          label: 'About' },
 ];
 
 const FOOTER_COLS = [
@@ -29,37 +29,37 @@ const FOOTER_COLS = [
       { label: 'Activity & Streaks', to: '/member/activity' },
       { label: 'Find Nearby Gyms', to: '/member/explore' },
       { label: 'Member Rewards', to: '/member' },
-      { label: 'Help & FAQ', to: '/about' },
+      { label: 'Help & FAQ', to: '/#about' },
     ],
   },
   {
     heading: 'For Gyms',
     links: [
-      { label: 'Become a Partner', to: '/for-gyms' },
+      { label: 'Become a Partner', to: '/#for-gyms' },
       { label: 'Owner Dashboard', to: '/partner' },
-      { label: 'Revenue Calculator', to: '/for-gyms' },
-      { label: 'Partner Guidelines', to: '/for-gyms' },
-      { label: 'Success Stories', to: '/for-gyms' },
+      { label: 'Revenue Calculator', to: '/#for-gyms' },
+      { label: 'Partner Guidelines', to: '/#for-gyms' },
+      { label: 'Success Stories', to: '/#for-gyms' },
     ],
   },
   {
     heading: 'Company',
     links: [
-      { label: 'About Silver GYM', to: '/about' },
-      { label: 'Our Mission in Dhaka', to: '/about' },
-      { label: 'Careers', to: '/about' },
-      { label: 'Press & Media', to: '/about' },
-      { label: 'Contact Us', to: '/about' },
+      { label: 'About Silver GYM', to: '/#about' },
+      { label: 'Our Mission in Dhaka', to: '/#about' },
+      { label: 'Careers', to: '/#about' },
+      { label: 'Press & Media', to: '/#about' },
+      { label: 'Contact Us', to: '/#about' },
     ],
   },
   {
     heading: 'Legal & Security',
     links: [
-      { label: 'Privacy Policy', to: '/about' },
-      { label: 'Terms of Service', to: '/about' },
-      { label: 'Gym Safety Code', to: '/about' },
-      { label: 'Refund Policy', to: '/about' },
-      { label: 'Security Overview', to: '/about' },
+      { label: 'Privacy Policy', to: '/#about' },
+      { label: 'Terms of Service', to: '/#about' },
+      { label: 'Gym Safety Code', to: '/#about' },
+      { label: 'Refund Policy', to: '/#about' },
+      { label: 'Security Overview', to: '/#about' },
     ],
   },
 ];
@@ -67,6 +67,7 @@ const FOOTER_COLS = [
 export default function PublicLayout() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -75,6 +76,25 @@ export default function PublicLayout() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (location.pathname !== '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (!location.hash) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    const id = location.hash.replace('#', '');
+
+    window.setTimeout(() => {
+      const target = document.getElementById(id);
+      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 0);
+  }, [location.hash, location.pathname]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-base)' }}>
@@ -288,7 +308,7 @@ export default function PublicLayout() {
               {/* Social icons */}
               <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                 <a
-                  href="#"
+                  href="/#about"
                   aria-label="Facebook"
                   style={{
                     width: 36,
@@ -314,7 +334,7 @@ export default function PublicLayout() {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
                 </a>
                 <a
-                  href="#"
+                  href="/#about"
                   aria-label="Instagram"
                   style={{
                     width: 36,
@@ -340,7 +360,7 @@ export default function PublicLayout() {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
                 </a>
                 <a
-                  href="#"
+                  href="/#about"
                   aria-label="LinkedIn"
                   style={{
                     width: 36,
@@ -366,7 +386,7 @@ export default function PublicLayout() {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
                 </a>
                 <a
-                  href="#"
+                  href="/#about"
                   aria-label="X / Twitter"
                   style={{
                     width: 36,

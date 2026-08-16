@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Home, Compass, Activity, CreditCard, User, Bell, MapPin, QrCode } from 'lucide-react';
 import { mockUser } from '../services/mockData';
@@ -19,12 +20,26 @@ const BOT_NAV = [
 ];
 
 export default function MemberLayout() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
 
   const isActive = (to) => {
     if (to === '/member') return pathname === '/member';
     return pathname.startsWith(to);
   };
+
+  useEffect(() => {
+    if (!hash) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    const scrollTargetId = hash.replace('#', '');
+
+    window.setTimeout(() => {
+      const target = document.getElementById(scrollTargetId);
+      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 0);
+  }, [hash, pathname]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-base)' }}>
@@ -71,12 +86,13 @@ export default function MemberLayout() {
           {/* Right side */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)' }}>
             {/* Location */}
-            <button
+            <Link
+              to="/member/explore"
               className="hide-mobile"
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '.4rem .875rem', background: 'var(--bg-subtle)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-full)', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 500 }}
             >
               <MapPin size={13} color="var(--sg-green)" /> {mockUser.location.split(',')[0]}
-            </button>
+            </Link>
 
             {/* My Pass CTA */}
             <Link to="/member/pass" className="btn btn-primary btn-sm hide-mobile" style={{ gap: 6 }}>
@@ -84,10 +100,10 @@ export default function MemberLayout() {
             </Link>
 
             {/* Notifications */}
-            <button style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative', padding: 6, borderRadius: 'var(--r-full)' }}>
+            <Link to="/member/activity" style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative', padding: 6, borderRadius: 'var(--r-full)' }}>
               <Bell size={18} color="var(--text-secondary)" />
               <span style={{ position: 'absolute', top: 4, right: 4, width: 7, height: 7, background: 'var(--status-error)', borderRadius: '50%', border: '2px solid white' }} />
-            </button>
+            </Link>
 
             {/* Avatar */}
             <Link to="/member/profile">

@@ -2,6 +2,13 @@ import { Link } from 'react-router-dom';
 import { Users, Building, Activity, DollarSign, AlertCircle, UserCheck } from 'lucide-react';
 import { adminData } from '../../services/mockData';
 
+const TODAY_LABEL = new Intl.DateTimeFormat('en-US', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+}).format(new Date());
+
 function MetricCard({ icon: Icon, value, label, sub, color }) {
   return (
     <div className="card card-shadow" style={{ padding: 'var(--sp-5)' }}>
@@ -23,7 +30,7 @@ export default function AdminDashboard() {
       <div style={{ marginBottom: 'var(--sp-8)' }}>
         <p className="eyebrow" style={{ marginBottom: 'var(--sp-2)' }}>Platform Administration</p>
         <h1 style={{ marginBottom: 4 }}>Overview</h1>
-        <p>Thursday, 14 August 2026</p>
+        <p>{TODAY_LABEL}</p>
       </div>
 
       {/* KPIs */}
@@ -69,7 +76,7 @@ export default function AdminDashboard() {
                     </span>
                   </td>
                   <td style={{ padding: '14px 12px' }}>
-                    <button className="btn btn-secondary btn-sm">Review</button>
+                    <Link to="/admin/applications" className="btn btn-secondary btn-sm">Review</Link>
                   </td>
                 </tr>
               ))}

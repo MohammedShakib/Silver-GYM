@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, MapPin, ArrowRight, Zap, ChevronRight } from 'lucide-react';
 import { mockUser, mockGyms, mockActivity, weeklyData } from '../../services/mockData';
 import { GymCardLarge } from '../../components/gym/GymCards';
 import DigitalPassCard from '../../components/pass/DigitalPassCard';
+import { openDirections } from '../../utils/browserActions';
 
 const HOUR = new Date().getHours();
 const GREETING = HOUR < 12 ? 'Good morning' : HOUR < 18 ? 'Good afternoon' : 'Good evening';
@@ -13,6 +14,7 @@ const QUICK_FILTERS = ['Near Me', 'Open Now', 'Low Crowd', 'Included in My Plan'
 export default function MemberHome() {
   const [filter, setFilter] = useState('');
   const bestMatch = mockGyms[0]; // Iron House
+  const navigate = useNavigate();
 
   return (
     <div className="anim-fade">
@@ -26,7 +28,7 @@ export default function MemberHome() {
               </h1>
               <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--text-lg)' }}>Where do you want to train today?</p>
             </div>
-            <button style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '.45rem .875rem', background: 'var(--bg-subtle)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-full)', fontSize: 'var(--text-sm)', fontWeight: 500, cursor: 'pointer', color: 'var(--text-secondary)' }}>
+            <button onClick={() => navigate('/member/explore')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '.45rem .875rem', background: 'var(--bg-subtle)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-full)', fontSize: 'var(--text-sm)', fontWeight: 500, cursor: 'pointer', color: 'var(--text-secondary)' }}>
               <MapPin size={14} color="var(--sg-green)" /> {mockUser.location} <ChevronRight size={13} />
             </button>
           </div>
@@ -36,7 +38,7 @@ export default function MemberHome() {
             <Search size={18} className="input-icon" />
             <input type="text" className="input search-bar input-with-icon" placeholder="Search gym, area or facility" />
             <div className="input-icon-right" style={{ right: 12 }}>
-              <button style={{ background: 'var(--sg-charcoal)', border: 'none', borderRadius: 'var(--r-full)', padding: '6px 14px', fontSize: 'var(--text-xs)', fontWeight: 700, color: 'white', cursor: 'pointer' }}>Search</button>
+              <button onClick={() => navigate('/member/explore')} style={{ background: 'var(--sg-charcoal)', border: 'none', borderRadius: 'var(--r-full)', padding: '6px 14px', fontSize: 'var(--text-xs)', fontWeight: 700, color: 'white', cursor: 'pointer' }}>Search</button>
             </div>
           </div>
 
@@ -106,7 +108,7 @@ export default function MemberHome() {
 
                   <div style={{ display: 'flex', gap: 'var(--sp-3)' }}>
                     <Link to={`/member/gym/${bestMatch.id}`} className="btn btn-dark btn-lg" style={{ flex: 1 }}>View Gym</Link>
-                    <button className="btn btn-secondary btn-lg">Directions</button>
+                    <button className="btn btn-secondary btn-lg" onClick={() => openDirections(bestMatch.address)}>Directions</button>
                   </div>
                 </div>
               </div>
@@ -116,7 +118,7 @@ export default function MemberHome() {
           {/* Digital Pass */}
           <div>
             <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, marginBottom: 'var(--sp-4)' }}>My Silver GYM Pass</h2>
-            <DigitalPassCard compact onOpen={() => window.location.href = '/member/pass'} />
+            <DigitalPassCard compact onOpen={() => navigate('/member/pass')} />
 
             {/* Smart suggestion */}
             <div style={{ marginTop: 'var(--sp-4)', padding: 'var(--sp-4)', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-xl)' }}>

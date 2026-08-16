@@ -45,8 +45,8 @@ export default function SignUp() {
           </button>
           <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', textAlign: 'center' }}>
             By creating an account you agree to our{' '}
-            <Link to="#" style={{ color: 'var(--sg-green)' }}>Terms</Link> and{' '}
-            <Link to="#" style={{ color: 'var(--sg-green)' }}>Privacy Policy</Link>
+            <Link to="/#about" style={{ color: 'var(--sg-green)' }}>Terms</Link> and{' '}
+            <Link to="/#about" style={{ color: 'var(--sg-green)' }}>Privacy Policy</Link>
           </p>
         </form>
 
