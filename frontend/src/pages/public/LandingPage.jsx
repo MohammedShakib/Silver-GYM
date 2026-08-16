@@ -22,6 +22,7 @@ import {
   Search,
 } from 'lucide-react';
 import { GYM_IMAGES, mockGyms, AREAS, ownerData } from '../../services/mockData';
+import coverageMapPreview from '../../assets/landing/coverage-map-preview.png';
 import heroPhoneMockup from '../../assets/landing/silver-gym-hero-phone-mockup.webp';
 
 const SHOW_LEGACY_HERO_VISUAL = false;
@@ -30,50 +31,6 @@ export default function LandingPage() {
   const [selectedArea, setSelectedArea] = useState('Mirpur');
 
   const featuredGyms = mockGyms.slice(0, 3);
-
-  // Area data lookup
-  const currentAreaInfo = AREAS.find(a => a.name === selectedArea) || AREAS[0];
-
-  const areaGymSample = {
-    Mirpur: [
-      { name: 'Iron House Fitness', tier: 'Essential + Active', rating: 4.8, crowd: 'Low', dist: '0.7 km' },
-      { name: 'PowerFit Mirpur', tier: 'Active + Unlimited', rating: 4.6, crowd: 'Low', dist: '0.9 km' },
-      { name: 'Fitness Plus Mirpur 2', tier: 'Essential', rating: 4.5, crowd: 'Moderate', dist: '1.4 km' },
-    ],
-    Uttara: [
-      { name: 'Apex Fitness Sector 4', tier: 'Active + Unlimited', rating: 4.9, crowd: 'Low', dist: '1.2 km' },
-      { name: 'PowerZone Uttara 11', tier: 'Essential + Active', rating: 4.7, crowd: 'Moderate', dist: '2.0 km' },
-      { name: 'Iron Core Sector 7', tier: 'Active', rating: 4.6, crowd: 'Low', dist: '2.5 km' },
-    ],
-    Gulshan: [
-      { name: 'Block 35 Fitness', tier: 'Unlimited Premium', rating: 4.9, crowd: 'Moderate', dist: '0.8 km' },
-      { name: 'Gulshan Club Fitness', tier: 'Unlimited Premium', rating: 4.8, crowd: 'Low', dist: '1.5 km' },
-      { name: 'Elite Performance G-1', tier: 'Active + Unlimited', rating: 4.7, crowd: 'Moderate', dist: '2.1 km' },
-    ],
-    Banani: [
-      { name: 'Urban Strength Banani', tier: 'Active + Unlimited', rating: 4.7, crowd: 'Busy', dist: '0.5 km' },
-      { name: 'Road 11 Fitness Hub', tier: 'Essential + Active', rating: 4.6, crowd: 'Moderate', dist: '1.1 km' },
-      { name: 'Banani DOHS Gym', tier: 'Active', rating: 4.8, crowd: 'Low', dist: '1.8 km' },
-    ],
-    Bashundhara: [
-      { name: 'Block D Fitness Club', tier: 'Active + Unlimited', rating: 4.8, crowd: 'Low', dist: '1.0 km' },
-      { name: 'Evergreen Gym R/A', tier: 'Essential + Active', rating: 4.6, crowd: 'Moderate', dist: '1.6 km' },
-      { name: 'Titan Strength Zone', tier: 'Unlimited', rating: 4.9, crowd: 'Low', dist: '2.2 km' },
-    ],
-    Dhanmondi: [
-      { name: 'Dhanmondi 27 Fitness', tier: 'Active + Unlimited', rating: 4.8, crowd: 'Moderate', dist: '0.9 km' },
-      { name: 'Pulse Gym Road 8', tier: 'Essential + Active', rating: 4.7, crowd: 'Low', dist: '1.4 km' },
-      { name: 'Lakeside Fitness Club', tier: 'Active', rating: 4.5, crowd: 'Moderate', dist: '2.0 km' },
-    ],
-    Badda: [
-      { name: 'Progoti Strength Badda', tier: 'Essential', rating: 4.5, crowd: 'Low', dist: '0.8 km' },
-      { name: 'Link Road Power Gym', tier: 'Essential + Active', rating: 4.6, crowd: 'Moderate', dist: '1.3 km' },
-    ],
-    Mohammadpur: [
-      { name: 'Ring Road Fitness Hub', tier: 'Active + Unlimited', rating: 4.7, crowd: 'Low', dist: '1.1 km' },
-      { name: 'Japan Garden City Gym', tier: 'Essential + Active', rating: 4.6, crowd: 'Moderate', dist: '1.5 km' },
-    ],
-  };
 
   const crowdColors = {
     low: { bg: 'rgba(34, 197, 94, 0.12)', text: '#16A34A', border: 'rgba(34, 197, 94, 0.3)' },
@@ -1174,102 +1131,14 @@ export default function LandingPage() {
                 overflow: 'hidden',
                 boxShadow: '0 20px 40px -8px rgba(0, 0, 0, 0.15)',
                 border: '1px solid #CBD5E1',
-                background: '#0F172A',
+                background: '#FFFFFF',
               }}
             >
               <img
-                src={GYM_IMAGES.hero}
-                alt="Dhaka Coverage Map"
-                style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }}
+                src={coverageMapPreview}
+                alt="Silver GYM Mirpur coverage preview"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
-
-              {/* Area Highlight Overlay Banner */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 16,
-                  left: 16,
-                  right: 16,
-                  background: 'rgba(15, 23, 42, 0.92)',
-                  backdropFilter: 'blur(12px)',
-                  borderRadius: '16px',
-                  padding: '12px 18px',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  color: 'white',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  zIndex: 10,
-                }}
-              >
-                <div>
-                  <div style={{ fontSize: '0.72rem', color: '#22C55E', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                    Selected Zone
-                  </div>
-                  <div style={{ fontSize: '1.15rem', fontWeight: 900, color: 'white' }}>
-                    {selectedArea} Hub
-                  </div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <span
-                    style={{
-                      background: '#16A34A',
-                      color: 'white',
-                      fontSize: '0.78rem',
-                      fontWeight: 800,
-                      padding: '4px 10px',
-                      borderRadius: '8px',
-                    }}
-                  >
-                    {currentAreaInfo?.gyms || 20} Partner Gyms
-                  </span>
-                </div>
-              </div>
-
-              {/* Sample Gyms in Selected Area Floating Card (Bottom) */}
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: 16,
-                  left: 16,
-                  right: 16,
-                  background: 'rgba(255, 255, 255, 0.96)',
-                  backdropFilter: 'blur(12px)',
-                  borderRadius: '18px',
-                  padding: '14px',
-                  boxShadow: '0 12px 30px rgba(0,0,0,0.25)',
-                  zIndex: 10,
-                }}
-              >
-                <p style={{ fontSize: '0.75rem', fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>
-                  Top Partner Gyms in {selectedArea}
-                </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {(areaGymSample[selectedArea] || areaGymSample['Mirpur']).slice(0, 3).map((g, idx) => (
-                    <div
-                      key={idx}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '6px 8px',
-                        background: '#F8FAFC',
-                        borderRadius: 8,
-                        fontSize: '0.8rem',
-                      }}
-                    >
-                      <span style={{ fontWeight: 700, color: '#0F172A' }}>{g.name}</span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.72rem' }}>
-                        <span style={{ color: '#64748B' }}>{g.dist}</span>
-                        <span style={{ color: '#16A34A', fontWeight: 700 }}>★ {g.rating}</span>
-                        <span style={{ background: '#E2E8F0', padding: '1px 6px', borderRadius: 4, color: '#334155', fontWeight: 600 }}>
-                          {g.tier}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
         </div>
