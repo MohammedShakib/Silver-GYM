@@ -1,74 +1,205 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
 import { Search, SlidersHorizontal, MapPin, ChevronDown } from 'lucide-react';
+import * as maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import { mockGyms } from '../../services/mockData';
 import { GymCardCompact } from '../../components/gym/GymCards';
 
 const FILTERS = ['Near Me', 'Open Now', 'Within 2 km', 'Low Crowd', 'Included In My Plan', '4.5+'];
 
-const GYM_PINS = [
-  { id: '1', x: '38%', y: '55%', label: 'Iron House', gym: mockGyms[0] },
-  { id: '2', x: '28%', y: '65%', label: 'PowerFit', gym: mockGyms[1] },
-  { id: '3', x: '70%', y: '30%', label: 'Block 35', gym: mockGyms[2] },
-  { id: '4', x: '62%', y: '42%', label: 'Urban Strength', gym: mockGyms[3] },
-];
+const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
+const MAP_CENTER = [90.3994, 23.7928];
+const USER_LOCATION = [90.3994, 23.7928];
 
-function MapPinComponent({ pin, active, onSelect }) {
-  return (
-    <div
-      className="map-pin"
-      style={{ left: pin.x, top: pin.y, zIndex: active ? 20 : 10 }}
-      onClick={() => onSelect(pin.id)}
-    >
-      <div className={`map-pin-dot ${active ? 'active' : ''}`} style={{ width: 32, height: 32 }}>
-        <span style={{ fontSize: 9, fontWeight: 900 }}>SG</span>
+const GYM_COORDINATES = {
+  '1': { lng: 90.3668, lat: 23.8067, label: 'Iron House' },
+  '2': { lng: 90.3651, lat: 23.8212, label: 'PowerFit' },
+  '3': { lng: 90.4142, lat: 23.7942, label: 'Block 35' },
+  '4': { lng: 90.4067, lat: 23.7957, label: 'Urban Strength' },
+};
+
+const GYM_PINS = mockGyms
+  .filter(gym => GYM_COORDINATES[gym.id])
+  .map(gym => ({
+    id: gym.id,
+    gym,
+    label: GYM_COORDINATES[gym.id].label,
+    coordinates: [GYM_COORDINATES[gym.id].lng, GYM_COORDINATES[gym.id].lat],
+  }));
+
+function getPopupHtml(gym) {
+  const included = gym.plans.includes('Active') ? 'Included' : 'Upgrade';
+  const badgeClass = gym.plans.includes('Active') ? 'sg-map-popup-badge-green' : 'sg-map-popup-badge-neutral';
+
+  return `
+    <div class="sg-map-popup-card">
+      <img src="${gym.image}" alt="${gym.name}" class="sg-map-popup-image" />
+      <p class="sg-map-popup-title">${gym.name}</p>
+      <div class="sg-map-popup-meta">
+        <span>${gym.distance} km • ${gym.crowd} crowd</span>
+        <span class="sg-map-popup-badge ${badgeClass}">${included}</span>
       </div>
-      <div className="map-pin-label">{pin.label}</div>
-
-      {active && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '100%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            marginBottom: 12,
-            background: 'white',
-            borderRadius: 'var(--r-xl)',
-            padding: 'var(--sp-4)',
-            boxShadow: 'var(--shadow-xl)',
-            width: 230,
-            border: '1px solid var(--border-subtle)',
-            zIndex: 30,
-          }}
-        >
-          <img src={pin.gym.image} alt={pin.gym.name} style={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 'var(--r-lg)', marginBottom: 8 }} />
-          <p style={{ margin: '0 0 2px', fontWeight: 700, fontSize: 'var(--text-sm)' }}>{pin.gym.name}</p>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{pin.gym.distance} km • {pin.gym.crowd} crowd</span>
-            <span className={`badge ${pin.gym.plans.includes('Active') ? 'badge-green' : 'badge-neutral'}`} style={{ fontSize: 9 }}>
-              {pin.gym.plans.includes('Active') ? 'Included ✓' : 'Upgrade'}
-            </span>
-          </div>
-          <Link to={`/member/gym/${pin.gym.id}`} className="btn btn-dark btn-sm btn-full">View Gym</Link>
-        </div>
-      )}
+      <a href="/member/gym/${gym.id}" class="sg-map-popup-link">View Gym</a>
     </div>
-  );
+  `;
+}
+
+function createMarkerElement(pin, onSelect, onHover, onLeave) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'sg-map-marker';
+  button.setAttribute('aria-label', pin.gym.name);
+  button.innerHTML = `
+    <span class="sg-map-marker-dot">SG</span>
+    <span class="sg-map-marker-label">${pin.label}</span>
+  `;
+
+  button.addEventListener('click', event => {
+    event.stopPropagation();
+    onSelect(pin.id);
+  });
+  button.addEventListener('mouseenter', () => onHover(pin.id));
+  button.addEventListener('mouseleave', () => onLeave());
+
+  return button;
 }
 
 export default function ExploreGyms() {
   const [activeFilter, setActiveFilter] = useState('');
   const [hoveredGym, setHoveredGym] = useState(null);
   const [selectedPin, setSelectedPin] = useState(null);
-  const [mapScale, setMapScale] = useState(1);
   const [sortLabel, setSortLabel] = useState('Recommended');
   const [showExtraFilters, setShowExtraFilters] = useState(false);
+
+  const mapContainerRef = useRef(null);
+  const mapRef = useRef(null);
+  const popupRef = useRef(null);
+  const markerRefs = useRef({});
 
   const handleSelectPin = (id) => {
     setSelectedPin(prev => (prev === id ? null : id));
     setHoveredGym(id);
   };
+
+  useEffect(() => {
+    if (!mapContainerRef.current || mapRef.current) {
+      return;
+    }
+
+    const map = new maplibregl.Map({
+      container: mapContainerRef.current,
+      style: MAP_STYLE_URL,
+      center: MAP_CENTER,
+      zoom: 12.2,
+      pitch: 42,
+      bearing: -14,
+      attributionControl: false,
+    });
+
+    const popup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+      offset: 28,
+      maxWidth: '240px',
+      className: 'sg-map-popup',
+    });
+
+    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
+    map.scrollZoom.disable();
+
+    let sceneReady = false;
+
+    const setupMapScene = () => {
+      if (sceneReady) {
+        return;
+      }
+
+      sceneReady = true;
+      const bounds = new maplibregl.LngLatBounds();
+
+      GYM_PINS.forEach(pin => {
+        const element = createMarkerElement(
+          pin,
+          handleSelectPin,
+          id => setHoveredGym(id),
+          () => setHoveredGym(null),
+        );
+
+        const marker = new maplibregl.Marker({
+          element,
+          anchor: 'bottom',
+        })
+          .setLngLat(pin.coordinates)
+          .addTo(map);
+
+        markerRefs.current[pin.id] = { marker, element, pin };
+        bounds.extend(pin.coordinates);
+      });
+
+      const userElement = document.createElement('div');
+      userElement.className = 'sg-map-user-marker';
+      new maplibregl.Marker({ element: userElement })
+        .setLngLat(USER_LOCATION)
+        .addTo(map);
+
+      bounds.extend(USER_LOCATION);
+      map.fitBounds(bounds, {
+        padding: { top: 120, right: 72, bottom: 72, left: 72 },
+        duration: 0,
+        maxZoom: 12.9,
+      });
+    };
+
+    map.once('style.load', setupMapScene);
+    map.once('load', setupMapScene);
+
+    map.on('click', () => {
+      setSelectedPin(null);
+    });
+
+    mapRef.current = map;
+    popupRef.current = popup;
+
+    return () => {
+      popup.remove();
+      Object.values(markerRefs.current).forEach(({ marker }) => marker.remove());
+      markerRefs.current = {};
+      map.remove();
+      mapRef.current = null;
+      popupRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const activeId = selectedPin || hoveredGym;
+
+    Object.entries(markerRefs.current).forEach(([id, entry]) => {
+      entry.element.classList.toggle('is-active', activeId === id);
+    });
+
+    if (!selectedPin || !popupRef.current || !mapRef.current) {
+      popupRef.current?.remove();
+      return;
+    }
+
+    const activePin = GYM_PINS.find(pin => pin.id === selectedPin);
+    if (!activePin) {
+      popupRef.current.remove();
+      return;
+    }
+
+    popupRef.current
+      .setLngLat(activePin.coordinates)
+      .setHTML(getPopupHtml(activePin.gym))
+      .addTo(mapRef.current);
+
+    mapRef.current.easeTo({
+      center: activePin.coordinates,
+      duration: 550,
+      zoom: Math.max(mapRef.current.getZoom(), 12.7),
+      offset: [0, 80],
+    });
+  }, [hoveredGym, selectedPin]);
 
   return (
     <div style={{ display: 'flex', height: 'calc(100vh - var(--header-h))', overflow: 'hidden' }} className="anim-fade">
@@ -108,7 +239,7 @@ export default function ExploreGyms() {
           <div className="flex-between" style={{ marginTop: 'var(--sp-3)' }}>
             <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{mockGyms.length} gyms near Mirpur 10</span>
             <button
-              onClick={() => setSortLabel(current => current === 'Recommended' ? 'Closest' : 'Recommended')}
+              onClick={() => setSortLabel(current => (current === 'Recommended' ? 'Closest' : 'Recommended'))}
               style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--text-xs)', fontWeight: 600, cursor: 'pointer', color: 'var(--text-secondary)' }}
             >
               Sort: {sortLabel} <ChevronDown size={12} />
@@ -121,7 +252,7 @@ export default function ExploreGyms() {
             <GymCardCompact
               key={gym.id}
               gym={gym}
-              selected={hoveredGym === gym.id}
+              selected={hoveredGym === gym.id || selectedPin === gym.id}
               onHover={() => {
                 setHoveredGym(gym.id);
                 setSelectedPin(gym.id);
@@ -133,35 +264,46 @@ export default function ExploreGyms() {
       </div>
 
       <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-        <div className="map-surface" style={{ width: '100%', height: '100%', transform: `scale(${mapScale})`, transformOrigin: 'center center', transition: 'transform 0.2s ease' }}>
-          <img
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAW1VIhpQI3RKs-ZZyXPMMuVEhv9YntXyKw3h2VyD2cNRZ46cmKGRo3_f6nKp1oNZzTybULzbWdJBky6ksIyHwl1wfe6IVgCAwMLtS6EaqnQRMYJh_HDGisidQ1a4dQR1vJ8GlsGh2mxorJ0ppt-uDCq7W0kmWHwtZ1r5iJg6Yz_9cjl5Fp_-bh9Jim_ggGuoRk45ho2g8sHOq6Gzk68orIZ12r6SlwV4Ir5h0qEXhzrQQdpheasY6g"
-            alt="Dhaka map"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.9 }}
-          />
-
-          <div className="user-pin" style={{ left: '42%', top: '60%' }} />
-
-          {GYM_PINS.map(pin => (
-            <MapPinComponent
-              key={pin.id}
-              pin={pin}
-              active={selectedPin === pin.id}
-              onSelect={handleSelectPin}
-            />
-          ))}
+        <div className="map-surface map-live-surface" style={{ width: '100%', height: '100%' }}>
+          <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
 
           <div style={{ position: 'absolute', bottom: 24, right: 16, display: 'flex', flexDirection: 'column', gap: 6 }}>
             {['+', '-'].map(control => (
               <button
                 key={control}
-                onClick={() => setMapScale(current => (control === '+' ? Math.min(1.4, current + 0.1) : Math.max(0.9, current - 0.1)))}
+                onClick={() => {
+                  if (!mapRef.current) {
+                    return;
+                  }
+
+                  if (control === '+') {
+                    mapRef.current.zoomIn({ duration: 250 });
+                  } else {
+                    mapRef.current.zoomOut({ duration: 250 });
+                  }
+                }}
                 style={{ width: 36, height: 36, background: 'white', border: '1px solid var(--border-default)', borderRadius: 'var(--r-md)', fontWeight: 700, fontSize: 18, cursor: 'pointer', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-primary)' }}
               >
                 {control}
               </button>
             ))}
-            <button onClick={() => setMapScale(1)} style={{ width: 36, height: 36, background: 'white', border: '1px solid var(--border-default)', borderRadius: 'var(--r-md)', cursor: 'pointer', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button
+              onClick={() => {
+                if (!mapRef.current) {
+                  return;
+                }
+
+                mapRef.current.easeTo({
+                  center: USER_LOCATION,
+                  zoom: 12.6,
+                  pitch: 42,
+                  bearing: -14,
+                  duration: 450,
+                });
+                setSelectedPin(null);
+              }}
+              style={{ width: 36, height: 36, background: 'white', border: '1px solid var(--border-default)', borderRadius: 'var(--r-md)', cursor: 'pointer', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
               <MapPin size={16} color="var(--status-info)" />
             </button>
           </div>
