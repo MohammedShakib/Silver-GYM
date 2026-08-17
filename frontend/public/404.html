@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Silver GYM</title>
+    <script>
+      (function () {
+        var redirectKey = 'silver-gym:spa-fallback-path';
+        var targetPath = window.location.pathname + window.location.search + window.location.hash;
+
+        window.sessionStorage.setItem(redirectKey, targetPath);
+        window.location.replace('/');
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>

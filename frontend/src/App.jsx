@@ -34,6 +34,28 @@ import ReceptionScanner  from './pages/partner/ReceptionScanner';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import FeaturePlaceholder from './components/common/FeaturePlaceholder';
 
+const FALLBACK_REDIRECT_KEY = 'silver-gym:spa-fallback-path';
+
+function restoreSpaFallbackPath() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const redirectedPath = window.sessionStorage.getItem(FALLBACK_REDIRECT_KEY);
+
+  if (!redirectedPath) {
+    return;
+  }
+
+  window.sessionStorage.removeItem(FALLBACK_REDIRECT_KEY);
+
+  if (redirectedPath !== window.location.pathname + window.location.search + window.location.hash) {
+    window.history.replaceState({}, '', redirectedPath);
+  }
+}
+
+restoreSpaFallbackPath();
+
 const router = createBrowserRouter([
   // ── Public routes ──
   {
