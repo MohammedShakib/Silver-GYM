@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, SlidersHorizontal, MapPin, ChevronDown, Check, LocateFixed, Navigation, Star, Map, List, RotateCcw, X } from 'lucide-react';
+import { Search, SlidersHorizontal, MapPin, ChevronDown, Check, LocateFixed, Navigation, Star, Map, List, RotateCcw } from 'lucide-react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { mockGyms } from '../../services/mockData';
@@ -34,6 +34,7 @@ const GYM_PINS = mockGyms
   }));
 
 const CROWD_ORDER = { low: 0, moderate: 1, busy: 2, full: 3 };
+const PREVIEW_CLEAR_DELAY_MS = 90;
 
 function distanceBetween(pointA, pointB) {
   const dx = pointA[0] - pointB[0];
@@ -75,13 +76,12 @@ function getNearestVisibleGym(center, visiblePins) {
   }, null);
 }
 
-/**
- * Reusable Map Preview Popup Component
- * Dynamically displays whichever gym is currently active (hovered or clicked)
- */
-function MapGymPreview({ gym, onClose }) {
+function MapGymPreview({ gym }) {
   const navigate = useNavigate();
-  if (!gym) return null;
+
+  if (!gym) {
+    return null;
+  }
 
   const isIncluded = gym.plans.includes('Active');
   const crowdLabel = gym.crowd === 'low' ? 'Low crowd' : gym.crowd === 'moderate' ? 'Moderate crowd' : 'Busy crowd';
@@ -101,7 +101,7 @@ function MapGymPreview({ gym, onClose }) {
         gap: 12,
         position: 'relative',
       }}
-      onClick={e => e.stopPropagation()}
+      onClick={event => event.stopPropagation()}
     >
       <div style={{ position: 'relative', width: 96, height: 96, borderRadius: 'var(--r-md)', overflow: 'hidden' }}>
         <img src={gym.image} alt={gym.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -118,10 +118,16 @@ function MapGymPreview({ gym, onClose }) {
             </span>
           </div>
 
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>
+            <MapPin size={11} color="var(--sg-green)" />
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{gym.area}</span>
+          </div>
+
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontWeight: 700, color: 'var(--text-primary)' }}>
               <Star size={11} fill="var(--status-warning)" color="var(--status-warning)" /> {gym.rating}
             </span>
+            <span>({gym.reviewCount})</span>
             <span>·</span>
             <span>{gym.distance} km</span>
             <span>·</span>
@@ -136,6 +142,10 @@ function MapGymPreview({ gym, onClose }) {
             <span style={{ color: crowdColor, fontWeight: 700 }}>
               {crowdLabel}
             </span>
+          </div>
+
+          <div style={{ fontSize: 11, fontWeight: 700, color: isIncluded ? 'var(--sg-green-active)' : 'var(--status-warning)' }}>
+            {isIncluded ? 'Included in Active plan' : 'Upgrade required for your plan'}
           </div>
         </div>
 
@@ -152,10 +162,11 @@ function MapGymPreview({ gym, onClose }) {
             type="button"
             onClick={() => openDirections(gym.address)}
             className="btn btn-secondary btn-sm"
-            style={{ padding: '0.35rem 0.6rem' }}
+            style={{ padding: '0.35rem 0.6rem', display: 'inline-flex', alignItems: 'center', gap: 4 }}
             title="Open in Google Maps"
           >
             <Navigation size={12} />
+            Directions
           </button>
         </div>
       </div>
@@ -164,24 +175,20 @@ function MapGymPreview({ gym, onClose }) {
 }
 
 export default function ExploreGyms() {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
   const initialFilter = searchParams.get('filter');
 
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [activeFilters, setActiveFilters] = useState(initialFilter ? [initialFilter] : ['Near Me']);
-  
-  // Shared interaction state
-  const [selectedGymId, setSelectedGymId] = useState(mockGyms[0]?.id ?? null);
+  const [selectedGymId, setSelectedGymId] = useState(null);
   const [hoveredGymId, setHoveredGymId] = useState(null);
-
   const [sortLabel, setSortLabel] = useState('Recommended');
   const [showExtraFilters, setShowExtraFilters] = useState(false);
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [showSearchArea, setShowSearchArea] = useState(false);
   const [previewAnchor, setPreviewAnchor] = useState(null);
-  const [mobileTab, setMobileTab] = useState('list'); // 'list' | 'map'
+  const [mobileTab, setMobileTab] = useState('list');
 
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
@@ -190,17 +197,20 @@ export default function ExploreGyms() {
   const cardRefs = useRef({});
   const lastSearchedCenterRef = useRef(MAP_CENTER);
   const dragMovedRef = useRef(false);
+  const activeMapPinRef = useRef(null);
+  const hoverResetTimeoutRef = useRef(null);
 
-  const toggleFilter = (filter) => {
+  const toggleFilter = useCallback((filter) => {
     setActiveFilters(current => (
       current.includes(filter)
         ? current.filter(item => item !== filter)
         : [...current, filter]
     ));
-  };
+  }, []);
 
   const query = searchQuery.trim().toLowerCase();
-  let filteredGyms = useMemo(() => {
+
+  const filteredGymsByFilter = useMemo(() => {
     return mockGyms.filter(gym => {
       const matchesSearch = !query || [gym.name, gym.area, gym.address, ...gym.amenities]
         .join(' ')
@@ -245,10 +255,11 @@ export default function ExploreGyms() {
 
       return true;
     });
-  }, [query, activeFilters]);
+  }, [activeFilters, query]);
 
-  filteredGyms = useMemo(() => {
-    const list = [...filteredGyms];
+  const filteredGyms = useMemo(() => {
+    const list = [...filteredGymsByFilter];
+
     return list.sort((left, right) => {
       if (sortLabel === 'Nearest') {
         return left.distance - right.distance;
@@ -266,21 +277,35 @@ export default function ExploreGyms() {
       const rightIncluded = right.plans.includes('Active') ? 1 : 0;
       return rightIncluded - leftIncluded || left.distance - right.distance || right.rating - left.rating;
     });
-  }, [filteredGyms, sortLabel]);
+  }, [filteredGymsByFilter, sortLabel]);
 
-  const visiblePins = useMemo(() => {
-    return GYM_PINS.filter(pin => filteredGyms.some(gym => gym.id === pin.id));
+  const visibleGymIds = useMemo(() => {
+    return new Set(filteredGyms.map(gym => gym.id));
   }, [filteredGyms]);
 
-  // Unified active gym: hover takes precedence temporarily, returns to persistent selection
-  const activeGymId = hoveredGymId ?? selectedGymId;
+  const visiblePins = useMemo(() => {
+    return GYM_PINS.filter(pin => visibleGymIds.has(pin.id));
+  }, [visibleGymIds]);
+
+  const activeGymId = useMemo(() => {
+    if (hoveredGymId && visibleGymIds.has(hoveredGymId)) {
+      return hoveredGymId;
+    }
+
+    if (selectedGymId && visibleGymIds.has(selectedGymId)) {
+      return selectedGymId;
+    }
+
+    return null;
+  }, [hoveredGymId, selectedGymId, visibleGymIds]);
+
   const activeGym = useMemo(() => {
-    return mockGyms.find(gym => gym.id === activeGymId) || null;
-  }, [activeGymId]);
+    return filteredGyms.find(gym => gym.id === activeGymId) || null;
+  }, [activeGymId, filteredGyms]);
 
   const activeMapPin = useMemo(() => {
-    return GYM_PINS.find(pin => pin.id === activeGymId) || null;
-  }, [activeGymId]);
+    return visiblePins.find(pin => pin.id === activeGymId) || null;
+  }, [activeGymId, visiblePins]);
 
   const extraFilterCount = activeFilters.filter(filter => EXTRA_FILTERS.includes(filter)).length;
 
@@ -289,59 +314,94 @@ export default function ExploreGyms() {
     : `${filteredGyms.length} partner gyms in Dhaka`;
   const resultSecondaryCopy = searchQuery || activeFilters.length > 1 ? 'Showing available partners' : '';
 
-  // Select Gym Handler (Click on card or marker)
-  const handleSelectGym = useCallback((gymId, { panMap = true, scrollList = true } = {}) => {
-    setSelectedGymId(gymId);
+  const clearHoverReset = useCallback(() => {
+    if (hoverResetTimeoutRef.current) {
+      clearTimeout(hoverResetTimeoutRef.current);
+      hoverResetTimeoutRef.current = null;
+    }
+  }, []);
 
-    const pin = GYM_PINS.find(p => p.id === gymId);
+  const handleHoverGym = useCallback((gymId) => {
+    clearHoverReset();
+    setHoveredGymId(current => current === gymId ? current : gymId);
+  }, [clearHoverReset]);
+
+  const scheduleHoverReset = useCallback(() => {
+    clearHoverReset();
+    hoverResetTimeoutRef.current = setTimeout(() => {
+      setHoveredGymId(null);
+      hoverResetTimeoutRef.current = null;
+    }, PREVIEW_CLEAR_DELAY_MS);
+  }, [clearHoverReset]);
+
+  const handleSelectGym = useCallback((gymId, { panMap = true, scrollList = true } = {}) => {
+    clearHoverReset();
+    setHoveredGymId(null);
+    setSelectedGymId(current => current === gymId ? current : gymId);
+
+    const pin = GYM_PINS.find(candidate => candidate.id === gymId);
     if (panMap && mapRef.current && pin) {
       mapRef.current.easeTo({
         center: pin.coordinates,
         duration: 480,
         zoom: Math.max(mapRef.current.getZoom(), 12.8),
-        offset: [0, 52],
+        padding: { top: 132, right: 104, bottom: 132, left: 104 },
       });
     }
 
     if (scrollList && cardRefs.current[gymId]) {
-      cardRefs.current[gymId]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      cardRefs.current[gymId].scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
     }
-  }, []);
+  }, [clearHoverReset]);
 
-  // Update preview anchor coordinates based on activeMapPin
   const updatePreviewAnchor = useCallback(() => {
-    if (!mapRef.current || !activeMapPin || !mapContainerRef.current) {
+    const currentPin = activeMapPinRef.current;
+
+    if (!mapRef.current || !currentPin || !mapContainerRef.current) {
       setPreviewAnchor(null);
       return;
     }
 
-    const point = mapRef.current.project(activeMapPin.coordinates);
+    const point = mapRef.current.project(currentPin.coordinates);
     const width = mapContainerRef.current.clientWidth;
     const height = mapContainerRef.current.clientHeight;
     const safeX = Math.max(170, Math.min(width - 170, point.x));
     const placeBelow = point.y < 200;
     const safeY = Math.max(88, Math.min(height - 72, point.y));
     setPreviewAnchor({ x: safeX, y: safeY, placeBelow });
-  }, [activeMapPin]);
+  }, []);
 
-  // If filtered list changes and currently selected gym is not in results, select first result
+  useEffect(() => {
+    activeMapPinRef.current = activeMapPin;
+    updatePreviewAnchor();
+  }, [activeMapPin, updatePreviewAnchor]);
+
+  useEffect(() => {
+    if (hoveredGymId && !visibleGymIds.has(hoveredGymId)) {
+      clearHoverReset();
+      setHoveredGymId(null);
+    }
+  }, [clearHoverReset, hoveredGymId, visibleGymIds]);
+
   useEffect(() => {
     if (!filteredGyms.length) {
+      clearHoverReset();
+      setHoveredGymId(null);
       setSelectedGymId(null);
       return;
     }
 
-    if (!filteredGyms.some(gym => gym.id === selectedGymId)) {
+    if (selectedGymId && !visibleGymIds.has(selectedGymId)) {
       setSelectedGymId(filteredGyms[0].id);
     }
-  }, [filteredGyms, selectedGymId]);
+  }, [clearHoverReset, filteredGyms, selectedGymId, visibleGymIds]);
 
-  // Update Anchor whenever activeMapPin changes
   useEffect(() => {
-    updatePreviewAnchor();
-  }, [updatePreviewAnchor]);
+    return () => {
+      clearHoverReset();
+    };
+  }, [clearHoverReset]);
 
-  // Initialize MapLibre Map (Only once)
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) {
       return;
@@ -379,8 +439,8 @@ export default function ExploreGyms() {
         const element = createMarkerElement(
           pin,
           id => handleSelectGym(id, { panMap: true, scrollList: true }),
-          id => setHoveredGymId(id),
-          () => setHoveredGymId(null),
+          handleHoverGym,
+          scheduleHoverReset,
         );
 
         const marker = new maplibregl.Marker({ element, anchor: 'bottom' })
@@ -403,6 +463,7 @@ export default function ExploreGyms() {
         duration: 0,
         maxZoom: 12.8,
       });
+
       lastSearchedCenterRef.current = map.getCenter().toArray();
       setShowSearchArea(false);
       updatePreviewAnchor();
@@ -423,13 +484,12 @@ export default function ExploreGyms() {
       }
       dragMovedRef.current = false;
     });
-    map.on('click', () => {
-      setHoveredGymId(null);
-    });
+    map.on('click', scheduleHoverReset);
 
     mapRef.current = map;
 
     return () => {
+      clearHoverReset();
       Object.values(markerRefs.current).forEach(({ marker }) => marker.remove());
       markerRefs.current = {};
       userMarkerRef.current?.remove();
@@ -437,9 +497,8 @@ export default function ExploreGyms() {
       map.remove();
       mapRef.current = null;
     };
-  }, [handleSelectGym, updatePreviewAnchor]);
+  }, [clearHoverReset, handleHoverGym, handleSelectGym, scheduleHoverReset, updatePreviewAnchor]);
 
-  // Synchronize Marker Visibility with Filtered Results
   useEffect(() => {
     const visibleIds = new Set(visiblePins.map(pin => pin.id));
     Object.entries(markerRefs.current).forEach(([id, entry]) => {
@@ -447,7 +506,6 @@ export default function ExploreGyms() {
     });
   }, [visiblePins]);
 
-  // Synchronize Marker Selected/Hovered Visual States
   useEffect(() => {
     Object.entries(markerRefs.current).forEach(([id, entry]) => {
       const isSelected = selectedGymId === id;
@@ -467,8 +525,6 @@ export default function ExploreGyms() {
 
   return (
     <div style={{ display: 'flex', height: 'calc(100vh - var(--header-h))', overflow: 'hidden', position: 'relative' }} className="anim-fade explore-container">
-      
-      {/* Mobile Toggle Floating Bar (below 768px) */}
       <div className="show-mobile" style={{
         position: 'absolute',
         top: 14,
@@ -524,7 +580,6 @@ export default function ExploreGyms() {
         </button>
       </div>
 
-      {/* Left List Panel */}
       <div
         className={`explore-list-panel ${mobileTab === 'map' ? 'hide-mobile' : ''}`}
         style={{
@@ -538,7 +593,6 @@ export default function ExploreGyms() {
           height: '100%',
         }}
       >
-        {/* Compact Header & Filter Section */}
         <div style={{ padding: '14px 18px 12px', background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-subtle)', flexShrink: 0 }}>
           <div className="input-group" style={{ position: 'relative', marginBottom: 10 }}>
             <Search size={16} className="input-icon" color="var(--text-muted)" />
@@ -572,10 +626,10 @@ export default function ExploreGyms() {
             )}
           </div>
 
-          {/* Quick Filter Chips */}
           <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2, scrollbarWidth: 'none' }}>
             {PRIMARY_FILTERS.map(filter => {
               const active = activeFilters.includes(filter);
+
               return (
                 <button
                   key={filter}
@@ -629,6 +683,7 @@ export default function ExploreGyms() {
             <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
               {EXTRA_FILTERS.map(filter => {
                 const active = activeFilters.includes(filter);
+
                 return (
                   <button
                     key={filter}
@@ -656,7 +711,6 @@ export default function ExploreGyms() {
             </div>
           )}
 
-          {/* Results Summary & Sorting */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, minHeight: 28 }}>
             <div>
               <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-primary)', fontWeight: 700 }}>
@@ -723,7 +777,6 @@ export default function ExploreGyms() {
           </div>
         </div>
 
-        {/* Results List */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           {filteredGyms.length === 0 ? (
             <EmptyState
@@ -748,9 +801,11 @@ export default function ExploreGyms() {
                   gym={gym}
                   selected={selectedGymId === gym.id}
                   hovered={hoveredGymId === gym.id}
-                  onSelect={(id) => handleSelectGym(id, { panMap: true, scrollList: false })}
-                  onHover={(id) => setHoveredGymId(id)}
-                  onLeave={() => setHoveredGymId(null)}
+                  onSelect={id => handleSelectGym(id, { panMap: true, scrollList: false })}
+                  onHover={handleHoverGym}
+                  onLeave={scheduleHoverReset}
+                  onFocus={handleHoverGym}
+                  onBlur={scheduleHoverReset}
                 />
               </div>
             ))
@@ -758,7 +813,6 @@ export default function ExploreGyms() {
         </div>
       </div>
 
-      {/* Right Map Panel */}
       <div
         className={`explore-map-panel ${mobileTab === 'list' ? 'hide-mobile' : ''}`}
         style={{ flex: 1, position: 'relative', overflow: 'hidden', height: '100%' }}
@@ -788,7 +842,6 @@ export default function ExploreGyms() {
             </div>
           )}
 
-          {/* Dynamic Reusable Map Preview Popup */}
           {activeGym && previewAnchor && (
             <div
               style={{
@@ -799,8 +852,8 @@ export default function ExploreGyms() {
                 zIndex: 25,
                 pointerEvents: 'auto',
               }}
-              onMouseEnter={() => setHoveredGymId(activeGym.id)}
-              onMouseLeave={() => setHoveredGymId(null)}
+              onMouseEnter={() => handleHoverGym(activeGym.id)}
+              onMouseLeave={scheduleHoverReset}
             >
               <MapGymPreview gym={activeGym} />
 
@@ -823,7 +876,6 @@ export default function ExploreGyms() {
             </div>
           )}
 
-          {/* Map Controls */}
           <div style={{ position: 'absolute', right: 18, bottom: 22, zIndex: 8 }}>
             <div style={{ background: 'rgba(255, 255, 255, 0.96)', border: '1px solid rgba(226, 232, 240, 0.95)', borderRadius: 18, boxShadow: '0 16px 30px rgba(15, 23, 42, 0.14)', padding: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
               {['+', '-'].map(control => (
@@ -861,6 +913,7 @@ export default function ExploreGyms() {
                   if (filteredGyms[0]) {
                     handleSelectGym(filteredGyms[0].id, { panMap: false, scrollList: true });
                   }
+                  clearHoverReset();
                   setHoveredGymId(null);
                 }}
                 style={{ width: 44, height: 44, background: 'white', border: '1px solid var(--border-default)', borderRadius: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}

@@ -10,7 +10,7 @@ const CROWD_CONFIG = {
   full: { dot: 'crowd-full', label: 'Full', textColor: 'var(--status-error)' },
 };
 
-export function GymCardCompact({ gym, selected, hovered, onSelect, onHover, onLeave }) {
+export function GymCardCompact({ gym, selected, hovered, onSelect, onHover, onLeave, onFocus, onBlur }) {
   const navigate = useNavigate();
   const crowd = CROWD_CONFIG[gym.crowd] || CROWD_CONFIG.low;
   const userPlan = 'Active';
@@ -23,7 +23,11 @@ export function GymCardCompact({ gym, selected, hovered, onSelect, onHover, onLe
       onClick={() => onSelect?.(gym.id)}
       onMouseEnter={() => onHover?.(gym.id)}
       onMouseLeave={() => onLeave?.()}
+      onFocus={() => onFocus?.(gym.id)}
+      onBlur={() => onBlur?.()}
       tabIndex={0}
+      role="button"
+      aria-pressed={selected}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -282,4 +286,3 @@ export function GymCardLarge({ gym }) {
 }
 
 export default GymCardLarge;
-
