@@ -613,6 +613,67 @@
     repeating-conic-gradient(#000 0% 25%, transparent 0% 50%) 0 0 / 10px 10px;
   border-radius: var(--r-sm);
 }
+.pass-cta-spin {
+  animation: passSpin 7s linear infinite;
+  transform-origin: center;
+}
+.pass-cta-spin-slow {
+  animation: passSpin 10s linear infinite;
+  transform-origin: center;
+}
+.pass-modal-shell {
+  animation: passModalRise .28s ease-out;
+}
+.pass-modal-ring,
+.pass-modal-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+}
+.pass-modal-ring-a {
+  border: 1px solid rgba(34, 197, 94, 0.18);
+  animation: passOrbitClockwise 12s linear infinite;
+}
+.pass-modal-ring-b {
+  inset: 22px;
+  border: 1px dashed rgba(59, 130, 246, 0.24);
+  animation: passOrbitCounter 9s linear infinite;
+}
+.pass-modal-glow {
+  inset: 44px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(34, 197, 94, 0.14) 0%, rgba(34, 197, 94, 0.06) 38%, transparent 72%);
+  filter: blur(10px);
+  animation: passPulse 3.2s ease-in-out infinite;
+}
+@keyframes passSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes passOrbitClockwise {
+  from { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.04); }
+  to { transform: rotate(360deg) scale(1); }
+}
+@keyframes passOrbitCounter {
+  from { transform: rotate(360deg) scale(1); }
+  50% { transform: rotate(180deg) scale(0.97); }
+  to { transform: rotate(0deg) scale(1); }
+}
+@keyframes passPulse {
+  0%, 100% { opacity: 0.45; transform: scale(0.96); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+@keyframes passModalRise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
 
 /* ─── Skeleton Loader ─── */
 .skeleton {
@@ -706,4 +767,3 @@
     height: 100% !important;
   }
 }
-
