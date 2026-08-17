@@ -22,9 +22,82 @@ import {
   Sparkles,
   QrCode
 } from 'lucide-react';
+import bkashLogo from '../../assets/payment-logos/bkash.svg';
+import mastercardLogo from '../../assets/payment-logos/mastercard.svg';
+import nagadLogo from '../../assets/payment-logos/nagad.svg';
+import rocketLogo from '../../assets/payment-logos/rocket.svg';
+import visaLogo from '../../assets/payment-logos/visa.svg';
 import { mockUser } from '../../services/mockData';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
+
+const paymentBrandLogos = {
+  bkash: {
+    src: bkashLogo,
+    shellStyle: { width: 54, background: '#FFFFFF' },
+    imageStyle: { width: 42 },
+  },
+  visa: {
+    src: visaLogo,
+    shellStyle: { width: 54, background: '#FFFFFF' },
+    imageStyle: { width: 40 },
+  },
+  rocket: {
+    src: rocketLogo,
+    shellStyle: { width: 54, background: '#FFFFFF' },
+    imageStyle: { width: 42 },
+  },
+  nagad: {
+    src: nagadLogo,
+    shellStyle: { width: 54, background: '#FFFFFF' },
+    imageStyle: { width: 42 },
+  },
+  mastercard: {
+    src: mastercardLogo,
+    shellStyle: { width: 58, background: '#FFFFFF' },
+    imageStyle: { width: 48 },
+  },
+};
+
+function PaymentBrandLogo({ type }) {
+  const logo = paymentBrandLogos[type];
+
+  if (!logo) {
+    return null;
+  }
+
+  const shellStyle = {
+    width: 54,
+    height: 32,
+    borderRadius: 8,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    overflow: 'hidden',
+    padding: '4px 6px',
+    border: '1px solid rgba(148, 163, 184, 0.2)',
+    boxShadow: '0 1px 2px rgba(15, 23, 42, 0.06)',
+  };
+
+  return (
+    <div style={{ ...shellStyle, ...logo.shellStyle }}>
+      <img
+        src={logo.src}
+        alt=""
+        aria-hidden="true"
+        style={{
+          width: '100%',
+          height: '100%',
+          maxWidth: logo.imageStyle.width,
+          objectFit: 'contain',
+          objectPosition: 'center',
+          display: 'block',
+        }}
+      />
+    </div>
+  );
+}
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -510,9 +583,7 @@ export default function Profile() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 'var(--sp-3)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg-subtle)', borderRadius: 'var(--r-md)', border: '1px solid var(--border-subtle)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: 6, background: '#E2136E', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 10 }}>
-                    bK
-                  </div>
+                  <PaymentBrandLogo type="bkash" />
                   <div>
                     <p style={{ margin: 0, fontWeight: 700, fontSize: 'var(--text-xs)', color: 'var(--text-primary)' }}>bKash Wallet</p>
                     <p style={{ margin: 0, fontSize: 10, color: 'var(--text-muted)' }}>+880 1712-***678</p>
@@ -523,15 +594,46 @@ export default function Profile() {
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg-subtle)', borderRadius: 'var(--r-md)', border: '1px solid var(--border-subtle)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: 6, background: '#1A1F71', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 9 }}>
-                    VISA
-                  </div>
+                  <PaymentBrandLogo type="visa" />
                   <div>
                     <p style={{ margin: 0, fontWeight: 700, fontSize: 'var(--text-xs)', color: 'var(--text-primary)' }}>Visa Card</p>
-                    <p style={{ margin: 0, fontSize: 10, color: 'var(--text-muted)' }}>•••• 4242</p>
+                    <p style={{ margin: 0, fontSize: 10, color: 'var(--text-muted)' }}>**** 4242</p>
                   </div>
                 </div>
                 <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Backup</span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg-subtle)', borderRadius: 'var(--r-md)', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <PaymentBrandLogo type="rocket" />
+                  <div>
+                    <p style={{ margin: 0, fontWeight: 700, fontSize: 'var(--text-xs)', color: 'var(--text-primary)' }}>Rocket Wallet</p>
+                    <p style={{ margin: 0, fontSize: 10, color: 'var(--text-muted)' }}>+880 1911-***452</p>
+                  </div>
+                </div>
+                <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Saved</span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg-subtle)', borderRadius: 'var(--r-md)', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <PaymentBrandLogo type="nagad" />
+                  <div>
+                    <p style={{ margin: 0, fontWeight: 700, fontSize: 'var(--text-xs)', color: 'var(--text-primary)' }}>Nagad Wallet</p>
+                    <p style={{ margin: 0, fontSize: 10, color: 'var(--text-muted)' }}>+880 1815-***241</p>
+                  </div>
+                </div>
+                <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Available</span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg-subtle)', borderRadius: 'var(--r-md)', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <PaymentBrandLogo type="mastercard" />
+                  <div>
+                    <p style={{ margin: 0, fontWeight: 700, fontSize: 'var(--text-xs)', color: 'var(--text-primary)' }}>Mastercard</p>
+                    <p style={{ margin: 0, fontSize: 10, color: 'var(--text-muted)' }}>**** 8804</p>
+                  </div>
+                </div>
+                <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Available</span>
               </div>
             </div>
 
@@ -539,7 +641,7 @@ export default function Profile() {
               variant="secondary"
               size="sm"
               fullWidth
-              onClick={() => setFeedbackNotice('Add payment method sheet opened (supports bKash, Nagad, Visa, Mastercard).')}
+              onClick={() => setFeedbackNotice('Add payment method sheet opened (supports bKash, Rocket, Nagad, Visa, Mastercard).')}
             >
               + Add New Method
             </Button>
@@ -598,4 +700,5 @@ export default function Profile() {
     </div>
   );
 }
+
 

@@ -289,7 +289,7 @@ export default function Membership() {
             variant="secondary"
             size="md"
             icon={CreditCard}
-            onClick={() => setActionNotice('Payment method update interface opened. Supported: bKash, Nagad, Visa, Mastercard.')}
+            onClick={() => setActionNotice('Payment method update interface opened. Supported: bKash, Rocket, Nagad, Visa, Mastercard.')}
           >
             Change Payment Method
           </Button>
