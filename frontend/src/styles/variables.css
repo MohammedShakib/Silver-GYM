@@ -1,31 +1,33 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  /* ─── Brand ─── */
-  --sg-green:          #22C55E;
+  /* ─── Brand Colors ─── */
+  --sg-green:          #20C863;
   --sg-green-hover:    #16A34A;
-  --sg-green-active:   #15803D;
-  --sg-green-light:    #DCFCE7;
+  --sg-green-active:   #128A45;
+  --sg-green-light:    #ECFBF2;
   --sg-green-muted:    #BBF7D0;
+  --sg-green-border:   rgba(32, 200, 99, 0.35);
 
-  --sg-charcoal:       #1C2128;
-  --sg-charcoal-mid:   #2D3748;
-  --sg-charcoal-light: #4A5568;
+  --sg-charcoal:       #101722;
+  --sg-charcoal-mid:   #171D26;
+  --sg-charcoal-light: #4B5563;
+  --sg-charcoal-dark:  #0D1117;
 
   --sg-silver:         #8A9BB0;
   --sg-silver-light:   #CBD5E0;
   --sg-silver-subtle:  #EDF2F7;
 
   /* ─── Backgrounds ─── */
-  --bg-base:    #FAFAF9;
+  --bg-base:    #F8FAF9;
   --bg-surface: #FFFFFF;
   --bg-subtle:  #F7F8FA;
   --bg-muted:   #EEF0F3;
-  --bg-dark:    #0D1117;
-  --bg-dark-mid: #161B22;
+  --bg-dark:    #101722;
+  --bg-dark-mid: #171D26;
 
   /* ─── Text ─── */
-  --text-primary:   #0D1117;
+  --text-primary:   #101722;
   --text-secondary: #4B5563;
   --text-muted:     #9CA3AF;
   --text-on-dark:   #F9FAFB;
@@ -37,8 +39,8 @@
   --border-strong:  #9CA3AF;
 
   /* ─── Status ─── */
-  --status-success:      #22C55E;
-  --status-success-bg:   #DCFCE7;
+  --status-success:      #20C863;
+  --status-success-bg:   #ECFBF2;
   --status-warning:      #F59E0B;
   --status-warning-bg:   #FEF3C7;
   --status-error:        #EF4444;
@@ -63,41 +65,69 @@
   --text-6xl:  3.75rem;    /* 60px */
   --text-7xl:  4.5rem;     /* 72px */
 
-  /* ─── Spacing ─── */
-  --sp-1: 0.25rem;
-  --sp-2: 0.5rem;
-  --sp-3: 0.75rem;
-  --sp-4: 1rem;
-  --sp-5: 1.25rem;
-  --sp-6: 1.5rem;
-  --sp-8: 2rem;
-  --sp-10: 2.5rem;
-  --sp-12: 3rem;
-  --sp-16: 4rem;
-  --sp-20: 5rem;
-  --sp-24: 6rem;
-  --sp-32: 8rem;
+  /* ─── Spacing scale [4, 8, 12, 16, 20, 24, 32, 40, 48, 64] ─── */
+  --sp-1: 0.25rem;  /* 4px */
+  --sp-2: 0.5rem;   /* 8px */
+  --sp-3: 0.75rem;  /* 12px */
+  --sp-4: 1rem;     /* 16px */
+  --sp-5: 1.25rem;  /* 20px */
+  --sp-6: 1.5rem;   /* 24px */
+  --sp-8: 2rem;     /* 32px */
+  --sp-10: 2.5rem;  /* 40px */
+  --sp-12: 3rem;    /* 48px */
+  --sp-16: 4rem;    /* 64px */
+  --sp-20: 5rem;    /* 80px */
+  --sp-24: 6rem;    /* 96px */
+  --sp-32: 8rem;    /* 128px */
 
   /* ─── Radii ─── */
-  --r-sm: 0.375rem;
-  --r-md: 0.625rem;
-  --r-lg: 0.875rem;
-  --r-xl: 1.25rem;
-  --r-2xl: 1.75rem;
+  --r-sm: 8px;      /* small controls */
+  --r-md: 10px;     /* inputs / chips */
+  --r-lg: 14px;     /* standard cards */
+  --r-xl: 18px;     /* large feature cards */
+  --r-2xl: 22px;    /* hero / modal */
   --r-full: 9999px;
 
   /* ─── Shadows ─── */
-  --shadow-xs: 0 1px 2px rgba(0,0,0,.05);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
-  --shadow-md: 0 4px 6px -1px rgba(0,0,0,.07), 0 2px 4px -1px rgba(0,0,0,.04);
-  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.07), 0 4px 6px -2px rgba(0,0,0,.04);
+  --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,.06), 0 2px 4px -1px rgba(0,0,0,.03);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.06), 0 4px 6px -2px rgba(0,0,0,.03);
   --shadow-xl: 0 20px 25px -5px rgba(0,0,0,.08), 0 10px 10px -5px rgba(0,0,0,.03);
   --shadow-2xl: 0 25px 50px -12px rgba(0,0,0,.14);
-  --shadow-green: 0 8px 24px rgba(34,197,94,.25);
+  --shadow-green: 0 8px 24px rgba(32, 200, 99, .22);
 
   /* ─── Layout ─── */
-  --header-h:      76px;
+  --header-h:      72px;
   --sidebar-w:     260px;
-  --content-max:   1320px;
-  --page-px:       clamp(1.5rem, 5vw, 4.5rem);
+  --content-max:   1260px;
+  --page-px:       clamp(1.25rem, 4vw, 3rem);
+
+  /* ─── Legacy / Component Compatibility Aliases ─── */
+  --color-brand-primary: var(--sg-green);
+  --color-brand-primary-light: var(--sg-green-light);
+  --color-status-success: var(--status-success);
+  --color-status-warning: var(--status-warning);
+  --color-status-error: var(--status-error);
+  --color-status-info: var(--status-info);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-default: var(--border-default);
+  --space-1: var(--sp-1);
+  --space-2: var(--sp-2);
+  --space-3: var(--sp-3);
+  --space-4: var(--sp-4);
+  --space-6: var(--sp-6);
+  --space-8: var(--sp-8);
+  --font-size-xs: var(--text-xs);
+  --font-size-sm: var(--text-sm);
+  --font-size-base: var(--text-base);
+  --font-size-lg: var(--text-lg);
+  --font-size-xl: var(--text-xl);
 }
+

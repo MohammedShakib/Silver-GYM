@@ -57,7 +57,7 @@ export default function GymDetails() {
 
       {/* Content */}
       <div className="container" style={{ paddingTop: 'var(--sp-8)', paddingBottom: 'var(--sp-16)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 'var(--sp-10)', alignItems: 'flex-start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1fr)', gap: 'var(--sp-8)', alignItems: 'flex-start' }} className="gym-details-grid">
 
           {/* Left — Main content */}
           <div>

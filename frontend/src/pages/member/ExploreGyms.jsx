@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, SlidersHorizontal, MapPin, ChevronDown, Check, LocateFixed, Navigation, Star } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Search, SlidersHorizontal, MapPin, ChevronDown, Check, LocateFixed, Navigation, Star, Map, List, RotateCcw } from 'lucide-react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { mockGyms } from '../../services/mockData';
 import { GymCardCompact } from '../../components/gym/GymCards';
+import EmptyState from '../../components/ui/EmptyState';
 
 const PRIMARY_FILTERS = ['Near Me', 'Open Now', 'Within 2 km', 'Low Crowd', 'Included In My Plan', '4.5+'];
 const EXTRA_FILTERS = ['Women Friendly', 'Pool', 'Trainer'];
@@ -75,8 +76,12 @@ function getNearestVisibleGym(center, visiblePins) {
 
 export default function ExploreGyms() {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilters, setActiveFilters] = useState(['Near Me']);
+  const [searchParams] = useSearchParams();
+  const initialQuery = searchParams.get('q') || '';
+  const initialFilter = searchParams.get('filter');
+
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [activeFilters, setActiveFilters] = useState(initialFilter ? [initialFilter] : ['Near Me']);
   const [hoveredGym, setHoveredGym] = useState(null);
   const [selectedPin, setSelectedPin] = useState(mockGyms[0]?.id ?? null);
   const [sortLabel, setSortLabel] = useState('Recommended');
@@ -84,6 +89,7 @@ export default function ExploreGyms() {
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [showSearchArea, setShowSearchArea] = useState(false);
   const [previewAnchor, setPreviewAnchor] = useState(null);
+  const [mobileTab, setMobileTab] = useState('list'); // 'list' | 'map'
 
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
@@ -100,6 +106,7 @@ export default function ExploreGyms() {
         : [...current, filter]
     ));
   };
+
 
   const query = searchQuery.trim().toLowerCase();
   let filteredGyms = mockGyms.filter(gym => {
@@ -343,22 +350,114 @@ export default function ExploreGyms() {
   }, [selectedMapPin]);
 
   return (
-    <div style={{ display: 'flex', height: 'calc(100vh - var(--header-h))', overflow: 'hidden' }} className="anim-fade">
-      <div style={{ width: '39%', minWidth: 420, display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--border-subtle)', background: 'var(--bg-base)' }}>
-        <div style={{ padding: '16px 20px 14px', background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-subtle)', flexShrink: 0 }}>
-          <div className="input-group" style={{ position: 'relative', marginBottom: 12 }}>
-            <Search size={16} className="input-icon" />
+    <div style={{ display: 'flex', height: 'calc(100vh - var(--header-h))', overflow: 'hidden', position: 'relative' }} className="anim-fade explore-container">
+      
+      {/* Mobile Toggle Floating Bar (below 768px) */}
+      <div className="show-mobile" style={{
+        position: 'absolute',
+        top: 14,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 50,
+        background: 'var(--sg-charcoal)',
+        borderRadius: 'var(--r-full)',
+        padding: '4px 6px',
+        display: 'flex',
+        gap: 4,
+        boxShadow: '0 8px 24px rgba(16,23,34,0.3)',
+      }}>
+        <button
+          type="button"
+          onClick={() => setMobileTab('list')}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 5,
+            padding: '0.4rem 0.85rem',
+            borderRadius: 'var(--r-full)',
+            border: 'none',
+            fontSize: 'var(--text-xs)',
+            fontWeight: 700,
+            cursor: 'pointer',
+            background: mobileTab === 'list' ? 'var(--sg-green)' : 'transparent',
+            color: mobileTab === 'list' ? 'white' : 'var(--sg-silver)',
+            transition: 'all .15s',
+          }}
+        >
+          <List size={13} strokeWidth={2.4} /> List ({filteredGyms.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileTab('map')}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 5,
+            padding: '0.4rem 0.85rem',
+            borderRadius: 'var(--r-full)',
+            border: 'none',
+            fontSize: 'var(--text-xs)',
+            fontWeight: 700,
+            cursor: 'pointer',
+            background: mobileTab === 'map' ? 'var(--sg-green)' : 'transparent',
+            color: mobileTab === 'map' ? 'white' : 'var(--sg-silver)',
+            transition: 'all .15s',
+          }}
+        >
+          <Map size={13} strokeWidth={2.4} /> Map
+        </button>
+      </div>
+
+      {/* Left List Panel */}
+      <div
+        className={`explore-list-panel ${mobileTab === 'map' ? 'hide-mobile' : ''}`}
+        style={{
+          width: '38%',
+          minWidth: 380,
+          maxWidth: 520,
+          display: 'flex',
+          flexDirection: 'column',
+          borderRight: '1px solid var(--border-subtle)',
+          background: 'var(--bg-base)',
+          height: '100%',
+        }}
+      >
+        {/* Compact Header & Filter Section */}
+        <div style={{ padding: '14px 18px 12px', background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-subtle)', flexShrink: 0 }}>
+          <div className="input-group" style={{ position: 'relative', marginBottom: 10 }}>
+            <Search size={16} className="input-icon" color="var(--text-muted)" />
             <input
               type="text"
               className="input input-with-icon"
               value={searchQuery}
               onChange={event => setSearchQuery(event.target.value)}
-              style={{ borderRadius: 'var(--r-full)', fontSize: 'var(--text-sm)', padding: '.78rem 1rem .78rem 2.8rem', height: 54 }}
+              style={{ borderRadius: 'var(--r-full)', fontSize: 'var(--text-sm)', padding: '.65rem 1rem .65rem 2.6rem', height: 44 }}
               placeholder="Gym, area, landmark or facility"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                style={{
+                  position: 'absolute',
+                  right: 12,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  fontWeight: 700,
+                }}
+              >
+                Clear
+              </button>
+            )}
           </div>
 
-          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2, scrollbarWidth: 'none' }}>
+          {/* Quick Filter Chips */}
+          <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2, scrollbarWidth: 'none' }}>
             {PRIMARY_FILTERS.map(filter => {
               const active = activeFilters.includes(filter);
               return (
@@ -368,20 +467,21 @@ export default function ExploreGyms() {
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: 6,
-                    height: 38,
-                    padding: '0 14px',
-                    borderRadius: 999,
-                    border: `1px solid ${active ? 'rgba(34, 197, 94, 0.45)' : 'var(--border-default)'}`,
-                    background: active ? 'rgba(34, 197, 94, 0.1)' : 'white',
-                    color: active ? '#166534' : 'var(--text-secondary)',
-                    fontSize: 12,
-                    fontWeight: active ? 700 : 600,
+                    gap: 5,
+                    height: 32,
+                    padding: '0 11px',
+                    borderRadius: 'var(--r-full)',
+                    border: `1.5px solid ${active ? 'var(--sg-green)' : 'var(--border-default)'}`,
+                    background: active ? 'var(--sg-green-light)' : 'var(--bg-surface)',
+                    color: active ? 'var(--sg-green-active)' : 'var(--text-secondary)',
+                    fontSize: 'var(--text-xs)',
+                    fontWeight: active ? 700 : 500,
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
+                    transition: 'all .15s ease',
                   }}
                 >
-                  {active && <Check size={12} />}
+                  {active && <Check size={11} strokeWidth={3} />}
                   {filter}
                 </button>
               );
@@ -391,26 +491,26 @@ export default function ExploreGyms() {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 6,
-                height: 38,
-                padding: '0 14px',
-                borderRadius: 999,
-                border: `1px solid ${showExtraFilters || extraFilterCount ? 'rgba(34, 197, 94, 0.45)' : 'var(--border-default)'}`,
-                background: showExtraFilters || extraFilterCount ? 'rgba(34, 197, 94, 0.1)' : 'white',
-                color: showExtraFilters || extraFilterCount ? '#166534' : 'var(--text-secondary)',
-                fontSize: 12,
+                gap: 5,
+                height: 32,
+                padding: '0 11px',
+                borderRadius: 'var(--r-full)',
+                border: `1.5px solid ${showExtraFilters || extraFilterCount ? 'var(--sg-green)' : 'var(--border-default)'}`,
+                background: showExtraFilters || extraFilterCount ? 'var(--sg-green-light)' : 'var(--bg-surface)',
+                color: showExtraFilters || extraFilterCount ? 'var(--sg-green-active)' : 'var(--text-secondary)',
+                fontSize: 'var(--text-xs)',
                 fontWeight: 700,
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
               }}
             >
-              <SlidersHorizontal size={12} />
+              <SlidersHorizontal size={11} />
               {extraFilterCount ? `More (${extraFilterCount})` : 'More'}
             </button>
           </div>
 
           {showExtraFilters && (
-            <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
               {EXTRA_FILTERS.map(filter => {
                 const active = activeFilters.includes(filter);
                 return (
@@ -420,19 +520,19 @@ export default function ExploreGyms() {
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: 6,
-                      height: 36,
-                      padding: '0 14px',
-                      borderRadius: 999,
-                      border: `1px solid ${active ? 'rgba(34, 197, 94, 0.45)' : 'var(--border-default)'}`,
-                      background: active ? 'rgba(34, 197, 94, 0.1)' : 'white',
-                      color: active ? '#166534' : 'var(--text-secondary)',
-                      fontSize: 12,
-                      fontWeight: active ? 700 : 600,
+                      gap: 5,
+                      height: 30,
+                      padding: '0 10px',
+                      borderRadius: 'var(--r-full)',
+                      border: `1.5px solid ${active ? 'var(--sg-green)' : 'var(--border-default)'}`,
+                      background: active ? 'var(--sg-green-light)' : 'var(--bg-surface)',
+                      color: active ? 'var(--sg-green-active)' : 'var(--text-secondary)',
+                      fontSize: 11,
+                      fontWeight: active ? 700 : 500,
                       cursor: 'pointer',
                     }}
                   >
-                    {active && <Check size={12} />}
+                    {active && <Check size={10} strokeWidth={3} />}
                     {filter}
                   </button>
                 );
@@ -440,11 +540,14 @@ export default function ExploreGyms() {
             </div>
           )}
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, minHeight: 30 }}>
+          {/* Results Summary & Sorting */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, minHeight: 28 }}>
             <div>
-              <div style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 700 }}>{resultPrimaryCopy}</div>
+              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-primary)', fontWeight: 700 }}>
+                {resultPrimaryCopy}
+              </div>
               {resultSecondaryCopy ? (
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>{resultSecondaryCopy}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1 }}>{resultSecondaryCopy}</div>
               ) : null}
             </div>
 
@@ -454,23 +557,23 @@ export default function ExploreGyms() {
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: 6,
-                  height: 32,
-                  padding: '0 12px',
-                  borderRadius: 999,
+                  gap: 5,
+                  height: 28,
+                  padding: '0 10px',
+                  borderRadius: 'var(--r-full)',
                   border: '1px solid var(--border-default)',
-                  background: 'white',
+                  background: 'var(--bg-surface)',
                   color: 'var(--text-secondary)',
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: 700,
                   cursor: 'pointer',
                 }}
               >
-                {sortLabel} <ChevronDown size={12} />
+                {sortLabel} <ChevronDown size={11} />
               </button>
 
               {showSortMenu && (
-                <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: 176, background: 'white', border: '1px solid var(--border-subtle)', borderRadius: 14, boxShadow: '0 16px 30px rgba(15, 23, 42, 0.12)', padding: 6, zIndex: 20 }}>
+                <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, width: 170, background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-md)', boxShadow: 'var(--shadow-lg)', padding: 4, zIndex: 20 }}>
                   {SORT_OPTIONS.map(option => (
                     <button
                       key={option}
@@ -480,13 +583,13 @@ export default function ExploreGyms() {
                       }}
                       style={{
                         width: '100%',
-                        minHeight: 36,
-                        borderRadius: 10,
+                        minHeight: 32,
+                        borderRadius: 'var(--r-sm)',
                         border: 'none',
-                        background: sortLabel === option ? 'rgba(34, 197, 94, 0.1)' : 'transparent',
-                        color: sortLabel === option ? '#166534' : 'var(--text-secondary)',
-                        fontSize: 12,
-                        fontWeight: 700,
+                        background: sortLabel === option ? 'var(--sg-green-light)' : 'transparent',
+                        color: sortLabel === option ? 'var(--sg-green-active)' : 'var(--text-secondary)',
+                        fontSize: 'var(--text-xs)',
+                        fontWeight: sortLabel === option ? 700 : 500,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
@@ -494,8 +597,8 @@ export default function ExploreGyms() {
                         cursor: 'pointer',
                       }}
                     >
-                      {option}
-                      {sortLabel === option ? <Check size={12} /> : null}
+                      <span>{option}</span>
+                      {sortLabel === option ? <Check size={12} strokeWidth={2.5} /> : null}
                     </button>
                   ))}
                 </div>
@@ -504,26 +607,44 @@ export default function ExploreGyms() {
           </div>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {filteredGyms.map(gym => (
-            <div
-              key={gym.id}
-              ref={node => {
-                cardRefs.current[gym.id] = node;
+        {/* Results List */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {filteredGyms.length === 0 ? (
+            <EmptyState
+              icon={RotateCcw}
+              title="No partner gyms found"
+              description="Try adjusting your search terms, area, or clearing some of the active filter chips."
+              actionLabel="Reset Filters"
+              onAction={() => {
+                setSearchQuery('');
+                setActiveFilters(['Near Me']);
               }}
-            >
-              <GymCardCompact
-                gym={gym}
-                selected={selectedPin === gym.id || hoveredGym === gym.id}
-                onHover={() => setHoveredGym(gym.id)}
-                onLeave={() => setHoveredGym(null)}
-              />
-            </div>
-          ))}
+            />
+          ) : (
+            filteredGyms.map(gym => (
+              <div
+                key={gym.id}
+                ref={node => {
+                  cardRefs.current[gym.id] = node;
+                }}
+              >
+                <GymCardCompact
+                  gym={gym}
+                  selected={selectedPin === gym.id || hoveredGym === gym.id}
+                  onHover={() => setHoveredGym(gym.id)}
+                  onLeave={() => setHoveredGym(null)}
+                />
+              </div>
+            ))
+          )}
         </div>
       </div>
 
-      <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+      {/* Right Map Panel */}
+      <div
+        className={`explore-map-panel ${mobileTab === 'list' ? 'hide-mobile' : ''}`}
+        style={{ flex: 1, position: 'relative', overflow: 'hidden', height: '100%' }}
+      >
         <div className="map-surface map-live-surface" style={{ width: '100%', height: '100%' }}>
           <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
 
