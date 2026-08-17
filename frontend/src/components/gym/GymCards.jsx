@@ -10,7 +10,7 @@ const CROWD_CONFIG = {
   full: { dot: 'crowd-full', label: 'Full', textColor: 'var(--status-error)' },
 };
 
-export function GymCardCompact({ gym, selected, onHover, onLeave }) {
+export function GymCardCompact({ gym, selected, hovered, onSelect, onHover, onLeave }) {
   const navigate = useNavigate();
   const crowd = CROWD_CONFIG[gym.crowd] || CROWD_CONFIG.low;
   const userPlan = 'Active';
@@ -20,31 +20,43 @@ export function GymCardCompact({ gym, selected, onHover, onLeave }) {
 
   return (
     <article
-      onClick={() => navigate(`/member/gym/${gym.id}`)}
+      onClick={() => onSelect?.(gym.id)}
       onMouseEnter={() => onHover?.(gym.id)}
       onMouseLeave={() => onLeave?.()}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect?.(gym.id);
+        }
+      }}
       style={{
         display: 'grid',
-        gridTemplateColumns: '124px 1fr',
+        gridTemplateColumns: '120px 1fr',
         gap: 'var(--sp-4)',
         padding: '12px 14px',
         minHeight: 136,
-        background: selected ? 'var(--sg-green-light)' : 'var(--bg-surface)',
-        border: `1.5px solid ${selected ? 'var(--sg-green)' : 'var(--border-subtle)'}`,
+        background: selected ? '#F8FFF9' : hovered ? 'var(--bg-subtle)' : 'var(--bg-surface)',
+        border: selected
+          ? '2px solid var(--sg-green)'
+          : hovered
+          ? '1.5px solid var(--border-default)'
+          : '1px solid var(--border-subtle)',
         borderRadius: 'var(--r-lg)',
         cursor: 'pointer',
         transition: 'all .18s ease',
         position: 'relative',
-        boxShadow: selected ? '0 8px 24px rgba(32, 200, 99, 0.12)' : 'none',
+        boxShadow: selected ? '0 8px 24px rgba(32, 200, 99, 0.12)' : hovered ? 'var(--shadow-sm)' : 'none',
+        transform: hovered && !selected ? 'translateY(-1px)' : 'none',
       }}
     >
       {selected && (
         <span
           style={{
             position: 'absolute',
-            left: -1.5,
-            top: 12,
-            bottom: 12,
+            left: -2,
+            top: 10,
+            bottom: 10,
             width: 4,
             borderRadius: '0 4px 4px 0',
             background: 'var(--sg-green)',
@@ -125,35 +137,20 @@ export function GymCardCompact({ gym, selected, onHover, onLeave }) {
             className={`badge ${included ? 'badge-green' : 'badge-warning'}`}
             style={{ fontSize: 10, fontWeight: 700 }}
           >
-            {included ? '✓ Included in Active Plan' : 'Upgrade required'}
+            {included ? '✓ Included in Plan' : 'Upgrade required'}
           </span>
 
-          {selected && (
-            <div style={{ display: 'flex', gap: 6 }}>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/member/gym/${gym.id}`);
-                }}
-                className="btn btn-dark btn-sm"
-                style={{ padding: '0.25rem 0.65rem', fontSize: 11 }}
-              >
-                View Gym
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openDirections(gym.address);
-                }}
-                className="btn btn-secondary btn-sm"
-                style={{ padding: '0.25rem 0.65rem', fontSize: 11 }}
-              >
-                Directions
-              </button>
-            </div>
-          )}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/member/gym/${gym.id}`);
+            }}
+            className="btn btn-dark btn-sm"
+            style={{ padding: '0.25rem 0.65rem', fontSize: 11, borderRadius: 'var(--r-sm)' }}
+          >
+            View Gym
+          </button>
         </div>
       </div>
     </article>
