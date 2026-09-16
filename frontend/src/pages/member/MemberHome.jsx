@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, MapPin, ArrowRight, Zap, ChevronRight, Star, CheckCircle } from 'lucide-react';
-import { weeklyData } from '../../services/mockData';
-import { useDemoApp } from '../../context/DemoAppContext';
+import { useCurrentMember } from '../../hooks/useCurrentMember';
+import { useMembership } from '../../hooks/useMembership';
+import { useGyms } from '../../hooks/useGyms';
+import { useActivity } from '../../hooks/useActivity';
+import { gymService } from '../../services/GymService';
 import GymCard from '../../components/gym/GymCards';
 import DigitalPassCard from '../../components/pass/DigitalPassCard';
 import { openDirections } from '../../utils/browserActions';
@@ -13,11 +16,21 @@ const GREETING = HOUR < 12 ? 'Good morning' : HOUR < 18 ? 'Good afternoon' : 'Go
 const QUICK_FILTERS = ['Near Me', 'Open Now', 'Low Crowd', 'Included in My Plan'];
 
 export default function MemberHome() {
-  const { user: mockUser, gyms: mockGyms, activity: mockActivity } = useDemoApp();
+  const { member: mockUser, isLoading: memberLoading } = useCurrentMember();
+  const { membership } = useMembership();
+  const { data: gyms, isLoading: gymsLoading } = useGyms();
+  const { activity: mockActivity } = useActivity();
+  
   const [filter, setFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const bestMatch = mockGyms[0]; // Iron House
   const navigate = useNavigate();
+
+  if (memberLoading || gymsLoading) return <div style={{ padding: 'var(--sp-12)', textAlign: 'center' }}>Loading dashboard...</div>;
+  if (!mockUser) return null;
+
+  const bestMatch = gyms && mockUser ? gymService.getRecommendedGyms(gyms, mockUser)[0] : null;
+
+  if (!bestMatch) return null;
 
   const handleSearchSubmit = (e) => {
     e?.preventDefault();
@@ -219,7 +232,7 @@ export default function MemberHome() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--sp-5)' }}>
-            {mockGyms.slice(0, 3).map(gym => (
+            {gyms.slice(0, 3).map(gym => (
               <GymCard key={gym.id} gym={gym} variant="large" />
             ))}
           </div>
@@ -246,7 +259,7 @@ export default function MemberHome() {
                 <div>
                   <p style={{ margin: '0 0 2px', fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Streak</p>
                   <p style={{ margin: 0, fontSize: 'var(--text-2xl)', fontWeight: 900, color: '#F59E0B' }}>
-                    {mockUser.streak} days 🔥
+                    {mockActivity?.workoutCount || 3} days 🔥
                   </p>
                 </div>
                 <div>
@@ -261,7 +274,7 @@ export default function MemberHome() {
               <div>
                 <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: '0 0 8px' }}>Daily workout duration (minutes)</p>
                 <div style={{ display: 'flex', alignItems: 'flex-end', height: 80, gap: 8 }}>
-                  {weeklyData.map((d) => (
+                  {mockActivity?.weeklyData?.map((d) => (
                     <div key={d.day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
                       <div
                         title={`${d.day}: ${d.min} minutes`}
@@ -293,24 +306,24 @@ export default function MemberHome() {
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--sp-4)' }}>
                   <div>
-                    <p style={{ margin: '0 0 2px', fontWeight: 800, fontSize: 'var(--text-lg)', color: 'var(--text-primary)' }}>{mockUser.plan} Plan</p>
+                    <p style={{ margin: '0 0 2px', fontWeight: 800, fontSize: 'var(--text-lg)', color: 'var(--text-primary)' }}>{membership?.planName} Plan</p>
                     <span className="badge badge-green">Active Subscription</span>
                   </div>
                   <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--text-muted)', textAlign: 'right' }}>
-                    Renews<br /><strong>{mockUser.renewalDate}</strong>
+                    Renews<br /><strong>{membership?.renewalDate}</strong>
                   </p>
                 </div>
 
                 <div style={{ marginBottom: 'var(--sp-4)' }}>
                   <div className="flex-between" style={{ marginBottom: 6 }}>
                     <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Visits used this cycle</span>
-                    <span style={{ fontWeight: 800, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>{mockUser.visitsUsed} / {mockUser.visitsTotal}</span>
+                    <span style={{ fontWeight: 800, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>{membership?.visitsUsed} / {membership?.visitsTotal}</span>
                   </div>
                   <div className="progress-track" style={{ height: 6 }}>
-                    <div className="progress-fill" style={{ width: `${(mockUser.visitsUsed / mockUser.visitsTotal) * 100}%` }} />
+                    <div className="progress-fill" style={{ width: `${(membership?.visitsUsed / membership?.visitsTotal) * 100}%` }} />
                   </div>
                   <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 6 }}>
-                    <strong style={{ color: 'var(--sg-green)' }}>{mockUser.visitsRemaining} visits</strong> remaining before renewal
+                    <strong style={{ color: 'var(--sg-green)' }}>{membership?.visitsRemaining} visits</strong> remaining before renewal
                   </p>
                 </div>
               </div>
@@ -335,7 +348,7 @@ export default function MemberHome() {
           </div>
 
           <div className="card card-shadow" style={{ padding: 'var(--sp-5)' }}>
-            {mockActivity.slice(0, 4).map((item, i) => (
+            {mockActivity?.history?.slice(0, 4).map((item, i) => (
               <div
                 key={item.id}
                 className="member-home-checkin-row"

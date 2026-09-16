@@ -1,13 +1,19 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle, CreditCard, Pause, AlertTriangle, Download, ShieldCheck, Sparkles } from 'lucide-react';
-import { useDemoApp } from '../../context/DemoAppContext';
+import { useCurrentMember } from '../../hooks/useCurrentMember';
+import { useMembership } from '../../hooks/useMembership';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
 
 export default function Membership() {
-  const { user: mockUser, plans } = useDemoApp();
-  const pct = Math.min(100, Math.round((mockUser.visitsUsed / mockUser.visitsTotal) * 100));
+  const { member: mockUser, isLoading: memberLoading } = useCurrentMember();
+  const { membership, plans, isLoading: memLoading } = useMembership();
+
+  if (memberLoading || memLoading) return <div style={{ padding: 'var(--sp-12)', textAlign: 'center' }}>Loading membership...</div>;
+  if (!mockUser || !membership) return <div>Membership not found</div>;
+
+  const pct = Math.min(100, Math.round((membership.visitsUsed / membership.visitsTotal) * 100));
   const [actionNotice, setActionNotice] = useState('');
   const [downloading, setDownloading] = useState(null);
 
@@ -49,10 +55,10 @@ export default function Membership() {
             </div>
 
             <h2 style={{ color: 'white', fontSize: 'clamp(2rem, 3.5vw, 2.75rem)', fontWeight: 900, marginBottom: 4, letterSpacing: '-0.02em' }}>
-              {mockUser.plan} Plan
+              {membership.planName} Plan
             </h2>
             <p style={{ color: 'var(--sg-silver)', fontSize: 'var(--text-sm)', marginBottom: 'var(--sp-5)' }}>
-              Next billing cycle renews on <strong style={{ color: 'white' }}>{mockUser.renewalDate}</strong>
+              Next billing cycle renews on <strong style={{ color: 'white' }}>{membership.renewalDate}</strong>
             </p>
 
             {/* Visits Progress */}
@@ -60,14 +66,14 @@ export default function Membership() {
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                 <span style={{ color: 'var(--sg-silver)', fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Monthly Visit Allowance</span>
                 <span style={{ color: 'white', fontWeight: 800, fontSize: 'var(--text-sm)' }}>
-                  {mockUser.visitsUsed} / {mockUser.visitsTotal} Visits Used
+                  {membership.visitsUsed} / {membership.visitsTotal} Visits Used
                 </span>
               </div>
               <div style={{ height: 6, background: 'rgba(255,255,255,.15)', borderRadius: 'var(--r-full)', overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${pct}%`, background: 'var(--sg-green)', borderRadius: 'var(--r-full)', transition: 'width .6s ease' }} />
               </div>
               <p style={{ color: 'var(--sg-green)', fontSize: 'var(--text-xs)', fontWeight: 700, margin: '6px 0 0' }}>
-                {mockUser.visitsRemaining} visits remaining this billing period
+                {membership.visitsRemaining} visits remaining this billing period
               </p>
             </div>
           </div>
@@ -91,7 +97,7 @@ export default function Membership() {
       {/* Plan benefits */}
       <div className="card card-shadow" style={{ padding: 'var(--sp-6)', marginBottom: 'var(--sp-8)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-4)' }}>
-          <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>Included in your {mockUser.plan} Plan</h3>
+          <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>Included in your {membership.planName} Plan</h3>
           <span className="badge badge-green">Standard Partner Access</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 'var(--sp-3)' }}>
@@ -204,7 +210,7 @@ export default function Membership() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 'var(--sp-5)' }}>
           {plans.map(plan => {
-            const isCurrentPlan = plan.name === mockUser.plan;
+            const isCurrentPlan = plan.name === membership.planName;
             const isUnlimited = plan.id === 'unlimited';
 
             return (

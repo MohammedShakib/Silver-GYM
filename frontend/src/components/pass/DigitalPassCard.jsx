@@ -1,10 +1,17 @@
-import { useDemoApp } from '../../context/DemoAppContext';
+import { useCurrentMember } from '../../hooks/useCurrentMember';
+import { useMembership } from '../../hooks/useMembership';
 import { QrCode } from 'lucide-react';
 import QRCode from 'react-qr-code';
 
 export default function DigitalPassCard({ compact = false, onOpen }) {
-  const { user: mockUser } = useDemoApp();
-  const pct = Math.min(100, Math.round((mockUser.visitsUsed / mockUser.visitsTotal) * 100));
+  const { member: mockUser, isLoading: memberLoading } = useCurrentMember();
+  const { membership, isLoading: memLoading } = useMembership();
+
+  if (memberLoading || memLoading) return <div style={{ padding: 'var(--sp-6)', textAlign: 'center' }}>Loading pass...</div>;
+  if (!mockUser || !membership) return <div>Pass not available</div>;
+
+  const pct = Math.min(100, Math.round((membership.visitsUsed / membership.visitsTotal) * 100));
+  const memberName = mockUser.name || `${mockUser.firstName} ${mockUser.lastName}`;
 
   if (compact) {
     return (
@@ -33,7 +40,7 @@ export default function DigitalPassCard({ compact = false, onOpen }) {
                   ACTIVE
                 </span>
               </div>
-              <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--sg-silver)' }}>{mockUser.plan} Plan</p>
+              <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--sg-silver)' }}>{membership.planName} Plan</p>
             </div>
             <div style={{ textAlign: 'right' }}>
               <p style={{ fontSize: 10, color: 'var(--sg-silver)', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Member ID</p>
@@ -44,7 +51,7 @@ export default function DigitalPassCard({ compact = false, onOpen }) {
           {/* Member Name */}
           <div style={{ marginBottom: 'var(--sp-4)' }}>
             <p style={{ fontSize: 'var(--text-lg)', fontWeight: 800, color: 'white', margin: 0, letterSpacing: '-0.01em' }}>
-              {mockUser.name}
+              {memberName}
             </p>
           </div>
 
@@ -53,7 +60,7 @@ export default function DigitalPassCard({ compact = false, onOpen }) {
             <div>
               <p style={{ fontSize: 11, color: 'var(--sg-silver)', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Monthly Visits</p>
               <p style={{ fontSize: 'var(--text-2xl)', fontWeight: 900, color: 'white', margin: 0, lineHeight: 1 }}>
-                {mockUser.visitsUsed} <span style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--sg-silver)' }}>/ {mockUser.visitsTotal}</span>
+                {membership.visitsUsed} <span style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--sg-silver)' }}>/ {membership.visitsTotal}</span>
               </p>
             </div>
             {onOpen && (
@@ -134,11 +141,11 @@ export default function DigitalPassCard({ compact = false, onOpen }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-4)', marginBottom: 'var(--sp-5)' }}>
           <div>
             <p style={{ fontSize: 10, color: 'var(--sg-silver)', textTransform: 'uppercase', letterSpacing: '.07em', margin: '0 0 2px' }}>Member Name</p>
-            <p style={{ fontWeight: 800, color: 'white', margin: 0, fontSize: 'var(--text-base)' }}>{mockUser.name}</p>
+            <p style={{ fontWeight: 800, color: 'white', margin: 0, fontSize: 'var(--text-base)' }}>{memberName}</p>
           </div>
           <div>
             <p style={{ fontSize: 10, color: 'var(--sg-silver)', textTransform: 'uppercase', letterSpacing: '.07em', margin: '0 0 2px' }}>Plan</p>
-            <p style={{ fontWeight: 800, color: 'var(--sg-green)', margin: 0, fontSize: 'var(--text-base)' }}>{mockUser.plan} Plan</p>
+            <p style={{ fontWeight: 800, color: 'var(--sg-green)', margin: 0, fontSize: 'var(--text-base)' }}>{membership.planName} Plan</p>
           </div>
           <div>
             <p style={{ fontSize: 10, color: 'var(--sg-silver)', textTransform: 'uppercase', letterSpacing: '.07em', margin: '0 0 2px' }}>Member ID</p>
@@ -146,7 +153,7 @@ export default function DigitalPassCard({ compact = false, onOpen }) {
           </div>
           <div>
             <p style={{ fontSize: 10, color: 'var(--sg-silver)', textTransform: 'uppercase', letterSpacing: '.07em', margin: '0 0 2px' }}>Visits Used</p>
-            <p style={{ fontWeight: 800, color: 'white', margin: 0, fontSize: 'var(--text-sm)' }}>{mockUser.visitsUsed} / {mockUser.visitsTotal}</p>
+            <p style={{ fontWeight: 800, color: 'white', margin: 0, fontSize: 'var(--text-sm)' }}>{membership.visitsUsed} / {membership.visitsTotal}</p>
           </div>
         </div>
 
@@ -191,13 +198,13 @@ export default function DigitalPassCard({ compact = false, onOpen }) {
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: 10, color: 'var(--sg-silver)', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Remaining Visits</p>
             <p style={{ fontSize: 'var(--text-3xl)', fontWeight: 900, color: 'var(--sg-green)', margin: 0, lineHeight: 1.1 }}>
-              {mockUser.visitsRemaining}
+              {membership.visitsRemaining}
             </p>
           </div>
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: 10, color: 'var(--sg-silver)', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Renews On</p>
             <p style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: 'white', margin: 0, lineHeight: 1.5 }}>
-              {mockUser.renewalDate}
+              {membership.renewalDate}
             </p>
           </div>
         </div>

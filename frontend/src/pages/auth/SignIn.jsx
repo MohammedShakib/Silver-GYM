@@ -1,16 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
-import { useDemoApp } from '../../context/DemoAppContext';
 
 export default function SignIn() {
   const [show, setShow] = useState(false);
   const navigate = useNavigate();
-  const { actions } = useDemoApp();
 
   const handleSignIn = (e) => {
     e.preventDefault();
-    actions.loginDemoUser();
     navigate('/member');
   };
 

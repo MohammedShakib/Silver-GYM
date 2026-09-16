@@ -3,10 +3,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, SlidersHorizontal, MapPin, ChevronDown, Check, LocateFixed, Navigation, Star, Map, List, RotateCcw } from 'lucide-react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { useDemoApp } from '../../context/DemoAppContext';
 import GymCard from '../../components/gym/GymCards';
 import EmptyState from '../../components/ui/EmptyState';
 import { openDirections } from '../../utils/browserActions';
+import { useGyms } from '../../hooks/useGyms';
+import { useCurrentMember } from '../../hooks/useCurrentMember';
+import { useMembership } from '../../hooks/useMembership';
 
 const PRIMARY_FILTERS = ['Near Me', 'Open Now', 'Within 2 km', 'Low Crowd', 'Included In My Plan', '4.5+'];
 const EXTRA_FILTERS = ['Women Friendly', 'Pool', 'Trainer'];
@@ -167,8 +169,12 @@ function MapGymPreview({ gym }) {
 }
 
 export default function ExploreGyms() {
-  const { gyms: mockGyms, user } = useDemoApp();
+  const { data: mockGyms, isLoading: gymsLoading } = useGyms();
+  const { member: user, isLoading: memberLoading } = useCurrentMember();
+  const { membership } = useMembership();
+
   const GYM_PINS = useMemo(() => {
+    if (!mockGyms || !user) return [];
     return mockGyms
       .filter(gym => GYM_COORDINATES[gym.id])
       .map(gym => ({
@@ -176,9 +182,9 @@ export default function ExploreGyms() {
         gym,
         label: GYM_COORDINATES[gym.id].label,
         coordinates: [GYM_COORDINATES[gym.id].lng, GYM_COORDINATES[gym.id].lat],
-        included: gym.plans.includes(user.plan),
+        included: gym.plans.includes(user?.plan),
       }));
-  }, [mockGyms, user.plan]);
+  }, [mockGyms, user]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
@@ -216,6 +222,7 @@ export default function ExploreGyms() {
   const query = searchQuery.trim().toLowerCase();
 
   const filteredGymsByFilter = useMemo(() => {
+    if (!mockGyms) return [];
     return mockGyms.filter(gym => {
       const matchesSearch = !query || [gym.name, gym.area, gym.address, ...gym.amenities]
         .join(' ')
@@ -238,7 +245,7 @@ export default function ExploreGyms() {
         return false;
       }
 
-      if (activeFilters.includes('Included In My Plan') && !gym.plans.includes(user.plan)) {
+      if (activeFilters.includes('Included In My Plan') && (!user || !gym.plans.includes(user.plan))) {
         return false;
       }
 
@@ -527,6 +534,14 @@ export default function ExploreGyms() {
       }
     });
   }, [hoveredGymId, selectedGymId]);
+
+  if (gymsLoading || memberLoading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - var(--header-h))' }}>
+        <p style={{ color: 'var(--text-secondary)' }}>Loading gyms...</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', height: 'calc(100vh - var(--header-h))', overflow: 'hidden', position: 'relative' }} className="anim-fade explore-container">

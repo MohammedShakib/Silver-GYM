@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { weeklyData, rewards } from '../../services/mockData';
-import { useDemoApp } from '../../context/DemoAppContext';
+import { useCurrentMember } from '../../hooks/useCurrentMember';
+import { useActivity } from '../../hooks/useActivity';
+import { useGyms } from '../../hooks/useGyms';
 import { Flame, Dumbbell, Clock, MapPin, ChevronLeft, ChevronRight, Trophy, Sparkles, ArrowRight } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 
@@ -105,9 +106,22 @@ function CalendarHeatmap() {
 }
 
 export default function Activity() {
-  const { user: mockUser, gyms: mockGyms, activity: mockActivity } = useDemoApp();
+  const { member: mockUser, isLoading: memberLoading } = useCurrentMember();
+  const { activity, isLoading: activityLoading } = useActivity();
+  const { data: mockGyms, isLoading: gymsLoading } = useGyms();
+  
   const [tab, setTab] = useState('History');
   const [period, setPeriod] = useState('Month');
+
+  if (memberLoading || activityLoading || gymsLoading) {
+    return <div style={{ padding: 'var(--sp-12)', textAlign: 'center' }}>Loading activity...</div>;
+  }
+  
+  if (!mockUser || !activity) return null;
+
+  const mockActivity = activity.history;
+  const weeklyData = activity.weeklyData;
+  const rewards = activity.rewards;
 
   return (
     <div className="container anim-fade" style={{ paddingTop: 'var(--sp-8)', paddingBottom: 'var(--sp-16)' }}>

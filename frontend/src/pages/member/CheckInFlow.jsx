@@ -1,14 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { X, Zap, Check, ArrowLeft, MapPin, CheckCircle } from 'lucide-react';
-import { useDemoApp } from '../../context/DemoAppContext';
+import { useGym } from '../../hooks/useGym';
+import { useMembership } from '../../hooks/useMembership';
+import { useActivity } from '../../hooks/useActivity';
+import { checkInService } from '../../services/CheckInService';
 
 export default function CheckInFlow() {
-  const { gyms, user: mockUser, actions } = useDemoApp();
   const { id } = useParams();
+  const { gym, isLoading: gymLoading } = useGym(id);
+  const { membership, isLoading: memLoading } = useMembership();
+  const { activity } = useActivity();
   const navigate = useNavigate();
-  const gym = gyms.find(g => g.id === id) || gyms[0];
   const [step, setStep] = useState('pre'); // pre | scan | verifying | success
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     if (step === 'scan') {
@@ -16,13 +21,29 @@ export default function CheckInFlow() {
       return () => clearTimeout(t);
     }
     if (step === 'verifying') {
-      const t = setTimeout(() => {
-        actions.checkInToGym(gym);
-        setStep('success');
-      }, 2000);
-      return () => clearTimeout(t);
+      let active = true;
+      const doCheckIn = async () => {
+        try {
+          await checkInService.checkIn(membership.memberId, gym.id);
+          if (active) setStep('success');
+        } catch (err) {
+          if (active) {
+            setErrorMsg(err.message);
+            setStep('pre');
+          }
+        }
+      };
+      
+      const t = setTimeout(doCheckIn, 1500);
+      return () => {
+        active = false;
+        clearTimeout(t);
+      };
     }
-  }, [step, actions, gym]);
+  }, [step, gym, membership]);
+
+  if (gymLoading || memLoading) return <div style={{ padding: 'var(--sp-12)', textAlign: 'center' }}>Loading check-in...</div>;
+  if (!gym || !membership) return <div>Check-in data not available</div>;
 
   /* ── Pre-screen ── */
   if (step === 'pre') return (
@@ -40,10 +61,15 @@ export default function CheckInFlow() {
       </div>
 
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-2xl)', overflow: 'hidden', marginBottom: 'var(--sp-8)' }}>
+        {errorMsg && (
+          <div style={{ padding: '14px var(--sp-6)', background: 'var(--status-error-bg)', color: 'var(--status-error)', fontWeight: 600, fontSize: 'var(--text-sm)', borderBottom: '1px solid var(--border-subtle)' }}>
+            Error: {errorMsg}
+          </div>
+        )}
         {[
-          { label: 'Your plan', value: `${mockUser.plan} Plan` },
-          { label: 'Gym access', value: '✓ Included', color: 'var(--sg-green)' },
-          { label: 'Visits remaining', value: `${mockUser.visitsRemaining} this month` },
+          { label: 'Your plan', value: `${membership.planName} Plan` },
+          { label: 'Gym access', value: 'Included', color: 'var(--sg-green)' },
+          { label: 'Visits remaining', value: `${membership.visitsRemaining} this month` },
           { label: 'Current crowd', value: gym.crowd.charAt(0).toUpperCase() + gym.crowd.slice(1), color: gym.crowd === 'low' ? 'var(--status-success)' : 'var(--status-warning)' },
           { label: 'Gym status', value: `Open · Until ${gym.closesAt}`, color: 'var(--status-success)' },
         ].map((row, i, arr) => (
@@ -147,9 +173,9 @@ export default function CheckInFlow() {
       <div style={{ background: 'rgba(0,0,0,.12)', borderRadius: 'var(--r-2xl)', padding: 'var(--sp-6)', width: '100%', maxWidth: 340, marginBottom: 'var(--sp-8)' }}>
         {[
           { label: 'Checked in at', value: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
-          { label: 'Workout this month', value: `#${mockUser.visitsUsed}` },
-          { label: 'Current streak', value: `${mockUser.streak} days 🔥` },
-          { label: 'Visits remaining', value: `${mockUser.visitsRemaining - 1} left` },
+          { label: 'Workout this month', value: `#${membership.visitsUsed}` },
+          { label: 'Current streak', value: `${activity?.workoutCount || 1} days 🔥` },
+          { label: 'Visits remaining', value: `${membership.visitsRemaining} left` },
         ].map(row => (
           <div key={row.label} className="flex-between" style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,.12)' }}>
             <span style={{ opacity: .8, fontSize: 'var(--text-sm)' }}>{row.label}</span>

@@ -17,7 +17,7 @@ import mastercardLogo from '../../assets/payment-logos/mastercard.svg';
 import nagadLogo from '../../assets/payment-logos/nagad.svg';
 import visaLogo from '../../assets/payment-logos/visa.svg';
 import rocketLogo from '../../assets/payment-logos/rocket.svg';
-import { useDemoApp } from '../../context/DemoAppContext';
+import { useCurrentMember } from '../../hooks/useCurrentMember';
 import Button from '../../components/ui/Button';
 
 const paymentBrandLogos = {
@@ -89,9 +89,12 @@ function PaymentBrandLogo({ type }) {
 }
 
 export default function Profile() {
-  const { user: mockUser, actions } = useDemoApp();
+  const { member: mockUser, isLoading } = useCurrentMember();
   const navigate = useNavigate();
   const [feedbackNotice, setFeedbackNotice] = useState('');
+
+  if (isLoading) return <div style={{ padding: 'var(--sp-12)', textAlign: 'center' }}>Loading profile...</div>;
+  if (!mockUser) return null;
 
   // Editable personal info state
   const [isEditingInfo, setIsEditingInfo] = useState(false);

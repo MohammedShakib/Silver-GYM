@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { CheckCircle, ArrowRight, MapPin, Target, Clock, Star } from 'lucide-react';
 import { plans } from '../../services/mockData';
-import { useDemoApp } from '../../context/DemoAppContext';
+import { useMembership } from '../../hooks/useMembership';
 
 const STEPS = [
   { num: 1, label: 'Location' },
@@ -23,14 +23,15 @@ export default function Onboarding() {
   const [facilities, setFacilities] = useState([]);
   const [times, setTimes] = useState([]);
   const navigate = useNavigate();
-  const { actions } = useDemoApp();
+  const { activateMembership } = useMembership();
 
-  const handleActivate = () => {
-    actions.updateOnboarding({
-      onboardingPreferences: { location, goals, facilities, times }
-    });
-    actions.activatePlan(activePlan.id);
-    navigate('/member');
+  const handleActivate = async () => {
+    try {
+      await activateMembership(activePlan.id);
+      navigate('/member');
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const toggle = (arr, setArr, val) => {

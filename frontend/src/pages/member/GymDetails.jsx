@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Heart, Share, MapPin, Clock, Users, Star, CheckCircle, Navigation, ChevronRight } from 'lucide-react';
-import { useDemoApp } from '../../context/DemoAppContext';
+import { useGym } from '../../hooks/useGym';
+import { useCurrentMember } from '../../hooks/useCurrentMember';
+import { useMembership } from '../../hooks/useMembership';
+import { EligibilityService } from '../../services/EligibilityService';
 import { useSavedGyms } from '../../hooks/useSavedGyms';
 import { openDirections, sharePage } from '../../utils/browserActions';
 
@@ -12,14 +15,25 @@ const CROWD_LABELS = {
 };
 
 export default function GymDetails() {
-  const { gyms, user: mockUser } = useDemoApp();
   const { id } = useParams();
-  const gym = gyms.find(g => g.id === id) || gyms[0];
-  const crowd = CROWD_LABELS[gym.crowd];
-  const included = gym.plans.includes(mockUser.plan);
+  const { gym, isLoading: gymLoading } = useGym(id);
+  const { member: mockUser, isLoading: memberLoading } = useCurrentMember();
+  const { membership } = useMembership();
+  
   const [activeTab, setActiveTab] = useState('about');
   const [shareFeedback, setShareFeedback] = useState('');
   const { isSaved, toggleSavedGym } = useSavedGyms();
+
+  if (gymLoading || memberLoading) {
+    return <div style={{ padding: 'var(--sp-12)', textAlign: 'center' }}>Loading gym details...</div>;
+  }
+  if (!gym) {
+    return <div style={{ padding: 'var(--sp-12)', textAlign: 'center' }}>Gym not found.</div>;
+  }
+
+  const crowd = CROWD_LABELS[gym.crowd] || CROWD_LABELS['moderate'];
+  const accessStatus = EligibilityService.getGymAccessStatus({ membership, plan: { name: mockUser?.plan }, gym });
+  const included = accessStatus === 'included';
   const saved = isSaved(gym.id);
 
   const currentHour = new Date().getHours();
