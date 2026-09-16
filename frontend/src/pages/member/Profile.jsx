@@ -1,34 +1,21 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  User,
   MapPin,
-  Bell,
-  Lock,
   CreditCard,
   HelpCircle,
   LogOut,
-  CheckCircle,
   Plus,
   Compass,
-  Clock,
-  Dumbbell,
-  Shield,
-  Phone,
-  Mail,
-  Edit2,
   Check,
   ChevronRight,
-  Sparkles,
-  QrCode
+  QrCode,
+  Shield
 } from 'lucide-react';
 import bkashLogo from '../../assets/payment-logos/bkash.svg';
 import mastercardLogo from '../../assets/payment-logos/mastercard.svg';
 import nagadLogo from '../../assets/payment-logos/nagad.svg';
-import rocketLogo from '../../assets/payment-logos/rocket.svg';
-import visaLogo from '../../assets/payment-logos/visa.svg';
 import { mockUser } from '../../services/mockData';
-import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
 
 const paymentBrandLogos = {
@@ -164,7 +151,7 @@ export default function Profile() {
       
       {/* Header & Member Card */}
       <div className="card card-shadow" style={{ padding: 'var(--sp-6) var(--sp-8)', marginBottom: 'var(--sp-8)', background: 'linear-gradient(to right, var(--bg-surface), var(--bg-subtle))' }}>
-        <div style={{ display: 'flex', gap: 'var(--sp-6)', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="profile-header-card" style={{ display: 'flex', gap: 'var(--sp-6)', alignItems: 'center', flexWrap: 'wrap' }}>
           <div style={{ position: 'relative' }}>
             <img
               src={mockUser.avatar}
@@ -202,7 +189,7 @@ export default function Profile() {
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: 'var(--sp-3)', flexWrap: 'wrap' }}>
+          <div className="profile-header-actions" style={{ display: 'flex', gap: 'var(--sp-3)', flexWrap: 'wrap' }}>
             <Link to="/member/pass" className="btn btn-dark btn-md" style={{ gap: 6 }}>
               <QrCode size={16} /> My Pass
             </Link>
@@ -235,7 +222,6 @@ export default function Profile() {
               <Button
                 variant={isEditingInfo ? 'primary' : 'secondary'}
                 size="sm"
-                icon={isEditingInfo ? Check : Edit2}
                 onClick={() => {
                   if (isEditingInfo) handleSaveInfo();
                   else setIsEditingInfo(true);
@@ -246,7 +232,7 @@ export default function Profile() {
             </div>
 
             {isEditingInfo ? (
-              <form onSubmit={handleSaveInfo} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-4)' }}>
+              <form onSubmit={handleSaveInfo} className="profile-info-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-4)' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: 'var(--text-xs)', fontWeight: 700, marginBottom: 4, color: 'var(--text-secondary)' }}>Full Name</label>
                   <input
@@ -285,7 +271,7 @@ export default function Profile() {
                 </div>
               </form>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-4)' }}>
+              <div className="profile-info-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-4)' }}>
                 <div style={{ padding: '10px 14px', background: 'var(--bg-subtle)', borderRadius: 'var(--r-md)', border: '1px solid var(--border-subtle)' }}>
                   <p style={{ margin: '0 0 2px', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Full Name</p>
                   <p style={{ margin: 0, fontWeight: 700, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>{personalInfo.name}</p>

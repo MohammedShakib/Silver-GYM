@@ -18,7 +18,7 @@ export default function SignUp() {
         <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--sp-8)', textAlign: 'center' }}>Start with just the basics.</p>
 
         <form onSubmit={e => { e.preventDefault(); navigate('/onboarding'); }} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-4)' }}>
+          <div className="auth-form-two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-4)' }}>
             <div>
               <label style={{ fontSize: 'var(--text-sm)', fontWeight: 500, display: 'block', marginBottom: 6 }}>First name</label>
               <input type="text" className="input" placeholder="Alex" />

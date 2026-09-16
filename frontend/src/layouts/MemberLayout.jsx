@@ -91,7 +91,7 @@ export default function MemberLayout() {
         display: 'flex',
         alignItems: 'center',
       }}>
-        <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div className="container member-header-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-8)' }}>
             <Link to="/member" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <BrandLogo variant="icon" size="sm" />
@@ -127,7 +127,7 @@ export default function MemberLayout() {
             </nav>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)' }}>
+          <div className="member-header-actions" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)' }}>
             <Link
               to="/member/explore"
               className="hide-mobile"
@@ -302,7 +302,7 @@ export default function MemberLayout() {
         </div>
       )}
 
-      <nav className="show-mobile" aria-label="Mobile Navigation" style={{
+      <nav className="show-mobile member-bottom-nav" aria-label="Mobile Navigation" style={{
         position: 'fixed',
         bottom: 0,
         left: 0,

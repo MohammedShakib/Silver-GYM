@@ -1,4 +1,4 @@
-import { CheckCircle, Users, AlertCircle, Clock } from 'lucide-react';
+import { CheckCircle, AlertCircle, Clock } from 'lucide-react';
 
 const STATUS_CONFIGS = {
   // Crowd

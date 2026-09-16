@@ -19,8 +19,8 @@ export default function AdminLayout() {
   const { pathname } = useLocation();
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-base)' }}>
-      <aside style={{
+    <div className="dashboard-shell" style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-base)' }}>
+      <aside className="dashboard-sidebar" style={{
         width: 'var(--sidebar-w)',
         flexShrink: 0,
         background: '#0D1117',
@@ -39,7 +39,7 @@ export default function AdminLayout() {
           </div>
         </div>
 
-        <nav style={{ flex: 1, padding: '0 var(--sp-3)' }}>
+        <nav className="dashboard-sidebar-nav" style={{ flex: 1, padding: '0 var(--sp-3)' }}>
           {ADMIN_LINKS.map(({ to, label, icon: Icon }) => {
             const active = to === '/admin' ? pathname === '/admin' : pathname.startsWith(to);
             return (
@@ -65,8 +65,8 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <div style={{ marginLeft: 'var(--sidebar-w)', flex: 1 }}>
-        <main style={{ padding: 'var(--sp-8)', maxWidth: 1200 }}>
+      <div className="dashboard-main-shell" style={{ marginLeft: 'var(--sidebar-w)', flex: 1 }}>
+        <main className="dashboard-main-content" style={{ padding: 'var(--sp-8)', maxWidth: 1200 }}>
           <Outlet />
         </main>
       </div>

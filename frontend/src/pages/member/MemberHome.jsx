@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, MapPin, ArrowRight, Zap, ChevronRight, Star, Clock, CheckCircle, Flame } from 'lucide-react';
+import { Search, MapPin, ArrowRight, Zap, ChevronRight, Star, CheckCircle } from 'lucide-react';
 import { mockUser, mockGyms, mockActivity, weeklyData } from '../../services/mockData';
-import { GymCardLarge } from '../../components/gym/GymCards';
+import GymCard from '../../components/gym/GymCards';
 import DigitalPassCard from '../../components/pass/DigitalPassCard';
 import { openDirections } from '../../utils/browserActions';
 
@@ -142,7 +142,7 @@ export default function MemberHome() {
                     </p>
 
                     {/* Status grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-2)', marginBottom: 'var(--sp-4)' }}>
+                    <div className="member-home-status-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-2)', marginBottom: 'var(--sp-4)' }}>
                       <div style={{ padding: '8px 12px', background: 'var(--sg-green-light)', borderRadius: 'var(--r-sm)', border: '1px solid var(--sg-green-muted)' }}>
                         <p style={{ margin: '0 0 2px', fontSize: 10, color: 'var(--sg-green-active)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>ACCESS</p>
                         <p style={{ margin: 0, fontWeight: 800, fontSize: 'var(--text-xs)', color: 'var(--sg-green-active)' }}>Included in Plan ✓</p>
@@ -166,7 +166,7 @@ export default function MemberHome() {
                     </p>
                   </div>
 
-                  <div style={{ display: 'flex', gap: 'var(--sp-3)' }}>
+                  <div className="member-home-best-actions" style={{ display: 'flex', gap: 'var(--sp-3)' }}>
                     <Link to={`/member/gym/${bestMatch.id}`} className="btn btn-dark btn-md" style={{ flex: 1 }}>View Gym</Link>
                     <button className="btn btn-secondary btn-md" onClick={() => openDirections(bestMatch.address)}>Directions</button>
                   </div>
@@ -218,7 +218,7 @@ export default function MemberHome() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--sp-5)' }}>
             {mockGyms.slice(0, 3).map(gym => (
-              <GymCardLarge key={gym.id} gym={gym} />
+              <GymCard key={gym.id} gym={gym} variant="large" />
             ))}
           </div>
         </div>
@@ -234,7 +234,7 @@ export default function MemberHome() {
             </div>
 
             <div className="card card-shadow" style={{ padding: 'var(--sp-6)', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--sp-4)', marginBottom: 'var(--sp-6)' }}>
+              <div className="member-home-metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--sp-4)', marginBottom: 'var(--sp-6)' }}>
                 <div>
                   <p style={{ margin: '0 0 2px', fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>This Week</p>
                   <p style={{ margin: 0, fontSize: 'var(--text-2xl)', fontWeight: 900, color: 'var(--text-primary)' }}>
@@ -336,6 +336,7 @@ export default function MemberHome() {
             {mockActivity.slice(0, 4).map((item, i) => (
               <div
                 key={item.id}
+                className="member-home-checkin-row"
                 style={{
                   display: 'flex',
                   alignItems: 'center',

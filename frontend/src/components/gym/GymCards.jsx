@@ -1,7 +1,6 @@
 import { MapPin, Star, Clock, CheckCircle, Heart, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSavedGyms } from '../../hooks/useSavedGyms';
-import { openDirections } from '../../utils/browserActions';
 
 const CROWD_CONFIG = {
   low: { dot: 'crowd-low', label: 'Low Crowd', textColor: 'var(--status-success)' },
@@ -10,7 +9,7 @@ const CROWD_CONFIG = {
   full: { dot: 'crowd-full', label: 'Full', textColor: 'var(--status-error)' },
 };
 
-export function GymCardCompact({ gym, selected, hovered, onSelect, onHover, onLeave, onFocus, onBlur }) {
+export default function GymCard({ gym, variant = 'large', selected, hovered, onSelect, onHover, onLeave, onFocus, onBlur }) {
   const navigate = useNavigate();
   const crowd = CROWD_CONFIG[gym.crowd] || CROWD_CONFIG.low;
   const userPlan = 'Active';
@@ -18,157 +17,151 @@ export function GymCardCompact({ gym, selected, hovered, onSelect, onHover, onLe
   const { isSaved, toggleSavedGym } = useSavedGyms();
   const saved = isSaved(gym.id);
 
-  return (
-    <article
-      onClick={() => onSelect?.(gym.id)}
-      onMouseEnter={() => onHover?.(gym.id)}
-      onMouseLeave={() => onLeave?.()}
-      onFocus={() => onFocus?.(gym.id)}
-      onBlur={() => onBlur?.()}
-      tabIndex={0}
-      role="button"
-      aria-pressed={selected}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onSelect?.(gym.id);
-        }
-      }}
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '120px 1fr',
-        gap: 'var(--sp-4)',
-        padding: '12px 14px',
-        minHeight: 136,
-        background: selected ? '#F8FFF9' : hovered ? 'var(--bg-subtle)' : 'var(--bg-surface)',
-        border: selected
-          ? '2px solid var(--sg-green)'
-          : hovered
-          ? '1.5px solid var(--border-default)'
-          : '1px solid var(--border-subtle)',
-        borderRadius: 'var(--r-lg)',
-        cursor: 'pointer',
-        transition: 'all .18s ease',
-        position: 'relative',
-        boxShadow: selected ? '0 8px 24px rgba(32, 200, 99, 0.12)' : hovered ? 'var(--shadow-sm)' : 'none',
-        transform: hovered && !selected ? 'translateY(-1px)' : 'none',
-      }}
-    >
-      {selected && (
-        <span
-          style={{
-            position: 'absolute',
-            left: -2,
-            top: 10,
-            bottom: 10,
-            width: 4,
-            borderRadius: '0 4px 4px 0',
-            background: 'var(--sg-green)',
-          }}
-        />
-      )}
+  if (variant === 'compact' || variant === 'explore') {
+    return (
+      <article
+        onClick={() => onSelect?.(gym.id)}
+        onMouseEnter={() => onHover?.(gym.id)}
+        onMouseLeave={() => onLeave?.()}
+        onFocus={() => onFocus?.(gym.id)}
+        onBlur={() => onBlur?.()}
+        tabIndex={0}
+        role="button"
+        aria-pressed={selected}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onSelect?.(gym.id);
+          }
+        }}
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '120px 1fr',
+          gap: 'var(--sp-4)',
+          padding: '12px 14px',
+          minHeight: 136,
+          background: selected ? '#F8FFF9' : hovered ? 'var(--bg-subtle)' : 'var(--bg-surface)',
+          border: selected
+            ? '2px solid var(--sg-green)'
+            : hovered
+            ? '1.5px solid var(--border-default)'
+            : '1px solid var(--border-subtle)',
+          borderRadius: 'var(--r-lg)',
+          cursor: 'pointer',
+          transition: 'all .18s ease',
+          position: 'relative',
+          boxShadow: selected ? '0 8px 24px rgba(32, 200, 99, 0.12)' : hovered ? 'var(--shadow-sm)' : 'none',
+          transform: hovered && !selected ? 'translateY(-1px)' : 'none',
+        }}
+      >
+        {selected && (
+          <span
+            style={{
+              position: 'absolute',
+              left: -2,
+              top: 10,
+              bottom: 10,
+              width: 4,
+              borderRadius: '0 4px 4px 0',
+              background: 'var(--sg-green)',
+            }}
+          />
+        )}
 
-      {/* Thumbnail */}
-      <div style={{ position: 'relative', height: 110, borderRadius: 'var(--r-md)', overflow: 'hidden', flexShrink: 0 }}>
-        <img src={gym.image} alt={gym.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-      </div>
+        {/* Thumbnail */}
+        <div style={{ position: 'relative', height: 110, borderRadius: 'var(--r-md)', overflow: 'hidden', flexShrink: 0 }}>
+          <img src={gym.image} alt={gym.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </div>
 
-      {/* Content */}
-      <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-        <div>
-          {/* Title row */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 2 }}>
-            <h4 style={{ fontSize: 'var(--text-base)', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 5, margin: 0 }}>
-              <span>{gym.name}</span>
-              {gym.verified && <CheckCircle size={13} color="var(--sg-green)" fill="var(--sg-green-light)" />}
-            </h4>
+        {/* Content */}
+        <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            {/* Title row */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 2 }}>
+              <h4 style={{ fontSize: 'var(--text-base)', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 5, margin: 0 }}>
+                <span>{gym.name}</span>
+                {gym.verified && <CheckCircle size={13} color="var(--sg-green)" fill="var(--sg-green-light)" />}
+              </h4>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleSavedGym(gym.id);
+                }}
+                title={saved ? 'Remove from saved' : 'Save gym'}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: 'var(--text-muted)' }}
+              >
+                <Heart size={15} fill={saved ? 'var(--status-error)' : 'none'} color={saved ? 'var(--status-error)' : 'var(--text-muted)'} />
+              </button>
+            </div>
+
+            {/* Area, Distance, ETA */}
+            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 5, margin: '0 0 6px', flexWrap: 'wrap' }}>
+              <span>{gym.area}</span>
+              <span style={{ color: 'var(--border-default)' }}>·</span>
+              <span>{gym.distance} km</span>
+              <span style={{ color: 'var(--border-default)' }}>·</span>
+              <span>{gym.eta} min</span>
+            </p>
+
+            {/* Rating, Open status, Crowd */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6, fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', alignItems: 'center' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontWeight: 700, color: 'var(--text-primary)' }}>
+                <Star size={11} fill="var(--status-warning)" color="var(--status-warning)" />
+                {gym.rating} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({gym.reviewCount})</span>
+              </span>
+              <span style={{ color: 'var(--border-default)' }}>·</span>
+              <span style={{ fontSize: 'var(--text-xs)', color: gym.status === 'open' ? 'var(--status-success)' : 'var(--status-error)', fontWeight: 600 }}>
+                {gym.status === 'open' ? `Open until ${gym.closesAt}` : 'Closed'}
+              </span>
+              <span style={{ color: 'var(--border-default)' }}>·</span>
+              <span style={{ fontSize: 'var(--text-xs)', color: crowd.textColor, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <span className={`crowd-dot ${crowd.dot}`} style={{ width: 6, height: 6 }} />
+                {crowd.label}
+              </span>
+            </div>
+
+            {/* Amenities tags */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 8 }}>
+              {gym.amenities.slice(0, 3).map((amenity) => (
+                <span key={amenity} style={{ fontSize: 10, background: 'var(--bg-muted)', color: 'var(--text-secondary)', padding: '2px 6px', borderRadius: 'var(--r-sm)', fontWeight: 500 }}>
+                  {amenity}
+                </span>
+              ))}
+              {gym.amenities.length > 3 && (
+                <span style={{ fontSize: 10, color: 'var(--text-muted)', padding: '2px 4px' }}>+{gym.amenities.length - 3}</span>
+              )}
+            </div>
+          </div>
+
+          {/* Footer: Plan Badge + Selected Actions */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
+            <span
+              className={`badge ${included ? 'badge-green' : 'badge-warning'}`}
+              style={{ fontSize: 10, fontWeight: 700 }}
+            >
+              {included ? '✓ Included' : 'Upgrade'}
+            </span>
 
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                toggleSavedGym(gym.id);
+                navigate(`/member/gym/${gym.id}`);
               }}
-              title={saved ? 'Remove from saved' : 'Save gym'}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: 'var(--text-muted)' }}
+              className="btn btn-dark btn-sm"
+              style={{ padding: '0.25rem 0.65rem', fontSize: 11, borderRadius: 'var(--r-sm)' }}
             >
-              <Heart size={15} fill={saved ? 'var(--status-error)' : 'none'} color={saved ? 'var(--status-error)' : 'var(--text-muted)'} />
+              View Gym
             </button>
           </div>
-
-          {/* Area, Distance, ETA */}
-          <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 5, margin: '0 0 6px', flexWrap: 'wrap' }}>
-            <span>{gym.area}</span>
-            <span style={{ color: 'var(--border-default)' }}>·</span>
-            <span>{gym.distance} km</span>
-            <span style={{ color: 'var(--border-default)' }}>·</span>
-            <span>{gym.eta} min</span>
-          </p>
-
-          {/* Rating, Open status, Crowd */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6, fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', alignItems: 'center' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontWeight: 700, color: 'var(--text-primary)' }}>
-              <Star size={11} fill="var(--status-warning)" color="var(--status-warning)" />
-              {gym.rating} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({gym.reviewCount})</span>
-            </span>
-            <span style={{ color: 'var(--border-default)' }}>·</span>
-            <span style={{ fontSize: 'var(--text-xs)', color: gym.status === 'open' ? 'var(--status-success)' : 'var(--status-error)', fontWeight: 600 }}>
-              {gym.status === 'open' ? `Open until ${gym.closesAt}` : 'Closed'}
-            </span>
-            <span style={{ color: 'var(--border-default)' }}>·</span>
-            <span style={{ fontSize: 'var(--text-xs)', color: crowd.textColor, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              <span className={`crowd-dot ${crowd.dot}`} style={{ width: 6, height: 6 }} />
-              {crowd.label}
-            </span>
-          </div>
-
-          {/* Amenities tags */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 8 }}>
-            {gym.amenities.slice(0, 3).map((amenity) => (
-              <span key={amenity} style={{ fontSize: 10, background: 'var(--bg-muted)', color: 'var(--text-secondary)', padding: '2px 6px', borderRadius: 'var(--r-sm)', fontWeight: 500 }}>
-                {amenity}
-              </span>
-            ))}
-            {gym.amenities.length > 3 && (
-              <span style={{ fontSize: 10, color: 'var(--text-muted)', padding: '2px 4px' }}>+{gym.amenities.length - 3}</span>
-            )}
-          </div>
         </div>
+      </article>
+    );
+  }
 
-        {/* Footer: Plan Badge + Selected Actions */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
-          <span
-            className={`badge ${included ? 'badge-green' : 'badge-warning'}`}
-            style={{ fontSize: 10, fontWeight: 700 }}
-          >
-            {included ? '✓ Included in Plan' : 'Upgrade required'}
-          </span>
-
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/member/gym/${gym.id}`);
-            }}
-            className="btn btn-dark btn-sm"
-            style={{ padding: '0.25rem 0.65rem', fontSize: 11, borderRadius: 'var(--r-sm)' }}
-          >
-            View Gym
-          </button>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-export function GymCardLarge({ gym }) {
-  const navigate = useNavigate();
-  const crowd = CROWD_CONFIG[gym.crowd] || CROWD_CONFIG.low;
-  const userPlan = 'Active';
-  const included = gym.plans.includes(userPlan);
-  const { isSaved, toggleSavedGym } = useSavedGyms();
-  const saved = isSaved(gym.id);
-
+  // Large/Home Variant
   return (
     <article
       onClick={() => navigate(`/member/gym/${gym.id}`)}
@@ -284,5 +277,3 @@ export function GymCardLarge({ gym }) {
     </article>
   );
 }
-
-export default GymCardLarge;

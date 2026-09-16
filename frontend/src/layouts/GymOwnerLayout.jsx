@@ -17,9 +17,9 @@ export default function GymOwnerLayout() {
   const { pathname } = useLocation();
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-base)' }}>
+    <div className="dashboard-shell" style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-base)' }}>
       {/* Sidebar */}
-      <aside style={{
+      <aside className="dashboard-sidebar" style={{
         width: 'var(--sidebar-w)',
         flexShrink: 0,
         background: 'var(--bg-dark)',
@@ -36,7 +36,7 @@ export default function GymOwnerLayout() {
           </div>
         </div>
 
-        <nav style={{ flex: 1, padding: '0 var(--sp-3)' }}>
+        <nav className="dashboard-sidebar-nav" style={{ flex: 1, padding: '0 var(--sp-3)' }}>
           {SIDEBAR_LINKS.map(({ to, label, icon: Icon }) => {
             const active = to === '/partner' ? pathname === '/partner' : pathname.startsWith(to);
             return (
@@ -65,8 +65,8 @@ export default function GymOwnerLayout() {
       </aside>
 
       {/* Main */}
-      <div style={{ marginLeft: 'var(--sidebar-w)', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <main style={{ flex: 1, padding: 'var(--sp-8) var(--sp-8)', maxWidth: 1200 }}>
+      <div className="dashboard-main-shell" style={{ marginLeft: 'var(--sidebar-w)', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <main className="dashboard-main-content" style={{ flex: 1, padding: 'var(--sp-8) var(--sp-8)', maxWidth: 1200 }}>
           <Outlet />
         </main>
       </div>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle, CreditCard, Pause, AlertTriangle, Download, ShieldCheck, Zap, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle, CreditCard, Pause, AlertTriangle, Download, ShieldCheck, Sparkles } from 'lucide-react';
 import { mockUser, plans } from '../../services/mockData';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
@@ -145,7 +145,7 @@ export default function Membership() {
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
+        <div className="responsive-table-wrap" style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-muted)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -275,7 +275,7 @@ export default function Membership() {
       {/* Membership Settings / Administrative Actions */}
       <div className="card card-shadow" style={{ padding: 'var(--sp-6)' }}>
         <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 800, margin: '0 0 var(--sp-4)', color: 'var(--text-primary)' }}>Membership Settings</h3>
-        <div style={{ display: 'flex', gap: 'var(--sp-3)', flexWrap: 'wrap', alignItems: 'center' }}>
+        <div className="membership-settings-row" style={{ display: 'flex', gap: 'var(--sp-3)', flexWrap: 'wrap', alignItems: 'center' }}>
           <Button
             variant="secondary"
             size="md"

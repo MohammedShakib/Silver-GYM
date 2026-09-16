@@ -48,7 +48,7 @@ export default function GymOwnerDashboard() {
       </div>
 
       {/* Main layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 'var(--sp-6)' }}>
+      <div className="dashboard-main-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 'var(--sp-6)' }}>
 
         {/* Live check-ins */}
         <div className="card card-shadow" style={{ padding: 'var(--sp-6)' }}>

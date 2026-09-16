@@ -39,7 +39,7 @@ export default function GymDetails() {
 
       {/* Gallery */}
       <div className="container" style={{ paddingTop: 'var(--sp-6)', paddingBottom: 0 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gridTemplateRows: '240px 160px', gap: 'var(--sp-2)', borderRadius: 'var(--r-2xl)', overflow: 'hidden' }}>
+        <div className="gym-gallery-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gridTemplateRows: '240px 160px', gap: 'var(--sp-2)', borderRadius: 'var(--r-2xl)', overflow: 'hidden' }}>
           <img src={gym.images[0]} alt="Main" style={{ width: '100%', height: '100%', objectFit: 'cover', gridRow: '1 / 3' }} />
           <div style={{ position: 'relative' }}>
             <img src={gym.images[1]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -105,7 +105,7 @@ export default function GymDetails() {
             </div>
 
             {/* Quick status row */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--sp-3)', marginBottom: 'var(--sp-8)' }}>
+            <div className="gym-status-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--sp-3)', marginBottom: 'var(--sp-8)' }}>
               {[
                 { icon: Clock, label: 'Open Now', sub: `Until ${gym.closesAt}`, color: 'var(--status-success)' },
                 { icon: Users, label: crowd.label + ' Crowd', sub: crowd.desc, color: crowd.color },
@@ -211,7 +211,7 @@ export default function GymDetails() {
             {/* Reviews */}
             {activeTab === 'reviews' && (
               <div className="anim-fade">
-                <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: 'var(--sp-8)', marginBottom: 'var(--sp-8)' }}>
+                <div className="gym-reviews-grid" style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: 'var(--sp-8)', marginBottom: 'var(--sp-8)' }}>
                   <div style={{ textAlign: 'center', padding: 'var(--sp-6)', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-xl)' }}>
                     <p style={{ fontSize: 'var(--text-7xl)', fontWeight: 900, margin: '0 0 4px', lineHeight: 1 }}>{gym.rating}</p>
                     <div style={{ display: 'flex', gap: 2, justifyContent: 'center', marginBottom: 4 }}>
@@ -254,7 +254,7 @@ export default function GymDetails() {
           </div>
 
           {/* Right — Sticky access card */}
-          <div style={{ position: 'sticky', top: 'calc(var(--header-h) + var(--sp-6))' }}>
+          <div className="gym-access-sidebar" style={{ position: 'sticky', top: 'calc(var(--header-h) + var(--sp-6))' }}>
             <div className="card" style={{ padding: 'var(--sp-6)', border: `2px solid ${included ? 'var(--sg-green)' : 'var(--border-default)'}`, boxShadow: included ? 'var(--shadow-green)' : 'var(--shadow-lg)' }}>
               <h3 style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--sp-5)' }}>Access with Silver GYM</h3>
 

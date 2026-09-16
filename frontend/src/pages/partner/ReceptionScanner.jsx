@@ -72,7 +72,7 @@ export default function ReceptionScanner() {
             ))}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-3)' }}>
+          <div className="scanner-action-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-3)' }}>
             <button className="btn btn-primary btn-lg" onClick={() => setState('ready')}>
               Confirm Entry
             </button>

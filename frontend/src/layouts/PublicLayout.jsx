@@ -115,7 +115,7 @@ export default function PublicLayout() {
           transition: 'all 0.25s ease',
         }}
       >
-        <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div className="container public-header-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           {/* Logo */}
           <Link
             to="/"
@@ -159,7 +159,7 @@ export default function PublicLayout() {
           </nav>
 
           {/* CTAs */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <div className="public-header-cta" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
             <Link
               to="/sign-in"
               className="hide-mobile"
@@ -183,7 +183,7 @@ export default function PublicLayout() {
             </Link>
             <Link
               to="/join"
-              className="btn btn-primary"
+              className="btn btn-primary hide-mobile"
               style={{
                 padding: '0.62rem 1.35rem',
                 fontSize: '0.92rem',
@@ -221,6 +221,7 @@ export default function PublicLayout() {
         {/* Mobile menu dropdown */}
         {mobileMenuOpen && (
           <div
+            className="public-mobile-menu"
             style={{
               position: 'absolute',
               top: '100%',
@@ -281,6 +282,7 @@ export default function PublicLayout() {
         <div className="container">
           {/* Top Row: Brand & Columns */}
           <div
+            className="public-footer-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: '1.4fr repeat(5, 1fr)',
@@ -453,6 +455,7 @@ export default function PublicLayout() {
 
           {/* Bottom strip */}
           <div
+            className="public-footer-bottom"
             style={{
               borderTop: '1px solid rgba(255, 255, 255, 0.08)',
               paddingTop: 'var(--sp-8)',

@@ -44,13 +44,14 @@ export default function AdminDashboard() {
       </div>
 
       {/* Gym applications */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 'var(--sp-6)', marginBottom: 'var(--sp-8)' }}>
+      <div className="dashboard-main-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 'var(--sp-6)', marginBottom: 'var(--sp-8)' }}>
         <div className="card card-shadow" style={{ padding: 'var(--sp-6)' }}>
           <div className="flex-between" style={{ marginBottom: 'var(--sp-5)' }}>
             <h3>Pending Gym Applications</h3>
             <Link to="/admin/applications" className="btn btn-ghost btn-sm">View all</Link>
           </div>
 
+          <div className="dashboard-table-wrap">
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--text-sm)' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
@@ -82,6 +83,7 @@ export default function AdminDashboard() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
 
         {/* Quick stats */}

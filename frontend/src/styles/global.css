@@ -11,7 +11,9 @@ body {
   background: var(--bg-base);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  overflow-x: hidden;
 }
+#root { min-height: 100vh; }
 img, video, svg { display: block; max-width: 100%; }
 button, input, select, textarea { font: inherit; }
 ul, ol { list-style: none; }
@@ -132,3 +134,14 @@ h5 { font-size: var(--text-lg); font-weight: 600; }
 @media (max-width: 767px) { .hide-mobile { display: none !important; } }
 @media (min-width: 768px) { .show-mobile { display: none !important; } }
 @media (max-width: 1023px) { .hide-tablet { display: none !important; } }
+
+@media (max-width: 768px) {
+  html { font-size: 15px; }
+  h1 { font-size: clamp(2rem, 9vw, 2.8rem); }
+  h2 { font-size: clamp(1.65rem, 7vw, 2.2rem); }
+  h3 { font-size: clamp(1.35rem, 5.5vw, 1.8rem); }
+  .container {
+    padding-left: max(var(--page-px), env(safe-area-inset-left));
+    padding-right: max(var(--page-px), env(safe-area-inset-right));
+  }
+}

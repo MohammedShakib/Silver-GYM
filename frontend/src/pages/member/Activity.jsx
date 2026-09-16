@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { mockActivity, weeklyData, rewards, mockGyms, mockUser } from '../../services/mockData';
-import { Flame, Dumbbell, Clock, MapPin, ChevronLeft, ChevronRight, CheckCircle, Trophy, Sparkles, ArrowRight } from 'lucide-react';
+import { Flame, Dumbbell, Clock, MapPin, ChevronLeft, ChevronRight, Trophy, Sparkles, ArrowRight } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 
 const TABS = ['History', 'Rewards'];
 const PERIODS = ['Week', 'Month', '3 Months', 'Year'];
 
 function CalendarHeatmap() {
-  const [currentMonth, setCurrentMonth] = useState('August 2026');
+  const [currentMonth] = useState('August 2026');
   // Build a 5-week display (35 days)
   const today = new Date();
   const days = Array.from({ length: 35 }, (_, i) => {

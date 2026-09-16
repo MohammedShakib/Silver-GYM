@@ -4,7 +4,7 @@ import { Search, SlidersHorizontal, MapPin, ChevronDown, Check, LocateFixed, Nav
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { mockGyms } from '../../services/mockData';
-import { GymCardCompact } from '../../components/gym/GymCards';
+import GymCard from '../../components/gym/GymCards';
 import EmptyState from '../../components/ui/EmptyState';
 import { openDirections } from '../../utils/browserActions';
 
@@ -797,7 +797,8 @@ export default function ExploreGyms() {
                   cardRefs.current[gym.id] = node;
                 }}
               >
-                <GymCardCompact
+                <GymCard
+                  variant="compact"
                   gym={gym}
                   selected={selectedGymId === gym.id}
                   hovered={hoveredGymId === gym.id}

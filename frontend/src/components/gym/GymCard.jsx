@@ -1,5 +1,5 @@
-import { GymCardLarge } from './GymCards';
+import GymCard from './GymCards';
 
-export default GymCardLarge;
-export { GymCardLarge };
+export default GymCard;
+export { GymCard };
 

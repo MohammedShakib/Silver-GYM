@@ -767,3 +767,208 @@
     height: 100% !important;
   }
 }
+
+@media (max-width: 1024px) {
+  .dashboard-main-grid,
+  .gym-status-grid,
+  .gym-reviews-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .public-footer-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .trust-strip-grid,
+  .how-steps-grid,
+  .experience-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .trust-stat-item {
+    border-right: none !important;
+    border-bottom: 1px solid #E2E8F0;
+  }
+}
+
+@media (max-width: 768px) {
+  .btn {
+    white-space: normal;
+  }
+
+  .btn-lg,
+  .btn-xl {
+    width: 100%;
+  }
+
+  .tabs {
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-btn {
+    flex-shrink: 0;
+  }
+
+  .toast {
+    left: 12px;
+    right: 12px;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    width: auto;
+  }
+
+  .public-header-bar {
+    gap: 12px;
+  }
+
+  .public-header-cta {
+    gap: 0.5rem !important;
+  }
+
+  .public-mobile-menu {
+    max-height: calc(100dvh - var(--header-h));
+    overflow-y: auto;
+  }
+
+  .public-footer-grid,
+  .public-footer-bottom,
+  .trust-strip-grid,
+  .how-steps-grid,
+  .experience-grid,
+  .auth-form-two-col,
+  .onboarding-two-col,
+  .onboarding-plan-grid,
+  .dashboard-shell,
+  .dashboard-main-grid,
+  .member-home-status-grid,
+  .member-home-metrics-grid,
+  .profile-info-grid,
+  .gym-gallery-grid,
+  .gym-status-grid,
+  .gym-reviews-grid,
+  .scanner-action-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .auth-split-page {
+    grid-template-columns: 1fr !important;
+  }
+
+  .auth-form-panel {
+    padding: var(--sp-8) var(--sp-4) !important;
+    max-width: 100% !important;
+  }
+
+  .onboarding-actions,
+  .member-home-best-actions,
+  .membership-settings-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .membership-settings-row > *,
+  .member-home-best-actions > *,
+  .profile-header-actions > * {
+    width: 100%;
+  }
+
+  .dashboard-shell {
+    flex-direction: column !important;
+  }
+
+  .dashboard-sidebar {
+    position: sticky !important;
+    top: 0 !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    padding: var(--sp-4) 0 !important;
+  }
+
+  .dashboard-sidebar-nav {
+    display: flex !important;
+    flex-wrap: nowrap;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px !important;
+    scrollbar-width: none;
+  }
+
+  .dashboard-sidebar-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dashboard-sidebar-nav a {
+    flex-shrink: 0;
+    margin-bottom: 0 !important;
+  }
+
+  .dashboard-main-shell {
+    margin-left: 0 !important;
+  }
+
+  .dashboard-main-content {
+    max-width: none !important;
+    padding: var(--sp-5) var(--sp-4) var(--sp-8) !important;
+  }
+
+  .dashboard-table-wrap,
+  .responsive-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dashboard-table-wrap table,
+  .responsive-table-wrap table {
+    min-width: 640px;
+  }
+
+  .member-home-checkin-row {
+    align-items: flex-start !important;
+  }
+
+  .member-home-checkin-row,
+  .profile-header-card,
+  .profile-payment-row {
+    flex-wrap: wrap !important;
+  }
+
+  .gym-gallery-grid {
+    grid-template-rows: none !important;
+  }
+
+  .gym-gallery-grid > :first-child {
+    grid-row: auto !important;
+    min-height: 240px;
+  }
+
+  .gym-access-sidebar {
+    position: static !important;
+    top: auto !important;
+  }
+
+  .pass-modal-backdrop {
+    align-items: flex-end !important;
+    padding: 12px !important;
+  }
+
+  .pass-modal-shell {
+    width: 100% !important;
+    max-height: calc(100dvh - 12px) !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+  }
+
+  .member-bottom-nav {
+    height: 72px !important;
+  }
+
+  .trust-stat-item:last-child {
+    border-bottom: none;
+  }
+}

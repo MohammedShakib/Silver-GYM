@@ -1,5 +1,5 @@
 import { mockUser } from '../../services/mockData';
-import { QrCode, Sparkles, CheckCircle } from 'lucide-react';
+import { QrCode } from 'lucide-react';
 
 export default function DigitalPassCard({ compact = false, onOpen }) {
   const pct = Math.min(100, Math.round((mockUser.visitsUsed / mockUser.visitsTotal) * 100));

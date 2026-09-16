@@ -90,7 +90,7 @@ export default function Onboarding() {
             <Target size={32} color="var(--sg-green)" style={{ marginBottom: 'var(--sp-4)' }} />
             <h2 style={{ marginBottom: 8 }}>What are your fitness goals?</h2>
             <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--sp-8)' }}>Select all that apply. We'll prioritize gyms that match.</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-3)', marginBottom: 'var(--sp-8)' }}>
+            <div className="onboarding-two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-3)', marginBottom: 'var(--sp-8)' }}>
               {GOALS.map(g => (
                 <button key={g} type="button" onClick={() => toggle(goals, setGoals, g)}
                   style={{
@@ -105,7 +105,7 @@ export default function Onboarding() {
                 </button>
               ))}
             </div>
-            <div style={{ display: 'flex', gap: 'var(--sp-3)' }}>
+            <div className="onboarding-actions" style={{ display: 'flex', gap: 'var(--sp-3)' }}>
               <button className="btn btn-secondary btn-lg" onClick={() => setStep(1)}>Back</button>
               <button className="btn btn-dark btn-lg" style={{ flex: 1 }} onClick={() => setStep(3)}>Continue <ArrowRight size={16} /></button>
             </div>
@@ -127,7 +127,7 @@ export default function Onboarding() {
                 </button>
               ))}
             </div>
-            <div style={{ display: 'flex', gap: 'var(--sp-3)' }}>
+            <div className="onboarding-actions" style={{ display: 'flex', gap: 'var(--sp-3)' }}>
               <button className="btn btn-secondary btn-lg" onClick={() => setStep(2)}>Back</button>
               <button className="btn btn-dark btn-lg" style={{ flex: 1 }} onClick={() => setStep(4)}>Continue <ArrowRight size={16} /></button>
             </div>
@@ -186,7 +186,7 @@ export default function Onboarding() {
                     <span style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>/mo</span>
                   </div>
                 </div>
-                <ul style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <ul className="onboarding-plan-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                   {activePlan.features.map(f => (
                     <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--text-sm)' }}>
                       <CheckCircle size={13} color="var(--sg-green)" /> {f}

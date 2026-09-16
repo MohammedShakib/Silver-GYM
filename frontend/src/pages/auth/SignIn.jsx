@@ -7,9 +7,9 @@ export default function SignIn() {
   const navigate = useNavigate();
 
   return (
-    <div style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+    <div className="auth-split-page" style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
       {/* Left - Form */}
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'var(--sp-16)', maxWidth: 520, margin: '0 auto', width: '100%' }}>
+      <div className="auth-form-panel" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'var(--sp-16)', maxWidth: 520, margin: '0 auto', width: '100%' }}>
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--sp-12)', textDecoration: 'none' }}>
           <div style={{ width: 28, height: 28, background: 'var(--sg-charcoal)', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ color: 'var(--sg-green)', fontWeight: 900, fontSize: 12 }}>SG</span>
@@ -57,8 +57,6 @@ export default function SignIn() {
           120+ partner gyms across 8 areas of Dhaka. All in one membership.
         </p>
       </div>
-
-      <style>{`@media (max-width: 768px) { section { grid-template-columns: 1fr !important; } }`}</style>
     </div>
   );
 }

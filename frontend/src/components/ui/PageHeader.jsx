@@ -7,50 +7,18 @@ export default function PageHeader({
   style = {},
 }) {
   return (
-    <div
-      className={`page-header ${className}`.trim()}
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        flexWrap: 'wrap',
-        gap: 'var(--sp-4)',
-        marginBottom: 'var(--sp-8)',
-        ...style,
-      }}
-    >
+    <div className={`page-header flex flex-between flex-wrap items-center ${className}`.trim()} style={{ gap: 'var(--sp-4)', marginBottom: 'var(--sp-8)', ...style }}>
       <div style={{ minWidth: 260 }}>
-        {badge ? <div style={{ marginBottom: 'var(--sp-2)' }}>{badge}</div> : null}
-        <h1
-          style={{
-            fontSize: 'clamp(2rem, 3.5vw, 2.5rem)',
-            fontWeight: 800,
-            letterSpacing: '-0.02em',
-            marginBottom: 'var(--sp-1)',
-            color: 'var(--text-primary)',
-          }}
-        >
-          {title}
-        </h1>
-        {subtitle ? (
-          <p
-            style={{
-              margin: 0,
-              color: 'var(--text-secondary)',
-              fontSize: 'var(--text-md)',
-              lineHeight: 1.5,
-            }}
-          >
-            {subtitle}
-          </p>
-        ) : null}
+        {badge && <div className="mb-2">{badge}</div>}
+        <h1 className="mb-1">{title}</h1>
+        {subtitle && <p className="text-md">{subtitle}</p>}
       </div>
 
-      {children ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)', flexWrap: 'wrap' }}>
+      {children && (
+        <div className="flex items-center flex-wrap flex-gap-3">
           {children}
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
