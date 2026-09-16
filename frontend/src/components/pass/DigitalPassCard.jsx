@@ -1,7 +1,9 @@
-import { mockUser } from '../../services/mockData';
+import { useDemoApp } from '../../context/DemoAppContext';
 import { QrCode } from 'lucide-react';
+import QRCode from 'react-qr-code';
 
 export default function DigitalPassCard({ compact = false, onOpen }) {
+  const { user: mockUser } = useDemoApp();
   const pct = Math.min(100, Math.round((mockUser.visitsUsed / mockUser.visitsTotal) * 100));
 
   if (compact) {
@@ -164,7 +166,13 @@ export default function DigitalPassCard({ compact = false, onOpen }) {
             justifyContent: 'center',
             boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
           }}>
-            <div className="qr-placeholder" style={{ width: '100%', height: '100%', borderRadius: 8 }} />
+            <QRCode
+              value={JSON.stringify({ id: mockUser.id, ts: Date.now() })}
+              size={148}
+              bgColor="#ffffff"
+              fgColor="#101722"
+              style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+            />
           </div>
           <p style={{ fontSize: 'var(--text-xs)', color: 'var(--sg-silver)', textAlign: 'center', margin: 0 }}>
             Show QR to reception for check-in

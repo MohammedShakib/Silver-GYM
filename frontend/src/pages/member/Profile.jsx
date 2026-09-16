@@ -15,7 +15,9 @@ import {
 import bkashLogo from '../../assets/payment-logos/bkash.svg';
 import mastercardLogo from '../../assets/payment-logos/mastercard.svg';
 import nagadLogo from '../../assets/payment-logos/nagad.svg';
-import { mockUser } from '../../services/mockData';
+import visaLogo from '../../assets/payment-logos/visa.svg';
+import rocketLogo from '../../assets/payment-logos/rocket.svg';
+import { useDemoApp } from '../../context/DemoAppContext';
 import Button from '../../components/ui/Button';
 
 const paymentBrandLogos = {
@@ -87,6 +89,7 @@ function PaymentBrandLogo({ type }) {
 }
 
 export default function Profile() {
+  const { user: mockUser, actions } = useDemoApp();
   const navigate = useNavigate();
   const [feedbackNotice, setFeedbackNotice] = useState('');
 

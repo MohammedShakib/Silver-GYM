@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Heart, Share, MapPin, Clock, Users, Star, CheckCircle, Navigation, ChevronRight } from 'lucide-react';
-import { mockGyms, mockUser } from '../../services/mockData';
+import { useDemoApp } from '../../context/DemoAppContext';
 import { useSavedGyms } from '../../hooks/useSavedGyms';
 import { openDirections, sharePage } from '../../utils/browserActions';
 
@@ -12,8 +12,9 @@ const CROWD_LABELS = {
 };
 
 export default function GymDetails() {
+  const { gyms, user: mockUser } = useDemoApp();
   const { id } = useParams();
-  const gym = mockGyms.find(g => g.id === id) || mockGyms[0];
+  const gym = gyms.find(g => g.id === id) || gyms[0];
   const crowd = CROWD_LABELS[gym.crowd];
   const included = gym.plans.includes(mockUser.plan);
   const [activeTab, setActiveTab] = useState('about');

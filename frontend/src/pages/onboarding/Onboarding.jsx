@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { CheckCircle, ArrowRight, MapPin, Target, Clock, Star } from 'lucide-react';
 import { plans } from '../../services/mockData';
+import { useDemoApp } from '../../context/DemoAppContext';
 
 const STEPS = [
   { num: 1, label: 'Location' },
@@ -22,6 +23,15 @@ export default function Onboarding() {
   const [facilities, setFacilities] = useState([]);
   const [times, setTimes] = useState([]);
   const navigate = useNavigate();
+  const { actions } = useDemoApp();
+
+  const handleActivate = () => {
+    actions.updateOnboarding({
+      onboardingPreferences: { location, goals, facilities, times }
+    });
+    actions.activatePlan(activePlan.id);
+    navigate('/member');
+  };
 
   const toggle = (arr, setArr, val) => {
     setArr(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val]);
@@ -196,7 +206,7 @@ export default function Onboarding() {
               </div>
             </div>
 
-            <button className="btn btn-primary btn-xl btn-full" style={{ marginBottom: 'var(--sp-4)' }} onClick={() => navigate('/member')}>
+            <button className="btn btn-primary btn-xl btn-full" style={{ marginBottom: 'var(--sp-4)' }} onClick={handleActivate}>
               Activate {activePlan.name} Plan <ArrowRight size={18} />
             </button>
             <div style={{ display: 'flex', gap: 'var(--sp-4)', justifyContent: 'center' }}>

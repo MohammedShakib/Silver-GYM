@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { X, Zap, Check, ArrowLeft, MapPin, CheckCircle } from 'lucide-react';
-import { mockGyms, mockUser } from '../../services/mockData';
+import { useDemoApp } from '../../context/DemoAppContext';
 
 export default function CheckInFlow() {
+  const { gyms, user: mockUser, actions } = useDemoApp();
   const { id } = useParams();
   const navigate = useNavigate();
-  const gym = mockGyms.find(g => g.id === id) || mockGyms[0];
+  const gym = gyms.find(g => g.id === id) || gyms[0];
   const [step, setStep] = useState('pre'); // pre | scan | verifying | success
 
   useEffect(() => {
@@ -15,10 +16,13 @@ export default function CheckInFlow() {
       return () => clearTimeout(t);
     }
     if (step === 'verifying') {
-      const t = setTimeout(() => setStep('success'), 2000);
+      const t = setTimeout(() => {
+        actions.checkInToGym(gym);
+        setStep('success');
+      }, 2000);
       return () => clearTimeout(t);
     }
-  }, [step]);
+  }, [step, actions, gym]);
 
   /* ── Pre-screen ── */
   if (step === 'pre') return (

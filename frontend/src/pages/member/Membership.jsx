@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle, CreditCard, Pause, AlertTriangle, Download, ShieldCheck, Sparkles } from 'lucide-react';
-import { mockUser, plans } from '../../services/mockData';
+import { useDemoApp } from '../../context/DemoAppContext';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
 
 export default function Membership() {
+  const { user: mockUser, plans } = useDemoApp();
   const pct = Math.min(100, Math.round((mockUser.visitsUsed / mockUser.visitsTotal) * 100));
   const [actionNotice, setActionNotice] = useState('');
   const [downloading, setDownloading] = useState(null);

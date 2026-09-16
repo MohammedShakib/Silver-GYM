@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { mockActivity, weeklyData, rewards, mockGyms, mockUser } from '../../services/mockData';
+import { weeklyData, rewards } from '../../services/mockData';
+import { useDemoApp } from '../../context/DemoAppContext';
 import { Flame, Dumbbell, Clock, MapPin, ChevronLeft, ChevronRight, Trophy, Sparkles, ArrowRight } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 
@@ -104,6 +105,7 @@ function CalendarHeatmap() {
 }
 
 export default function Activity() {
+  const { user: mockUser, gyms: mockGyms, activity: mockActivity } = useDemoApp();
   const [tab, setTab] = useState('History');
   const [period, setPeriod] = useState('Month');
 

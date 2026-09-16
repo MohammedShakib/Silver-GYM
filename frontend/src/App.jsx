@@ -1,4 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { DemoAppProvider } from './context/DemoAppContext';
 
 // Layouts
 import PublicLayout    from './layouts/PublicLayout';
@@ -272,5 +273,9 @@ const router = createBrowserRouter([
 ]);
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <DemoAppProvider>
+      <RouterProvider router={router} />
+    </DemoAppProvider>
+  );
 }

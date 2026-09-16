@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, MapPin, ArrowRight, Zap, ChevronRight, Star, CheckCircle } from 'lucide-react';
-import { mockUser, mockGyms, mockActivity, weeklyData } from '../../services/mockData';
+import { weeklyData } from '../../services/mockData';
+import { useDemoApp } from '../../context/DemoAppContext';
 import GymCard from '../../components/gym/GymCards';
 import DigitalPassCard from '../../components/pass/DigitalPassCard';
 import { openDirections } from '../../utils/browserActions';
@@ -12,6 +13,7 @@ const GREETING = HOUR < 12 ? 'Good morning' : HOUR < 18 ? 'Good afternoon' : 'Go
 const QUICK_FILTERS = ['Near Me', 'Open Now', 'Low Crowd', 'Included in My Plan'];
 
 export default function MemberHome() {
+  const { user: mockUser, gyms: mockGyms, activity: mockActivity } = useDemoApp();
   const [filter, setFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const bestMatch = mockGyms[0]; // Iron House

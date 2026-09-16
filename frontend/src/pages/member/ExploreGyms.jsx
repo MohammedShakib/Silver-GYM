@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, SlidersHorizontal, MapPin, ChevronDown, Check, LocateFixed, Navigation, Star, Map, List, RotateCcw } from 'lucide-react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { mockGyms } from '../../services/mockData';
+import { useDemoApp } from '../../context/DemoAppContext';
 import GymCard from '../../components/gym/GymCards';
 import EmptyState from '../../components/ui/EmptyState';
 import { openDirections } from '../../utils/browserActions';
@@ -23,15 +23,7 @@ const GYM_COORDINATES = {
   '4': { lng: 90.4067, lat: 23.7957, label: 'Urban Strength' },
 };
 
-const GYM_PINS = mockGyms
-  .filter(gym => GYM_COORDINATES[gym.id])
-  .map(gym => ({
-    id: gym.id,
-    gym,
-    label: GYM_COORDINATES[gym.id].label,
-    coordinates: [GYM_COORDINATES[gym.id].lng, GYM_COORDINATES[gym.id].lat],
-    included: gym.plans.includes('Active'),
-  }));
+
 
 const CROWD_ORDER = { low: 0, moderate: 1, busy: 2, full: 3 };
 const PREVIEW_CLEAR_DELAY_MS = 90;
@@ -175,7 +167,20 @@ function MapGymPreview({ gym }) {
 }
 
 export default function ExploreGyms() {
-  const [searchParams] = useSearchParams();
+  const { gyms: mockGyms, user } = useDemoApp();
+  const GYM_PINS = useMemo(() => {
+    return mockGyms
+      .filter(gym => GYM_COORDINATES[gym.id])
+      .map(gym => ({
+        id: gym.id,
+        gym,
+        label: GYM_COORDINATES[gym.id].label,
+        coordinates: [GYM_COORDINATES[gym.id].lng, GYM_COORDINATES[gym.id].lat],
+        included: gym.plans.includes(user.plan),
+      }));
+  }, [mockGyms, user.plan]);
+
+  const [searchParams, setSearchParams] = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
   const initialFilter = searchParams.get('filter');
 
@@ -233,7 +238,7 @@ export default function ExploreGyms() {
         return false;
       }
 
-      if (activeFilters.includes('Included In My Plan') && !gym.plans.includes('Active')) {
+      if (activeFilters.includes('Included In My Plan') && !gym.plans.includes(user.plan)) {
         return false;
       }
 
@@ -273,8 +278,8 @@ export default function ExploreGyms() {
         return CROWD_ORDER[left.crowd] - CROWD_ORDER[right.crowd] || left.distance - right.distance;
       }
 
-      const leftIncluded = left.plans.includes('Active') ? 1 : 0;
-      const rightIncluded = right.plans.includes('Active') ? 1 : 0;
+      const leftIncluded = left.plans.includes(user.plan) ? 1 : 0;
+      const rightIncluded = right.plans.includes(user.plan) ? 1 : 0;
       return rightIncluded - leftIncluded || left.distance - right.distance || right.rating - left.rating;
     });
   }, [filteredGymsByFilter, sortLabel]);
@@ -285,7 +290,7 @@ export default function ExploreGyms() {
 
   const visiblePins = useMemo(() => {
     return GYM_PINS.filter(pin => visibleGymIds.has(pin.id));
-  }, [visibleGymIds]);
+  }, [GYM_PINS, visibleGymIds]);
 
   const activeGymId = useMemo(() => {
     if (hoveredGymId && visibleGymIds.has(hoveredGymId)) {

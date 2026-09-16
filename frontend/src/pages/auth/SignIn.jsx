@@ -1,10 +1,18 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { useDemoApp } from '../../context/DemoAppContext';
 
 export default function SignIn() {
   const [show, setShow] = useState(false);
   const navigate = useNavigate();
+  const { actions } = useDemoApp();
+
+  const handleSignIn = (e) => {
+    e.preventDefault();
+    actions.loginDemoUser();
+    navigate('/member');
+  };
 
   return (
     <div className="auth-split-page" style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
@@ -14,13 +22,13 @@ export default function SignIn() {
           <div style={{ width: 28, height: 28, background: 'var(--sg-charcoal)', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ color: 'var(--sg-green)', fontWeight: 900, fontSize: 12 }}>SG</span>
           </div>
-          <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 'var(--text-xl)' }}>Silver GYM</span>
+          <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 'var(--text-xl)', color: 'var(--text-primary)' }}>Silver GYM</span>
         </Link>
 
         <h1 style={{ fontSize: 'var(--text-4xl)', marginBottom: 8 }}>Welcome back</h1>
         <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--sp-8)' }}>Sign in to your Silver GYM account</p>
 
-        <form onSubmit={e => { e.preventDefault(); navigate('/member'); }} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
+        <form onSubmit={handleSignIn} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
           <div>
             <label style={{ fontSize: 'var(--text-sm)', fontWeight: 500, display: 'block', marginBottom: 6 }}>Email address</label>
             <input type="email" className="input" placeholder="you@example.com" defaultValue="alex@example.com" />
