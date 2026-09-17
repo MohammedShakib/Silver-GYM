@@ -37,4 +37,6 @@ class MockGymRepository {
   }
 }
 
-export const gymRepository = new MockGymRepository();
+export const gymRepository = import.meta.env.VITE_DATA_MODE === 'api' 
+  ? (await import('./ApiGymRepository')).ApiGymRepository 
+  : new MockGymRepository();

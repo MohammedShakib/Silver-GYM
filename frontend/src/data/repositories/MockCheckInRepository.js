@@ -55,4 +55,6 @@ class MockCheckInRepository {
   }
 }
 
-export const checkInRepository = new MockCheckInRepository();
+export const checkInRepository = import.meta.env.VITE_DATA_MODE === 'api'
+  ? (await import('./ApiCheckInRepository')).ApiCheckInRepository
+  : new MockCheckInRepository();

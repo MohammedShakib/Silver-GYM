@@ -1,30 +1,30 @@
-import cors from 'cors'
-import express from 'express'
-import { env } from './config/env.js'
-import apiRoutes from './routes/index.js'
-import { errorHandler, notFound } from './middlewares/error.middleware.js'
+import express from 'express';
+import cors from 'cors';
+import { errorHandler } from './middlewares/errorHandler.js';
+import gymsRoutes from './routes/gyms.routes.js';
+import membersRoutes from './routes/members.routes.js';
+import membershipsRoutes from './routes/memberships.routes.js';
+import checkInsRoutes from './routes/checkIns.routes.js';
+import plansRoutes from './routes/plans.routes.js';
 
-const app = express()
+const app = express();
 
-app.use(
-  cors({
-    origin: env.clientUrl,
-    credentials: true,
-  }),
-)
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+app.use(cors({ origin: process.env.FRONTEND_URL || '*' }));
+app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Welcome to Silver GYM API',
-  })
-})
+// Health check
+app.get('/api/v1/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
-app.use('/api', apiRoutes)
+// Routes
+app.use('/api/v1/gyms', gymsRoutes);
+app.use('/api/v1/me', membersRoutes);
+app.use('/api/v1/me/membership', membershipsRoutes);
+app.use('/api/v1/check-ins', checkInsRoutes);
+app.use('/api/v1/plans', plansRoutes);
 
-app.use(notFound)
-app.use(errorHandler)
+// Error handling
+app.use(errorHandler);
 
-export default app
+export default app;

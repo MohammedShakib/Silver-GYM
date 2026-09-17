@@ -70,4 +70,6 @@ class MockMembershipRepository {
   }
 }
 
-export const membershipRepository = new MockMembershipRepository();
+export const membershipRepository = import.meta.env.VITE_DATA_MODE === 'api'
+  ? (await import('./ApiMembershipRepository')).ApiMembershipRepository
+  : new MockMembershipRepository();
