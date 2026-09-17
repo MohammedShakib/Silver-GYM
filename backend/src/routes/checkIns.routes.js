@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { authMock } from '../middlewares/authMock.js';
+import { requireAuth } from '../middlewares/auth.js';
 import { createCheckIn } from '../controllers/checkIns.controller.js';
 
 const router = Router();
 
-router.use(authMock);
+router.use(requireAuth);
 
 router.post('/', createCheckIn);
 

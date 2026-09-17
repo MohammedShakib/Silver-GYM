@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Layouts
 import PublicLayout    from './layouts/PublicLayout';
@@ -74,7 +75,11 @@ const router = createBrowserRouter([
   // ── Member routes ──
   {
     path: '/member',
-    element: <MemberLayout />,
+    element: (
+      <ProtectedRoute allowedRoles={['MEMBER']}>
+        <MemberLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true,                    element: <MemberHome /> },
       { path: 'explore',               element: <ExploreGyms /> },
@@ -90,7 +95,11 @@ const router = createBrowserRouter([
   // ── Partner routes ──
   {
     path: '/partner',
-    element: <GymOwnerLayout />,
+    element: (
+      <ProtectedRoute allowedRoles={['GYM_OWNER', 'ADMIN']}>
+        <GymOwnerLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true,              element: <GymOwnerDashboard /> },
       { path: 'reception',       element: <ReceptionScanner /> },
@@ -166,7 +175,11 @@ const router = createBrowserRouter([
   // ── Admin routes ──
   {
     path: '/admin',
-    element: <AdminLayout />,
+    element: (
+      <ProtectedRoute allowedRoles={['ADMIN']}>
+        <AdminLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <AdminDashboard /> },
       {
@@ -274,6 +287,8 @@ const router = createBrowserRouter([
 
 export default function App() {
   return (
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   );
 }

@@ -18,7 +18,11 @@ model Member {
   role      String   @default("MEMBER")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+  passwordHash String?
+  emailVerifiedAt DateTime?
+  
+  sessions       Session[]
+  gymStaff       GymStaff[]
   preferences    MemberPreference?
   savedLocations SavedLocation[]
   memberships    Membership[]
@@ -80,6 +84,7 @@ model Gym {
   checkIns     CheckIn[]
   reviews      Review[]
   trainers     Trainer[]
+  staff        GymStaff[]
 }
 
 model GymImage {
@@ -203,4 +208,30 @@ model Trainer {
   specialty       String?
   experienceYears Int?
   bio             String?
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  memberId  String
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  lastUsedAt DateTime @default(now())
+  ipAddress String?
+  userAgent String?
+}
+
+model GymStaff {
+  id        String   @id @default(uuid())
+  memberId  String
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  gymId     String
+  gym       Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  role      String   @default("OWNER")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([memberId, gymId])
 }

@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -70,6 +71,9 @@ async function main() {
     }
   });
 
+  // Passwords for test accounts
+  const passwordHash = await bcrypt.hash('password123', 10);
+  
   // Create Demo Member
   const member = await prisma.member.create({
     data: {
@@ -80,7 +84,9 @@ async function main() {
       phone: '+8801700000000',
       avatarUrl: GYM_IMAGES.avatar,
       status: 'ACTIVE',
-      role: 'MEMBER'
+      role: 'MEMBER',
+      passwordHash,
+      emailVerifiedAt: new Date()
     }
   });
 
@@ -99,12 +105,38 @@ async function main() {
       planId: planActive.id,
       status: 'ACTIVE',
       startsAt: new Date('2026-03-01T00:00:00Z'),
-      renewsAt: new Date('2026-08-30T00:00:00Z'), // renewalDate: '30 August 2026'
+      renewsAt: new Date('2026-08-30T00:00:00Z'),
       endsAt: null,
       visitsUsed: 12,
       cycleStartsAt: new Date('2026-07-30T00:00:00Z'),
       cycleEndsAt: new Date('2026-08-30T00:00:00Z'),
       autoRenew: true
+    }
+  });
+
+  // Create Gym Owner
+  const owner = await prisma.member.create({
+    data: {
+      memberCode: 'SG-OWNER-01',
+      name: 'Karim Owner',
+      email: 'owner@silvergym.test',
+      status: 'ACTIVE',
+      role: 'GYM_OWNER',
+      passwordHash,
+      emailVerifiedAt: new Date()
+    }
+  });
+
+  // Create Admin
+  const admin = await prisma.member.create({
+    data: {
+      memberCode: 'SG-ADMIN-01',
+      name: 'Super Admin',
+      email: 'admin@silvergym.test',
+      status: 'ACTIVE',
+      role: 'ADMIN',
+      passwordHash,
+      emailVerifiedAt: new Date()
     }
   });
 
@@ -146,6 +178,15 @@ async function main() {
       latitude: 23.8052,
       longitude: 90.3696,
       logoUrl: GYM_IMAGES.ironHouse
+    }
+  });
+
+  // Assign Owner to Iron House
+  await prisma.gymStaff.create({
+    data: {
+      memberId: owner.id,
+      gymId: gymIronHouse.id,
+      role: 'OWNER'
     }
   });
 

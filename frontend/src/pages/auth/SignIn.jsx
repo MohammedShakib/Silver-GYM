@@ -1,14 +1,41 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function SignIn() {
   const [show, setShow] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
 
-  const handleSignIn = (e) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
-    navigate('/member');
+    setError('');
+    setIsSubmitting(true);
+
+    const res = await login(email, password);
+    
+    if (res.success) {
+      const from = location.state?.from?.pathname;
+      if (from) {
+        navigate(from, { replace: true });
+      } else if (res.user.role === 'ADMIN') {
+        navigate('/admin', { replace: true });
+      } else if (res.user.role === 'GYM_OWNER') {
+        navigate('/partner', { replace: true });
+      } else {
+        navigate('/member', { replace: true });
+      }
+    } else {
+      setError(res.error || 'Invalid credentials');
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -25,10 +52,23 @@ export default function SignIn() {
         <h1 style={{ fontSize: 'var(--text-4xl)', marginBottom: 8 }}>Welcome back</h1>
         <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--sp-8)' }}>Sign in to your Silver GYM account</p>
 
+        {error && (
+          <div style={{ background: '#FEE2E2', color: '#B91C1C', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px' }}>
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSignIn} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
           <div>
             <label style={{ fontSize: 'var(--text-sm)', fontWeight: 500, display: 'block', marginBottom: 6 }}>Email address</label>
-            <input type="email" className="input" placeholder="you@example.com" defaultValue="alex@example.com" />
+            <input 
+              type="email" 
+              className="input" 
+              placeholder="you@example.com" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
@@ -36,14 +76,22 @@ export default function SignIn() {
               <Link to="/#about" style={{ fontSize: 'var(--text-sm)', color: 'var(--sg-green)' }}>Forgot password?</Link>
             </div>
             <div className="input-group" style={{ position: 'relative' }}>
-              <input type={show ? 'text' : 'password'} className="input" placeholder="Your password" defaultValue="password123" style={{ paddingRight: 44 }} />
+              <input 
+                type={show ? 'text' : 'password'} 
+                className="input" 
+                placeholder="Your password" 
+                style={{ paddingRight: 44 }}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
               <button type="button" className="input-icon-right" onClick={() => setShow(!show)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
                 {show ? <EyeOff size={17} color="var(--text-muted)" /> : <Eye size={17} color="var(--text-muted)" />}
               </button>
             </div>
           </div>
-          <button type="submit" className="btn btn-dark btn-lg btn-full" style={{ marginTop: 'var(--sp-2)' }}>
-            Sign In <ArrowRight size={16} />
+          <button type="submit" className="btn btn-dark btn-lg btn-full" style={{ marginTop: 'var(--sp-2)' }} disabled={isSubmitting}>
+            {isSubmitting ? 'Signing in...' : <><span style={{ marginRight: '8px' }}>Sign In</span> <ArrowRight size={16} /></>}
           </button>
         </form>
 

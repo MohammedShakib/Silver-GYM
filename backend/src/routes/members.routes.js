@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { authMock } from '../middlewares/authMock.js';
+import { requireAuth } from '../middlewares/auth.js';
 import { getMe, getMyActivity, getSavedGyms, toggleSavedGym } from '../controllers/members.controller.js';
 
 const router = Router();
 
-router.use(authMock);
+router.use(requireAuth);
 
 router.get('/', getMe);
 router.get('/activity', getMyActivity);

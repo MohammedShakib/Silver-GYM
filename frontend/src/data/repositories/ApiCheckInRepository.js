@@ -4,6 +4,7 @@ export class ApiCheckInRepository {
   static async createCheckIn(gymId, method = 'DEMO') {
     const res = await fetch(`${getBaseUrl()}/check-ins`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ gymId, method })
     });
