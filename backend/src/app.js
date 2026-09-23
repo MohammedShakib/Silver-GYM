@@ -9,6 +9,8 @@ import membershipsRoutes from './routes/memberships.routes.js';
 import checkInsRoutes from './routes/checkIns.routes.js';
 import plansRoutes from './routes/plans.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
+import passRoutes from './routes/pass.routes.js';
+import partnerRoutes from './routes/partner.routes.js';
 
 const app = express();
 
@@ -32,6 +34,8 @@ app.use('/api/v1/me/membership', membershipsRoutes);
 app.use('/api/v1/check-ins', checkInsRoutes);
 app.use('/api/v1/plans', plansRoutes);
 app.use('/api/v1/payments', paymentRoutes);
+app.use('/api/v1/pass', passRoutes);
+app.use('/api/v1/partner', partnerRoutes);
 
 // Error handling
 app.use(errorHandler);

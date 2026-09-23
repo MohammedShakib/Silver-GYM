@@ -1,12 +1,10 @@
 import { Router } from 'express';
 import { requireAuth } from '../middlewares/auth.js';
-import { createCheckIn, getHistory } from '../controllers/checkIns.controller.js';
+import * as passController from '../controllers/pass.controller.js';
 
 const router = Router();
 
 router.use(requireAuth);
-
-router.get('/history', getHistory);
-router.post('/', createCheckIn);
+router.post('/tokens', passController.generatePass);
 
 export default router;

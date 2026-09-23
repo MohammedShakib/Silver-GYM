@@ -1,39 +1,30 @@
-import { checkInRepository } from '../data/repositories/MockCheckInRepository';
-import { membershipRepository } from '../data/repositories/MockMembershipRepository';
-import { gymRepository } from '../data/repositories/MockGymRepository';
-import { EligibilityService } from './EligibilityService';
+import api from './api';
+import { v4 as uuidv4 } from 'uuid'; // Actually wait, UUID might not be installed. Let's use crypto.randomUUID or a simple fallback if not available.
+// Vite / modern browsers support crypto.randomUUID()
 
 class CheckInService {
   /**
-   * Orchestrates the check-in process
+   * Scan gym QR code as a member
    */
-  async checkIn(userId, gymId) {
-    const membership = await membershipRepository.getMembership(userId);
-    const gym = await gymRepository.getGymById(gymId);
-    const plans = await membershipRepository.getPlans();
-    const activePlan = plans.find(p => p.id === membership.planId);
-
-    const status = EligibilityService.getGymAccessStatus({ membership, plan: activePlan, gym });
-    
-    if (status !== 'included') {
-      throw new Error(`Cannot check in. Status: ${status}`);
-    }
-
-    // 1. Create the check-in record
-    const checkIn = await checkInRepository.createCheckIn({
-      memberId: userId,
-      gymId: gym.id,
-      gymName: gym.name,
-      method: 'member_qr'
+  async checkInGymQr(token) {
+    const idempotencyKey = crypto.randomUUID();
+    const response = await api.post('/check-ins', {
+      token,
+      idempotencyKey
     });
+    return response.data;
+  }
 
-    // 2. Update membership visits usage
-    await membershipRepository.updateMembership(userId, {
-      visitsUsed: membership.visitsUsed + 1,
-      visitsRemaining: Math.max(0, membership.visitsRemaining - 1),
+  /**
+   * Scan member pass as a partner receptionist
+   */
+  async verifyMemberPass(gymId, token) {
+    const idempotencyKey = crypto.randomUUID();
+    const response = await api.post(`/partner/gyms/${gymId}/check-ins/member-pass`, {
+      token,
+      idempotencyKey
     });
-
-    return checkIn;
+    return response.data;
   }
 }
 

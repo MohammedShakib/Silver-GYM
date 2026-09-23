@@ -3,7 +3,7 @@ import { useMembership } from '../../hooks/useMembership';
 import { QrCode } from 'lucide-react';
 import QRCode from 'react-qr-code';
 
-export default function DigitalPassCard({ compact = false, onOpen }) {
+export default function DigitalPassCard({ compact = false, onOpen, passToken }) {
   const { member: mockUser, isLoading: memberLoading } = useCurrentMember();
   const { membership, isLoading: memLoading } = useMembership();
 
@@ -174,7 +174,7 @@ export default function DigitalPassCard({ compact = false, onOpen }) {
             boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
           }}>
             <QRCode
-              value={JSON.stringify({ id: mockUser.id, ts: Date.now() })}
+              value={passToken || 'loading...'}
               size={148}
               bgColor="#ffffff"
               fgColor="#101722"

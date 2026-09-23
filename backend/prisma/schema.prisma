@@ -31,6 +31,7 @@ model Member {
   reviews        Review[]
   payments       Payment[]
   invoices       Invoice[]
+  passCredentials PassCredential[]
 }
 
 model MemberPreference {
@@ -88,6 +89,7 @@ model Gym {
   reviews      Review[]
   trainers     Trainer[]
   staff        GymStaff[]
+  checkInCredentials GymCheckInCredential[]
 }
 
 model GymImage {
@@ -242,6 +244,7 @@ model CheckIn {
   membershipId String
   method       String     @default("DEMO")
   status       String     @default("PENDING")
+  idempotencyKey String?    @unique
   checkedInAt  DateTime   @default(now())
   createdAt    DateTime   @default(now())
 
@@ -298,4 +301,27 @@ model GymStaff {
   updatedAt DateTime @updatedAt
 
   @@unique([memberId, gymId])
+}
+
+model PassCredential {
+  id        String   @id @default(uuid())
+  memberId  String
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  purpose   String   @default("MEMBER_ENTRY")
+  status    String   @default("ACTIVE") // ACTIVE, USED, EXPIRED, REVOKED
+  issuedAt  DateTime @default(now())
+  expiresAt DateTime
+  usedAt    DateTime?
+  revokedAt DateTime?
+}
+
+model GymCheckInCredential {
+  id        String   @id @default(uuid())
+  gymId     String
+  gym       Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  status    String   @default("ACTIVE") // ACTIVE, REVOKED
+  issuedAt  DateTime @default(now())
+  rotatedAt DateTime?
 }

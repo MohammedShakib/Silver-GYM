@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -18,7 +19,12 @@ async function main() {
   // Clean DB
   await prisma.checkIn.deleteMany();
   await prisma.savedGym.deleteMany();
+  await prisma.invoice.deleteMany();
+  await prisma.payment.deleteMany();
+  await prisma.membershipCycle.deleteMany();
   await prisma.membership.deleteMany();
+  await prisma.gymCheckInCredential.deleteMany();
+  await prisma.passCredential.deleteMany();
   await prisma.membershipPlan.deleteMany();
   await prisma.gymOpeningHour.deleteMany();
   await prisma.gymAmenity.deleteMany();
@@ -316,6 +322,20 @@ async function main() {
       checkedInAt: new Date(now.getTime() - 48 * 60 * 60 * 1000) // 2 days ago
     }
   });
+
+  // Create GymCheckInCredentials
+  // We will generate simple token hashes for demo purposes using crypto
+  const createHash = (token) => crypto.createHash('sha256').update(token).digest('hex');
+
+  const gymCredentials = [
+    { gymId: gymIronHouse.id, tokenHash: createHash('qr_iron-house-fitness') },
+    { gymId: gymPowerFit.id, tokenHash: createHash('qr_powerfit-mirpur') },
+    { gymId: gymBlock35.id, tokenHash: createHash('qr_block-35-fitness') }
+  ];
+
+  for (const gc of gymCredentials) {
+    await prisma.gymCheckInCredential.create({ data: gc });
+  }
 
   console.log('Seed completed successfully!');
 }
