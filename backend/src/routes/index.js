@@ -10,6 +10,8 @@ import checkInRoutes from './checkIns.routes.js'
 import partnerRoutes from './partner.routes.js'
 import passRoutes from './pass.routes.js'
 import adminRoutes from './admin.routes.js'
+import settlementRoutes from './settlement.routes.js'
+import payoutRoutes from './payout.routes.js'
 
 const router = Router()
 
@@ -23,6 +25,8 @@ router.use('/payments', paymentRoutes)
 router.use('/check-ins', checkInRoutes)
 router.use('/partner', partnerRoutes)
 router.use('/pass', passRoutes)
+router.use('/admin/settlements', settlementRoutes)
+router.use('/admin/payouts', payoutRoutes)
 router.use('/admin', adminRoutes)
 
 export default router

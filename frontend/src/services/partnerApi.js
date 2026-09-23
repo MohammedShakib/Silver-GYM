@@ -26,6 +26,16 @@ export const partnerApi = {
     return data;
   },
 
+  getSettlements: async (gymId) => {
+    const { data } = await api.get(`/partner/gyms/${gymId}/settlements`);
+    return data;
+  },
+
+  getSettlementDetail: async (gymId, id) => {
+    const { data } = await api.get(`/partner/gyms/${gymId}/settlements/${id}`);
+    return data;
+  },
+
   getProfile: async (gymId) => {
     const { data } = await api.get(`/partner/gyms/${gymId}/profile`);
     return data;

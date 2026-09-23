@@ -94,6 +94,10 @@ model Gym {
   checkInCredentials GymCheckInCredential[]
   reviewResponses ReviewResponse[]
   staffInvitations StaffInvitation[]
+  commercialTerms GymCommercialTerms[]
+  settlements    Settlement[]
+  payouts        Payout[]
+  payoutMethods  PartnerPayoutMethod[]
 }
 
 model GymImage {
@@ -255,6 +259,7 @@ model CheckIn {
   member       Member     @relation(fields: [memberId], references: [id], onDelete: Cascade)
   gym          Gym        @relation(fields: [gymId], references: [id], onDelete: Cascade)
   membership   Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  settlementLineItem SettlementLineItem?
 }
 
 model Review {
@@ -422,4 +427,125 @@ model RiskFlag {
   createdAt   DateTime @default(now())
   resolvedAt  DateTime?
   resolvedBy  String?
+}
+
+model GymCommercialTerms {
+  id                  String   @id @default(uuid())
+  gymId               String
+  gym                 Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  settlementModel     String   @default("PER_VISIT") // PER_VISIT
+  ratePerVisit        Int
+  currency            String   @default("BDT")
+  settlementFrequency String   @default("MONTHLY") // MONTHLY
+  minimumPayoutAmount Int?
+  effectiveFrom       DateTime
+  effectiveUntil      DateTime?
+  status              String   @default("ACTIVE") // ACTIVE, INACTIVE
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Settlement {
+  id                  String   @id @default(uuid())
+  reference           String   @unique
+  gymId               String
+  gym                 Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  periodStart         DateTime
+  periodEnd           DateTime
+  currency            String   @default("BDT")
+  grossAmount         Int      @default(0)
+  positiveAdjustments Int      @default(0)
+  negativeAdjustments Int      @default(0)
+  netAmount           Int      @default(0)
+  billableVisitCount  Int      @default(0)
+  status              String   @default("DRAFT") // DRAFT, CALCULATED, UNDER_REVIEW, APPROVED, PAYOUT_PENDING, PAID, DISPUTED, CANCELLED
+  calculatedAt        DateTime?
+  approvedAt          DateTime?
+  approvedBy          String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  lineItems           SettlementLineItem[]
+  adjustments         SettlementAdjustment[]
+  payouts             Payout[]
+  disputes            SettlementDispute[]
+
+  @@unique([gymId, periodStart, periodEnd])
+}
+
+model SettlementLineItem {
+  id           String     @id @default(uuid())
+  settlementId String
+  settlement   Settlement @relation(fields: [settlementId], references: [id], onDelete: Cascade)
+  checkInId    String     @unique // One check-in can only be settled once
+  checkIn      CheckIn    @relation(fields: [checkInId], references: [id])
+  gymId        String
+  rateAmount   Int
+  currency     String     @default("BDT")
+  serviceDate  DateTime
+  amount       Int
+  status       String     @default("ACTIVE")
+}
+
+model SettlementAdjustment {
+  id           String     @id @default(uuid())
+  settlementId String
+  settlement   Settlement @relation(fields: [settlementId], references: [id], onDelete: Cascade)
+  type         String     // BONUS, PENALTY, CHECKIN_CORRECTION, MANUAL_CORRECTION
+  direction    String     // CREDIT, DEBIT
+  amount       Int
+  reason       String
+  createdBy    String
+  createdAt    DateTime   @default(now())
+}
+
+model Payout {
+  id                 String   @id @default(uuid())
+  reference          String   @unique
+  gymId              String
+  gym                Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  settlementId       String
+  settlement         Settlement @relation(fields: [settlementId], references: [id])
+  provider           String   // MANUAL, BANK_TRANSFER, BKASH, etc.
+  payoutMethodId     String?
+  amount             Int
+  currency           String   @default("BDT")
+  status             String   @default("PENDING") // PENDING, PROCESSING, PAID, FAILED, CANCELLED
+  providerTransferId String?  @unique
+  initiatedAt        DateTime?
+  completedAt        DateTime?
+  failedAt           DateTime?
+  failureCode        String?
+  failureMessage     String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model PartnerPayoutMethod {
+  id                      String   @id @default(uuid())
+  gymId                   String
+  gym                     Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  type                    String   // BANK_TRANSFER, MOBILE_MONEY
+  provider                String   // BKASH, NAGAD, DBBL, etc.
+  accountName             String
+  maskedAccountIdentifier String
+  providerReference       String?
+  status                  String   @default("PENDING") // PENDING, VERIFIED, INACTIVE
+  verifiedAt              DateTime?
+  createdAt               DateTime @default(now())
+}
+
+model SettlementDispute {
+  id           String     @id @default(uuid())
+  settlementId String
+  settlement   Settlement @relation(fields: [settlementId], references: [id], onDelete: Cascade)
+  gymId        String
+  openedBy     String
+  reason       String     // MISSING_VISIT, INCORRECT_RATE, OTHER
+  description  String
+  status       String     @default("OPEN") // OPEN, UNDER_REVIEW, RESOLVED, REJECTED
+  resolvedBy   String?
+  resolution   String?
+  createdAt    DateTime   @default(now())
+  resolvedAt   DateTime?
 }

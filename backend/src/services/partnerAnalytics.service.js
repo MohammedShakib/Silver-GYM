@@ -141,6 +141,7 @@ export const partnerAnalyticsService = {
   
   /**
    * Get estimated revenue data.
+   * Phase 10: Pulls real Settlement data for closed periods, estimates current month.
    */
   async getRevenue(gymId) {
     const gym = await prisma.gym.findUnique({
@@ -149,33 +150,75 @@ export const partnerAnalyticsService = {
     });
     
     if (!gym) throw new Error('Gym not found');
-    const rate = TIER_RATES[gym.accessTier] || 200;
     
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     
-    // Current month
+    // Current month: Still estimated as it's not closed
+    // Need to resolve rate properly or fallback
+    let rate = 20000;
+    const currentTerms = await prisma.gymCommercialTerms.findFirst({
+      where: { gymId, status: 'ACTIVE', effectiveFrom: { lte: now }, OR: [{ effectiveUntil: null }, { effectiveUntil: { gt: now } }] },
+      orderBy: { effectiveFrom: 'desc' }
+    });
+    if (currentTerms) {
+      rate = currentTerms.ratePerVisit;
+    } else {
+      const TIER_RATES = { STANDARD: 20000, PLUS: 35000, PREMIUM: 50000, VIP: 60000 };
+      rate = TIER_RATES[gym.accessTier] || 20000;
+    }
+
     const thisMonthVisits = await prisma.checkIn.count({
       where: { gymId, checkedInAt: { gte: startOfMonth }, status: 'VERIFIED' }
     });
     
-    // Last month
+    // Last month: Get the actual Settlement
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
     
-    const lastMonthVisits = await prisma.checkIn.count({
-      where: { gymId, checkedInAt: { gte: startOfLastMonth, lte: endOfLastMonth }, status: 'VERIFIED' }
+    const lastMonthSettlement = await prisma.settlement.findFirst({
+      where: {
+        gymId,
+        periodStart: { lte: startOfLastMonth }, // Just basic matching for month boundary
+      },
+      orderBy: { periodStart: 'desc' }
     });
+
+    // If no settlement exists yet for last month, we can estimate it, but it should be zero or fallback
+    let lastMonthData = {
+      verifiedVisits: 0,
+      estimatedEarnings: 0,
+      status: 'No Data'
+    };
+
+    if (lastMonthSettlement) {
+      lastMonthData = {
+        verifiedVisits: lastMonthSettlement.billableVisitCount,
+        estimatedEarnings: lastMonthSettlement.netAmount,
+        status: lastMonthSettlement.status
+      };
+    } else {
+      // Fallback estimate if not generated
+      const lastMonthVisits = await prisma.checkIn.count({
+        where: { gymId, checkedInAt: { gte: startOfLastMonth, lte: endOfLastMonth }, status: 'VERIFIED' }
+      });
+      lastMonthData = {
+        verifiedVisits: lastMonthVisits,
+        estimatedEarnings: lastMonthVisits * rate,
+        status: 'PENDING_GENERATION'
+      };
+    }
     
     return {
-      ratePerVisit: rate,
+      ratePerVisit: rate / 100, // convert back to major units for UI display
       thisMonth: {
         verifiedVisits: thisMonthVisits,
-        estimatedEarnings: thisMonthVisits * rate
+        estimatedEarnings: (thisMonthVisits * rate) / 100
       },
       lastMonth: {
-        verifiedVisits: lastMonthVisits,
-        estimatedEarnings: lastMonthVisits * rate
+        verifiedVisits: lastMonthData.verifiedVisits,
+        estimatedEarnings: lastMonthData.estimatedEarnings / 100,
+        status: lastMonthData.status
       }
     };
   }

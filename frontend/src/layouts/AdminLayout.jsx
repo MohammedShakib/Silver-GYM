@@ -9,7 +9,7 @@ const ADMIN_LINKS = [
   { to: '/admin/applications',     label: 'Applications',  icon: FileText },
   { to: '/admin/memberships',      label: 'Memberships',   icon: CreditCard },
   { to: '/admin/checkins',         label: 'Check-Ins',    icon: Activity },
-  { to: '/admin/transactions',     label: 'Transactions',  icon: DollarSign },
+  { to: '/admin/settlements',      label: 'Settlements',  icon: DollarSign },
   { to: '/admin/payouts',          label: 'Payouts',       icon: DollarSign },
   { to: '/admin/reports',          label: 'Audit Log',       icon: FileText },
   { to: '/admin/settings',         label: 'Settings',      icon: Settings },

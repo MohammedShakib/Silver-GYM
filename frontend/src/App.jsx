@@ -37,6 +37,7 @@ import ReceptionScanner from './pages/partner/ReceptionScanner';
 import PartnerCheckIns from './pages/partner/PartnerCheckIns';
 import PartnerAnalytics from './pages/partner/PartnerAnalytics';
 import PartnerRevenue from './pages/partner/PartnerRevenue';
+import PartnerSettlementDetail from './pages/partner/PartnerSettlementDetail';
 import PartnerReviews from './pages/partner/PartnerReviews';
 import PartnerProfile from './pages/partner/PartnerProfile';
 import PartnerStaff from './pages/partner/PartnerStaff';
@@ -48,6 +49,9 @@ import AdminMembers from './pages/admin/AdminMembers';
 import AdminGyms from './pages/admin/AdminGyms';
 import AdminApplications from './pages/admin/AdminApplications';
 import AdminAuditLog from './pages/admin/AdminAuditLog';
+import AdminSettlements from './pages/admin/AdminSettlements';
+import AdminSettlementDetail from './pages/admin/AdminSettlementDetail';
+import AdminPayouts from './pages/admin/AdminPayouts';
 import FeaturePlaceholder from './components/common/FeaturePlaceholder';
 
 const FALLBACK_REDIRECT_KEY = 'silver-gym:spa-fallback-path';
@@ -127,6 +131,7 @@ const router = createBrowserRouter([
       { path: 'check-ins',       element: <PartnerCheckIns /> },
       { path: 'analytics',       element: <PartnerAnalytics /> },
       { path: 'revenue',         element: <PartnerRevenue /> },
+      { path: 'revenue/:id',     element: <PartnerSettlementDetail /> },
       { path: 'reviews',         element: <PartnerReviews /> },
       { path: 'profile',         element: <PartnerProfile /> },
       { path: 'staff',           element: <PartnerStaff /> }
@@ -179,17 +184,9 @@ const router = createBrowserRouter([
           />
         ),
       },
-      {
-        path: 'payouts',
-        element: (
-          <FeaturePlaceholder
-            title="Payouts"
-            description="Payout operations are not implemented yet. The overview still exposes platform-level revenue summaries."
-            backTo="/admin"
-            backLabel="Back to Admin Overview"
-          />
-        ),
-      },
+      { path: 'settlements', element: <AdminSettlements /> },
+      { path: 'settlements/:id', element: <AdminSettlementDetail /> },
+      { path: 'payouts', element: <AdminPayouts /> },
       { path: 'reports', element: <AdminAuditLog /> },
       {
         path: 'settings',

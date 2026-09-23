@@ -105,5 +105,41 @@ export const adminApi = {
   getAuditLogs: async (params) => {
     const response = await api.get('/admin/audit', { params });
     return response.data;
+  },
+
+  // Settlements
+  getSettlements: async (params) => {
+    const response = await api.get('/admin/settlements', { params });
+    return response.data;
+  },
+  getSettlementDetail: async (id) => {
+    const response = await api.get(`/admin/settlements/${id}`);
+    return response.data;
+  },
+  generateSettlement: async (data) => {
+    const response = await api.post('/admin/settlements/generate', data);
+    return response.data;
+  },
+  approveSettlement: async (id) => {
+    const response = await api.post(`/admin/settlements/${id}/approve`);
+    return response.data;
+  },
+  addSettlementAdjustment: async (id, data) => {
+    const response = await api.post(`/admin/settlements/${id}/adjustments`, data);
+    return response.data;
+  },
+
+  // Payouts
+  getPayouts: async (params) => {
+    const response = await api.get('/admin/payouts', { params });
+    return response.data;
+  },
+  initiatePayout: async (settlementId) => {
+    const response = await api.post(`/admin/payouts/settlements/${settlementId}/initiate`);
+    return response.data;
+  },
+  confirmManualPayout: async (id, providerTransferId) => {
+    const response = await api.post(`/admin/payouts/${id}/confirm`, { providerTransferId });
+    return response.data;
   }
 };

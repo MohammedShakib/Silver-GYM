@@ -27,6 +27,10 @@ router.get('/gyms/:gymId/analytics', requireGymPermission(['OWNER', 'MANAGER']),
 // Revenue (Owner only)
 router.get('/gyms/:gymId/revenue', requireGymPermission(['OWNER']), partnerController.getRevenue);
 
+import { settlementController } from '../controllers/settlement.controller.js';
+router.get('/gyms/:gymId/settlements', requireGymPermission(['OWNER']), settlementController.partnerGetSettlements);
+router.get('/gyms/:gymId/settlements/:id', requireGymPermission(['OWNER']), settlementController.partnerGetSettlementDetail);
+
 // Profile (Owner, Manager)
 router.get('/gyms/:gymId/profile', requireGymPermission(['OWNER', 'MANAGER', 'RECEPTIONIST']), partnerController.getProfile);
 router.patch('/gyms/:gymId/profile', requireGymPermission(['OWNER', 'MANAGER']), partnerController.updateProfile);
