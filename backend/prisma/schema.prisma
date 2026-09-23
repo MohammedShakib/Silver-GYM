@@ -77,6 +77,8 @@ model Gym {
   longitude   Float?
   capacity    Int?
   crowd       String   @default("LOW")
+  crowdOverrideLevel String?
+  crowdOverrideExpiresAt DateTime?
   status      String   @default("ACTIVE")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -90,6 +92,8 @@ model Gym {
   trainers     Trainer[]
   staff        GymStaff[]
   checkInCredentials GymCheckInCredential[]
+  reviewResponses ReviewResponse[]
+  staffInvitations StaffInvitation[]
 }
 
 model GymImage {
@@ -264,6 +268,7 @@ model Review {
 
   member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   gym       Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  response  ReviewResponse?
 }
 
 model Trainer {
@@ -324,4 +329,29 @@ model GymCheckInCredential {
   status    String   @default("ACTIVE") // ACTIVE, REVOKED
   issuedAt  DateTime @default(now())
   rotatedAt DateTime?
+}
+
+model ReviewResponse {
+  id           String   @id @default(uuid())
+  reviewId     String   @unique
+  review       Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  gymId        String
+  gym          Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  authorUserId String
+  response     String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model StaffInvitation {
+  id         String    @id @default(uuid())
+  gymId      String
+  gym        Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  email      String
+  role       String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  invitedBy  String
+  createdAt  DateTime  @default(now())
 }

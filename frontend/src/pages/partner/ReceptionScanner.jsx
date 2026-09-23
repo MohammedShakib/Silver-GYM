@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Zap, X, CheckCircle, ArrowLeft } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { checkInService } from '../../services/CheckInService';
+import { usePartnerGym } from '../../context/PartnerGymContext';
 
 export default function ReceptionScanner() {
-  const { gymId } = useParams();
+  const { selectedGym } = usePartnerGym();
   const [state, setState] = useState('ready'); // ready | scanning | loading | verified | error
   const [result, setResult] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
@@ -67,16 +68,14 @@ export default function ReceptionScanner() {
   const handleScan = async (token) => {
     setState('loading');
     try {
-      // In a real app, gymId should be derived from the logged-in partner's context.
-      // For now, if we don't have gymId in params, we might hardcode or assume '1' (Iron House).
-      const activeGymId = gymId || '1'; 
+      if (!selectedGym) throw new Error('No gym selected');
       
-      const res = await checkInService.verifyMemberPass(activeGymId, token);
+      const res = await checkInService.verifyMemberPass(selectedGym.id, token);
       setResult(res);
       setState('verified');
     } catch (err) {
       setState('error');
-      setErrorMsg(err.response?.data?.message || 'Verification failed. Invalid pass or access denied.');
+      setErrorMsg(err.response?.data?.message || err.message || 'Verification failed. Invalid pass or access denied.');
     }
   };
 

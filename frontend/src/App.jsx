@@ -31,8 +31,16 @@ import Checkout      from './pages/member/Checkout';
 import PaymentVerification from './pages/member/PaymentVerification';
 import SandboxCheckout from './pages/member/SandboxCheckout';
 // Partner
-import GymOwnerDashboard from './pages/partner/GymOwnerDashboard';
-import ReceptionScanner  from './pages/partner/ReceptionScanner';
+import PartnerLayout from './components/partner/PartnerLayout';
+import PartnerOverview from './pages/partner/PartnerOverview';
+import ReceptionScanner from './pages/partner/ReceptionScanner';
+import PartnerCheckIns from './pages/partner/PartnerCheckIns';
+import PartnerAnalytics from './pages/partner/PartnerAnalytics';
+import PartnerRevenue from './pages/partner/PartnerRevenue';
+import PartnerReviews from './pages/partner/PartnerReviews';
+import PartnerProfile from './pages/partner/PartnerProfile';
+import PartnerStaff from './pages/partner/PartnerStaff';
+import { PartnerGymProvider } from './context/PartnerGymContext';
 
 // Admin
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -103,79 +111,21 @@ const router = createBrowserRouter([
   {
     path: '/partner',
     element: (
-      <ProtectedRoute allowedRoles={['GYM_OWNER', 'ADMIN']}>
-        <GymOwnerLayout />
+      <ProtectedRoute allowedRoles={['GYM_OWNER', 'ADMIN', 'GYM_STAFF']}>
+        <PartnerGymProvider>
+          <PartnerLayout />
+        </PartnerGymProvider>
       </ProtectedRoute>
     ),
     children: [
-      { index: true,              element: <GymOwnerDashboard /> },
+      { index: true,              element: <PartnerOverview /> },
       { path: 'reception',       element: <ReceptionScanner /> },
-      {
-        path: 'checkins',
-        element: (
-          <FeaturePlaceholder
-            title="Partner Check-Ins"
-            description="Reception mode is working, but the historical partner check-in reporting screen is not built yet."
-            backTo="/partner"
-            backLabel="Back to Partner Dashboard"
-          />
-        ),
-      },
-      {
-        path: 'analytics',
-        element: (
-          <FeaturePlaceholder
-            title="Partner Analytics"
-            description="This analytics screen is still pending implementation. The overview dashboard remains the working partner entry point."
-            backTo="/partner"
-            backLabel="Back to Partner Dashboard"
-          />
-        ),
-      },
-      {
-        path: 'revenue',
-        element: (
-          <FeaturePlaceholder
-            title="Partner Revenue"
-            description="Revenue details are not wired yet. Estimated payout is available on the partner overview for now."
-            backTo="/partner"
-            backLabel="Back to Partner Dashboard"
-          />
-        ),
-      },
-      {
-        path: 'reviews',
-        element: (
-          <FeaturePlaceholder
-            title="Partner Reviews"
-            description="Member review management has not been implemented yet. This route now resolves cleanly instead of 404ing."
-            backTo="/partner"
-            backLabel="Back to Partner Dashboard"
-          />
-        ),
-      },
-      {
-        path: 'profile',
-        element: (
-          <FeaturePlaceholder
-            title="Gym Profile"
-            description="Gym profile editing is still a pending feature. The partner shell stays navigable, but this page is not yet operational."
-            backTo="/partner"
-            backLabel="Back to Partner Dashboard"
-          />
-        ),
-      },
-      {
-        path: 'settings',
-        element: (
-          <FeaturePlaceholder
-            title="Partner Settings"
-            description="Partner settings are not connected yet. This placeholder keeps navigation honest while the feature is unfinished."
-            backTo="/partner"
-            backLabel="Back to Partner Dashboard"
-          />
-        ),
-      },
+      { path: 'check-ins',       element: <PartnerCheckIns /> },
+      { path: 'analytics',       element: <PartnerAnalytics /> },
+      { path: 'revenue',         element: <PartnerRevenue /> },
+      { path: 'reviews',         element: <PartnerReviews /> },
+      { path: 'profile',         element: <PartnerProfile /> },
+      { path: 'staff',           element: <PartnerStaff /> }
     ],
   },
 

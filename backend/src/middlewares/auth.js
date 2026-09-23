@@ -115,3 +115,25 @@ export const requireGymAccess = async (req, res, next) => {
     next(error);
   }
 };
+
+export const requireGymPermission = (allowedRoles) => {
+  return (req, res, next) => {
+    try {
+      if (req.auth.role === 'ADMIN') {
+        return next();
+      }
+      
+      if (!req.gymStaff) {
+        throw new ApiError(403, 'FORBIDDEN', 'Gym staff context missing. Ensure requireGymAccess is called first.');
+      }
+      
+      if (!allowedRoles.includes(req.gymStaff.role)) {
+        throw new ApiError(403, 'FORBIDDEN', 'Your gym staff role does not have permission for this action.');
+      }
+      
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+};
