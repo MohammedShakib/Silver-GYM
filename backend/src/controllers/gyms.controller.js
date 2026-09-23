@@ -2,8 +2,11 @@ import { searchGyms, getGym } from '../services/gyms.service.js';
 
 export const listGyms = async (req, res, next) => {
   try {
-    const { search, area, lat, lng, radius } = req.query;
-    const gyms = await searchGyms({ search, area, lat, lng, radius });
+    const filters = {
+      ...req.query,
+      userId: req.auth?.userId
+    };
+    const gyms = await searchGyms(filters);
     res.json(gyms);
   } catch (error) {
     next(error);

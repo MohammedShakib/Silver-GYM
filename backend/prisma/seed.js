@@ -177,9 +177,24 @@ async function main() {
       area: 'Mirpur 10',
       latitude: 23.8052,
       longitude: 90.3696,
-      logoUrl: GYM_IMAGES.ironHouse
+      logoUrl: GYM_IMAGES.ironHouse,
+      crowd: 'MODERATE'
     }
   });
+
+  // Seed Opening Hours
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  for (const day of days) {
+    await prisma.gymOpeningHour.create({
+      data: {
+        gymId: gymIronHouse.id,
+        dayOfWeek: day,
+        openTime: '06:00',
+        closeTime: '23:00',
+        isClosed: false
+      }
+    });
+  }
 
   // Assign Owner to Iron House
   await prisma.gymStaff.create({
@@ -212,9 +227,22 @@ async function main() {
       area: 'Mirpur 12',
       latitude: 23.8211,
       longitude: 90.3665,
-      logoUrl: GYM_IMAGES.powerFit
+      logoUrl: GYM_IMAGES.powerFit,
+      crowd: 'LOW'
     }
   });
+
+  for (const day of days) {
+    await prisma.gymOpeningHour.create({
+      data: {
+        gymId: gymPowerFit.id,
+        dayOfWeek: day,
+        openTime: '00:00',
+        closeTime: '23:59', // 24/7
+        isClosed: false
+      }
+    });
+  }
 
   const amenitiesPower = ['Strength', 'AC', 'Locker', 'Trainer'];
   for (const name of amenitiesPower) {
@@ -238,9 +266,22 @@ async function main() {
       area: 'Gulshan 2',
       latitude: 23.7915,
       longitude: 90.4132,
-      logoUrl: GYM_IMAGES.block35
+      logoUrl: GYM_IMAGES.block35,
+      crowd: 'BUSY'
     }
   });
+
+  for (const day of days) {
+    await prisma.gymOpeningHour.create({
+      data: {
+        gymId: gymBlock35.id,
+        dayOfWeek: day,
+        openTime: '08:00',
+        closeTime: '22:00',
+        isClosed: day === 'Sunday'
+      }
+    });
+  }
 
   const amenitiesBlock = ['Strength', 'Cardio', 'AC', 'Locker', 'Shower', 'Pool', 'Sauna'];
   for (const name of amenitiesBlock) {

@@ -7,6 +7,9 @@ import { useMembership } from '../../hooks/useMembership';
 import { EligibilityService } from '../../services/EligibilityService';
 import { useSavedGyms } from '../../hooks/useSavedGyms';
 import { openDirections, sharePage } from '../../utils/browserActions';
+import React, { useContext } from 'react';
+import { LocationContext } from '../../context/LocationContext';
+import { calculateDistanceKm, estimateTravelTime } from '../../utils/geo';
 
 const CROWD_LABELS = {
   low: { label: 'Low', color: 'var(--status-success)', bg: 'var(--sg-green-light)', desc: 'Usually quiet right now' },
@@ -38,6 +41,13 @@ export default function GymDetails() {
 
   const currentHour = new Date().getHours();
   const todayHour = Math.min(currentHour - 6, 23);
+
+  const { location } = useContext(LocationContext);
+  const distanceRaw = gym.latitude && gym.longitude && location
+    ? calculateDistanceKm(location.latitude, location.longitude, gym.latitude, gym.longitude)
+    : gym.distance;
+  const distanceStr = distanceRaw != null ? distanceRaw.toFixed(1) : '-';
+  const etaStr = distanceRaw != null ? estimateTravelTime(distanceRaw, 'drive') : gym.eta || '-';
 
   return (
     <div className="anim-fade">
@@ -92,7 +102,7 @@ export default function GymDetails() {
                     <span style={{ fontWeight: 400, color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>({gym.reviewCount} reviews)</span>
                   </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
-                    <MapPin size={14} /> {gym.area}, Dhaka · {gym.distance} km · {gym.eta} min
+                    <MapPin size={14} /> {gym.area}, Dhaka · {distanceStr} km · {etaStr} min
                   </span>
                 </div>
               </div>
@@ -125,7 +135,7 @@ export default function GymDetails() {
                 { icon: Clock, label: 'Open Now', sub: `Until ${gym.closesAt}`, color: 'var(--status-success)' },
                 { icon: Users, label: crowd.label + ' Crowd', sub: crowd.desc, color: crowd.color },
                 { icon: CheckCircle, label: included ? `Included in ${mockUser.plan}` : 'Upgrade Required', sub: included ? 'Your plan covers this gym' : 'Not in your plan', color: included ? 'var(--sg-green)' : 'var(--status-error)' },
-                { icon: MapPin, label: `${gym.distance} km away`, sub: `~${gym.eta} min travel`, color: 'var(--status-info)' },
+                { icon: MapPin, label: `${distanceStr} km away`, sub: `~${etaStr} min travel`, color: 'var(--status-info)' },
               ].map(s => (
                 <div key={s.label} style={{ padding: 'var(--sp-4)', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-lg)' }}>
                   <s.icon size={16} color={s.color} style={{ marginBottom: 6 }} />

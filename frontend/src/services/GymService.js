@@ -13,15 +13,6 @@ class GymService {
       gyms = gyms.filter(g => g.name.toLowerCase().includes(q) || g.area.toLowerCase().includes(q));
     }
     
-    // Sort
-    if (filters.sort === 'nearest') {
-      gyms.sort((a, b) => a.distance - b.distance);
-    } else if (filters.sort === 'rating') {
-      gyms.sort((a, b) => b.rating - a.rating);
-    } else if (filters.sort === 'crowd') {
-      gyms.sort((a, b) => a.crowdPct - b.crowdPct);
-    }
-
     return gyms;
   }
 

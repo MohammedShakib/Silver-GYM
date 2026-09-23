@@ -47,6 +47,35 @@ export const requireAuth = async (req, res, next) => {
   }
 };
 
+export const optionalAuth = async (req, res, next) => {
+  try {
+    const token = req.cookies[SESSION_COOKIE_NAME];
+    if (!token) {
+      return next();
+    }
+
+    const tokenHash = hashSessionToken(token);
+    const session = await prisma.session.findUnique({
+      where: { tokenHash },
+      include: { member: true }
+    });
+
+    if (session && session.expiresAt > new Date()) {
+      const user = session.member;
+      if (user.status !== 'SUSPENDED' && user.status !== 'DISABLED') {
+        req.auth = {
+          userId: user.id,
+          role: user.role
+        };
+      }
+    }
+    next();
+  } catch (error) {
+    // Ignore errors for optional auth
+    next();
+  }
+};
+
 export const requireRole = (...roles) => {
   return (req, res, next) => {
     if (!req.auth || !roles.includes(req.auth.role)) {

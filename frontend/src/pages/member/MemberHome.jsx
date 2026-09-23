@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, MapPin, ArrowRight, Zap, ChevronRight, Star, CheckCircle } from 'lucide-react';
 import { useCurrentMember } from '../../hooks/useCurrentMember';
@@ -15,10 +15,21 @@ const GREETING = HOUR < 12 ? 'Good morning' : HOUR < 18 ? 'Good afternoon' : 'Go
 
 const QUICK_FILTERS = ['Near Me', 'Open Now', 'Low Crowd', 'Included in My Plan'];
 
+import LocationSelector from '../../components/ui/LocationSelector';
+import { LocationContext } from '../../context/LocationContext';
+
 export default function MemberHome() {
   const { member: mockUser, isLoading: memberLoading } = useCurrentMember();
   const { membership } = useMembership();
-  const { data: gyms, isLoading: gymsLoading } = useGyms();
+  const { location } = React.useContext(LocationContext);
+  
+  const { data: gyms, isLoading: gymsLoading } = useGyms({
+    lat: location.latitude,
+    lng: location.longitude,
+    radius: 10,
+    sort: 'RECOMMENDED',
+    limit: 10
+  });
   const { activity: mockActivity } = useActivity();
   
   const [filter, setFilter] = useState('');
@@ -28,9 +39,9 @@ export default function MemberHome() {
   if (memberLoading || gymsLoading) return <div style={{ padding: 'var(--sp-12)', textAlign: 'center' }}>Loading dashboard...</div>;
   if (!mockUser) return null;
 
-  const bestMatch = gyms && mockUser ? gymService.getRecommendedGyms(gyms, mockUser)[0] : null;
+  const bestMatch = gyms && gyms.length > 0 ? gyms[0] : null;
 
-  if (!bestMatch) return null;
+  if (!bestMatch) return <div style={{ padding: 'var(--sp-12)', textAlign: 'center' }}>No gyms found near your location.</div>;
 
   const handleSearchSubmit = (e) => {
     e?.preventDefault();
@@ -45,31 +56,12 @@ export default function MemberHome() {
           <div className="flex-between" style={{ flexWrap: 'wrap', gap: 'var(--sp-4)', marginBottom: 'var(--sp-6)' }}>
             <div>
               <h1 style={{ fontSize: 'clamp(1.75rem, 3.5vw, 2.5rem)', fontWeight: 800, marginBottom: 4, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
-                {GREETING}, {mockUser.firstName} 👋
+                {GREETING}, {mockUser.name.split(' ')[0]} 👋
               </h1>
               <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--text-base)' }}>Where do you want to train today?</p>
             </div>
-            <button
-              onClick={() => navigate('/member/explore')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '0.45rem 0.875rem',
-                background: 'var(--bg-subtle)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--r-full)',
-                fontSize: 'var(--text-xs)',
-                fontWeight: 600,
-                cursor: 'pointer',
-                color: 'var(--text-secondary)',
-                transition: 'all .15s ease',
-              }}
-            >
-              <MapPin size={13} color="var(--sg-green)" />
-              <span>{mockUser.location}</span>
-              <ChevronRight size={13} color="var(--text-muted)" />
-            </button>
+            
+            <LocationSelector />
           </div>
 
           {/* Search bar */}

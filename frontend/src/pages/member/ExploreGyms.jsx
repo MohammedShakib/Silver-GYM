@@ -15,15 +15,7 @@ const EXTRA_FILTERS = ['Women Friendly', 'Pool', 'Trainer'];
 const SORT_OPTIONS = ['Recommended', 'Nearest', 'Highest Rated', 'Least Crowded'];
 
 const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
-const MAP_CENTER = [90.3994, 23.7928];
-const USER_LOCATION = [90.3994, 23.7928];
-
-const GYM_COORDINATES = {
-  '1': { lng: 90.3668, lat: 23.8067, label: 'Iron House' },
-  '2': { lng: 90.3651, lat: 23.8212, label: 'PowerFit' },
-  '3': { lng: 90.4142, lat: 23.7942, label: 'Block 35' },
-  '4': { lng: 90.4067, lat: 23.7957, label: 'Urban Strength' },
-};
+const DEFAULT_MAP_CENTER = [90.4125, 23.8103]; // Dhaka
 
 
 
@@ -168,23 +160,82 @@ function MapGymPreview({ gym }) {
   );
 }
 
+import { LocationContext } from '../../context/LocationContext';
+
 export default function ExploreGyms() {
-  const { data: mockGyms, isLoading: gymsLoading } = useGyms();
+  const { location } = React.useContext(LocationContext);
+  const [mapBounds, setMapBounds] = useState(null);
+  
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialQuery = searchParams.get('q') || '';
+  const initialFilter = searchParams.get('filter');
+
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [activeFilters, setActiveFilters] = useState(initialFilter ? [initialFilter] : ['Near Me']);
+  const [sortLabel, setSortLabel] = useState('Recommended');
+  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Construct query parameters for the backend
+  const apiFilters = useMemo(() => {
+    const f = {
+      search: debouncedSearch,
+      page: 1,
+      limit: 50
+    };
+
+    if (mapBounds) {
+      f.north = mapBounds.north;
+      f.south = mapBounds.south;
+      f.east = mapBounds.east;
+      f.west = mapBounds.west;
+    } else {
+      f.lat = location.latitude;
+      f.lng = location.longitude;
+      f.radius = activeFilters.includes('Within 2 km') ? 2 : 10;
+    }
+
+    if (activeFilters.includes('Open Now')) f.openNow = 'true';
+    if (activeFilters.includes('Low Crowd')) f.crowd = 'low';
+    if (activeFilters.includes('Included In My Plan')) f.includedOnly = 'true';
+    if (activeFilters.includes('4.5+')) f.ratingMin = 4.5;
+    
+    const amenities = [];
+    if (activeFilters.includes('Women Friendly')) amenities.push('women-friendly');
+    if (activeFilters.includes('Pool')) amenities.push('pool');
+    if (activeFilters.includes('Trainer')) amenities.push('trainer');
+    
+    if (amenities.length > 0) f.amenities = amenities.join(',');
+
+    if (sortLabel === 'Nearest') f.sort = 'NEAREST';
+    else if (sortLabel === 'Highest Rated') f.sort = 'HIGHEST_RATED';
+    else if (sortLabel === 'Least Crowded') f.sort = 'LEAST_CROWDED';
+    else f.sort = 'RECOMMENDED';
+
+    return f;
+  }, [debouncedSearch, mapBounds, location, activeFilters, sortLabel]);
+
+  const { data: mockGyms, isLoading: gymsLoading } = useGyms(apiFilters);
   const { member: user, isLoading: memberLoading } = useCurrentMember();
   const { membership } = useMembership();
 
   const GYM_PINS = useMemo(() => {
-    if (!mockGyms || !user) return [];
+    if (!mockGyms) return [];
     return mockGyms
-      .filter(gym => GYM_COORDINATES[gym.id])
+      .filter(gym => gym.latitude && gym.longitude)
       .map(gym => ({
         id: gym.id,
         gym,
-        label: GYM_COORDINATES[gym.id].label,
-        coordinates: [GYM_COORDINATES[gym.id].lng, GYM_COORDINATES[gym.id].lat],
-        included: gym.plans.includes(user?.plan),
+        label: gym.name,
+        coordinates: [gym.longitude, gym.latitude],
+        included: gym.accessStatus === 'INCLUDED',
       }));
-  }, [mockGyms, user]);
+  }, [mockGyms]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
@@ -206,7 +257,7 @@ export default function ExploreGyms() {
   const markerRefs = useRef({});
   const userMarkerRef = useRef(null);
   const cardRefs = useRef({});
-  const lastSearchedCenterRef = useRef(MAP_CENTER);
+  const lastSearchedCenterRef = useRef(DEFAULT_MAP_CENTER);
   const dragMovedRef = useRef(false);
   const activeMapPinRef = useRef(null);
   const hoverResetTimeoutRef = useRef(null);
@@ -221,75 +272,7 @@ export default function ExploreGyms() {
 
   const query = searchQuery.trim().toLowerCase();
 
-  const filteredGymsByFilter = useMemo(() => {
-    if (!mockGyms) return [];
-    return mockGyms.filter(gym => {
-      const matchesSearch = !query || [gym.name, gym.area, gym.address, ...gym.amenities]
-        .join(' ')
-        .toLowerCase()
-        .includes(query);
-
-      if (!matchesSearch) {
-        return false;
-      }
-
-      if (activeFilters.includes('Open Now') && gym.status !== 'open') {
-        return false;
-      }
-
-      if (activeFilters.includes('Within 2 km') && gym.distance > 2) {
-        return false;
-      }
-
-      if (activeFilters.includes('Low Crowd') && gym.crowd !== 'low') {
-        return false;
-      }
-
-      if (activeFilters.includes('Included In My Plan') && (!user || !gym.plans.includes(user.plan))) {
-        return false;
-      }
-
-      if (activeFilters.includes('4.5+') && gym.rating < 4.5) {
-        return false;
-      }
-
-      if (activeFilters.includes('Women Friendly') && !gym.amenities.includes('Women Friendly')) {
-        return false;
-      }
-
-      if (activeFilters.includes('Pool') && !gym.amenities.includes('Pool')) {
-        return false;
-      }
-
-      if (activeFilters.includes('Trainer') && !gym.amenities.includes('Trainer')) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [activeFilters, query]);
-
-  const filteredGyms = useMemo(() => {
-    const list = [...filteredGymsByFilter];
-
-    return list.sort((left, right) => {
-      if (sortLabel === 'Nearest') {
-        return left.distance - right.distance;
-      }
-
-      if (sortLabel === 'Highest Rated') {
-        return right.rating - left.rating || left.distance - right.distance;
-      }
-
-      if (sortLabel === 'Least Crowded') {
-        return CROWD_ORDER[left.crowd] - CROWD_ORDER[right.crowd] || left.distance - right.distance;
-      }
-
-      const leftIncluded = left.plans.includes(user.plan) ? 1 : 0;
-      const rightIncluded = right.plans.includes(user.plan) ? 1 : 0;
-      return rightIncluded - leftIncluded || left.distance - right.distance || right.rating - left.rating;
-    });
-  }, [filteredGymsByFilter, sortLabel]);
+  const filteredGyms = mockGyms || [];
 
   const visibleGymIds = useMemo(() => {
     return new Set(filteredGyms.map(gym => gym.id));
@@ -422,7 +405,7 @@ export default function ExploreGyms() {
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
       style: MAP_STYLE_URL,
-      center: MAP_CENTER,
+      center: [location.longitude, location.latitude] || DEFAULT_MAP_CENTER,
       zoom: 12.2,
       pitch: 42,
       bearing: -14,
@@ -466,10 +449,10 @@ export default function ExploreGyms() {
       const userElement = document.createElement('div');
       userElement.className = 'sg-map-user-marker';
       userMarkerRef.current = new maplibregl.Marker({ element: userElement })
-        .setLngLat(USER_LOCATION)
+        .setLngLat([location.longitude, location.latitude])
         .addTo(map);
 
-      bounds.extend(USER_LOCATION);
+      bounds.extend([location.longitude, location.latitude]);
       map.fitBounds(bounds, {
         padding: { top: 90, right: 92, bottom: 72, left: 92 },
         duration: 0,
@@ -851,10 +834,14 @@ export default function ExploreGyms() {
 
                   lastSearchedCenterRef.current = mapRef.current.getCenter().toArray();
                   setShowSearchArea(false);
-                  const nearest = getNearestVisibleGym(lastSearchedCenterRef.current, visiblePins);
-                  if (nearest) {
-                    handleSelectGym(nearest.id, { panMap: true, scrollList: true });
-                  }
+                  const bounds = mapRef.current.getBounds();
+                  setMapBounds({
+                    north: bounds.getNorth(),
+                    south: bounds.getSouth(),
+                    east: bounds.getEast(),
+                    west: bounds.getWest()
+                  });
+                  // Optionally select nearest after loading, but state is async.
                 }}
                 style={{ background: 'white', border: '1px solid var(--border-default)', borderRadius: 999, padding: '10px 18px', fontWeight: 700, fontSize: 14, cursor: 'pointer', boxShadow: '0 10px 26px rgba(15, 23, 42, 0.12)', display: 'flex', alignItems: 'center', gap: 8 }}
               >
@@ -925,7 +912,7 @@ export default function ExploreGyms() {
                   }
 
                   mapRef.current.easeTo({
-                    center: USER_LOCATION,
+                    center: [location.longitude, location.latitude],
                     zoom: 12.6,
                     pitch: 42,
                     bearing: -14,

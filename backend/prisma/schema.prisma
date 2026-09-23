@@ -73,6 +73,7 @@ model Gym {
   latitude    Float?
   longitude   Float?
   capacity    Int?
+  crowd       String   @default("LOW")
   status      String   @default("ACTIVE")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

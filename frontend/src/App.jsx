@@ -285,10 +285,14 @@ const router = createBrowserRouter([
   },
 ]);
 
+import { LocationProvider } from './context/LocationContext';
+
 export default function App() {
   return (
     <AuthProvider>
-      <RouterProvider router={router} />
+      <LocationProvider>
+        <RouterProvider router={router} />
+      </LocationProvider>
     </AuthProvider>
   );
 }
