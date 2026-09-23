@@ -11,7 +11,7 @@ const ADMIN_LINKS = [
   { to: '/admin/checkins',         label: 'Check-Ins',    icon: Activity },
   { to: '/admin/transactions',     label: 'Transactions',  icon: DollarSign },
   { to: '/admin/payouts',          label: 'Payouts',       icon: DollarSign },
-  { to: '/admin/reports',          label: 'Reports',       icon: BarChart3 },
+  { to: '/admin/reports',          label: 'Audit Log',       icon: FileText },
   { to: '/admin/settings',         label: 'Settings',      icon: Settings },
 ];
 

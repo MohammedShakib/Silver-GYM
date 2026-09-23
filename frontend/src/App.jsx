@@ -44,6 +44,10 @@ import { PartnerGymProvider } from './context/PartnerGymContext';
 
 // Admin
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminMembers from './pages/admin/AdminMembers';
+import AdminGyms from './pages/admin/AdminGyms';
+import AdminApplications from './pages/admin/AdminApplications';
+import AdminAuditLog from './pages/admin/AdminAuditLog';
 import FeaturePlaceholder from './components/common/FeaturePlaceholder';
 
 const FALLBACK_REDIRECT_KEY = 'silver-gym:spa-fallback-path';
@@ -139,39 +143,9 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <AdminDashboard /> },
-      {
-        path: 'users',
-        element: (
-          <FeaturePlaceholder
-            title="Admin Users"
-            description="The admin users workspace is not implemented yet. The navigation now resolves without sending users to a missing route."
-            backTo="/admin"
-            backLabel="Back to Admin Overview"
-          />
-        ),
-      },
-      {
-        path: 'gyms',
-        element: (
-          <FeaturePlaceholder
-            title="Admin Gyms"
-            description="Gym management is still pending. Use the overview page for the currently available admin data."
-            backTo="/admin"
-            backLabel="Back to Admin Overview"
-          />
-        ),
-      },
-      {
-        path: 'applications',
-        element: (
-          <FeaturePlaceholder
-            title="Gym Applications"
-            description="The summary table exists on the admin overview, but the dedicated application workflow has not been implemented yet."
-            backTo="/admin"
-            backLabel="Back to Admin Overview"
-          />
-        ),
-      },
+      { path: 'users', element: <AdminMembers /> },
+      { path: 'gyms', element: <AdminGyms /> },
+      { path: 'applications', element: <AdminApplications /> },
       {
         path: 'memberships',
         element: (
@@ -216,17 +190,7 @@ const router = createBrowserRouter([
           />
         ),
       },
-      {
-        path: 'reports',
-        element: (
-          <FeaturePlaceholder
-            title="Reports"
-            description="Scheduled reports and exports are not implemented yet. This route now fails gracefully."
-            backTo="/admin"
-            backLabel="Back to Admin Overview"
-          />
-        ),
-      },
+      { path: 'reports', element: <AdminAuditLog /> },
       {
         path: 'settings',
         element: (

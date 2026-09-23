@@ -355,3 +355,71 @@ model StaffInvitation {
   invitedBy  String
   createdAt  DateTime  @default(now())
 }
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  actorUserId String?
+  actorRole   String?
+  action      String
+  entityType  String
+  entityId    String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+}
+
+model SupportCase {
+  id              String   @id @default(uuid())
+  reference       String   @unique
+  requesterType   String   // MEMBER, PARTNER, ADMIN
+  requesterUserId String
+  gymId           String?
+  category        String   // MEMBERSHIP, PAYMENT, ACCOUNT, GYM, etc.
+  subject         String
+  description     String
+  status          String   @default("OPEN")
+  priority        String   @default("NORMAL")
+  assignedAdminId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  resolvedAt      DateTime?
+
+  messages        SupportCaseMessage[]
+}
+
+model SupportCaseMessage {
+  id           String      @id @default(uuid())
+  caseId       String
+  case         SupportCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  authorUserId String
+  message      String
+  isInternal   Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+}
+
+model GymApplication {
+  id                 String   @id @default(uuid())
+  applicantUserId    String
+  gymName            String
+  address            String
+  area               String?
+  contactEmail       String
+  contactPhone       String
+  status             String   @default("PENDING") // PENDING, UNDER_REVIEW, APPROVED, REJECTED
+  assignedReviewerId String?
+  notes              String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model RiskFlag {
+  id          String   @id @default(uuid())
+  entityType  String   // MEMBER, GYM, CHECK_IN, PAYMENT
+  entityId    String
+  type        String   // IMPOSSIBLE_TRAVEL, QR_REPLAY, etc.
+  severity    String   @default("MEDIUM")
+  status      String   @default("OPEN")
+  description String?
+  createdAt   DateTime @default(now())
+  resolvedAt  DateTime?
+  resolvedBy  String?
+}
