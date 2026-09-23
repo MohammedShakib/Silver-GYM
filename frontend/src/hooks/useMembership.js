@@ -1,54 +1,46 @@
 import { useState, useEffect, useCallback } from 'react';
 import { membershipService } from '../services/MembershipService';
-import { storage } from '../data/storage/StorageAdapter';
+import { useCurrentMember } from './useCurrentMember';
 
 export function useMembership() {
   const [membership, setMembership] = useState(null);
   const [plans, setPlans] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const userId = storage.get('demoUserId');
+  const { member } = useCurrentMember();
 
   const refetch = useCallback(async () => {
-    if (!userId) return;
+    if (!member) {
+      setIsLoading(false);
+      return;
+    }
+    
     setIsLoading(true);
     setError(null);
     try {
       const [memData, plansData] = await Promise.all([
-        membershipService.getCurrentMembership(userId),
+        membershipService.getCurrentMembership(),
         membershipService.getPlans()
       ]);
       setMembership(memData);
       setPlans(plansData);
     } catch (err) {
+      console.error('Membership fetch error:', err);
       setError(err);
     } finally {
       setIsLoading(false);
     }
-  }, [userId]);
+  }, [member]);
 
   useEffect(() => {
     refetch();
   }, [refetch]);
-
-  const activatePlan = async (planId) => {
-    setIsLoading(true);
-    try {
-      const updated = await membershipService.activatePlan(userId, planId);
-      setMembership(updated);
-      return updated;
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return { 
     membership, 
     plans, 
     isLoading, 
     error, 
-    refetch,
-    activatePlan 
+    refetch
   };
 }

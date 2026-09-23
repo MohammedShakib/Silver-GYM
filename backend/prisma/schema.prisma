@@ -29,6 +29,8 @@ model Member {
   savedGyms      SavedGym[]
   checkIns       CheckIn[]
   reviews        Review[]
+  payments       Payment[]
+  invoices       Invoice[]
 }
 
 model MemberPreference {
@@ -140,6 +142,7 @@ model MembershipPlan {
   updatedAt     DateTime @updatedAt
 
   memberships   Membership[]
+  payments      Payment[]
 }
 
 model Membership {
@@ -160,6 +163,66 @@ model Membership {
   updatedAt     DateTime       @updatedAt
 
   checkIns      CheckIn[]
+  payments      Payment[]
+  invoices      Invoice[]
+  cycles        MembershipCycle[]
+}
+
+model MembershipCycle {
+  id           String     @id @default(uuid())
+  membershipId String
+  membership   Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  startsAt     DateTime
+  endsAt       DateTime
+  visitLimit   Int?
+  visitsUsed   Int        @default(0)
+  status       String     @default("ACTIVE")
+  createdAt    DateTime   @default(now())
+}
+
+model Payment {
+  id                    String          @id @default(uuid())
+  memberId              String
+  member                Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  membershipId          String?
+  membership            Membership?     @relation(fields: [membershipId], references: [id], onDelete: SetNull)
+  planId                String
+  plan                  MembershipPlan  @relation(fields: [planId], references: [id])
+  provider              String
+  providerTransactionId String?         @unique
+  providerReference     String?
+  type                  String          @default("NEW_MEMBERSHIP")
+  amount                Int
+  currency              String          @default("BDT")
+  status                String          @default("PENDING")
+  idempotencyKey        String?         @unique
+  initiatedAt           DateTime        @default(now())
+  paidAt                DateTime?
+  failedAt              DateTime?
+  failureCode           String?
+  failureMessage        String?
+  metadata              Json?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  invoices              Invoice[]
+}
+
+model Invoice {
+  id            String      @id @default(uuid())
+  invoiceNumber String      @unique
+  memberId      String
+  member        Member      @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  paymentId     String
+  payment       Payment     @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  membershipId  String?
+  membership    Membership? @relation(fields: [membershipId], references: [id], onDelete: SetNull)
+  amount        Int
+  currency      String      @default("BDT")
+  status        String      @default("ISSUED")
+  issuedAt      DateTime    @default(now())
+  paidAt        DateTime?
+  createdAt     DateTime    @default(now())
 }
 
 model SavedGym {

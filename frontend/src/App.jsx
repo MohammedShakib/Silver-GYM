@@ -27,7 +27,9 @@ import MyPass        from './pages/member/MyPass';
 import Activity      from './pages/member/Activity';
 import Membership    from './pages/member/Membership';
 import Profile       from './pages/member/Profile';
-
+import Checkout      from './pages/member/Checkout';
+import PaymentVerification from './pages/member/PaymentVerification';
+import SandboxCheckout from './pages/member/SandboxCheckout';
 // Partner
 import GymOwnerDashboard from './pages/partner/GymOwnerDashboard';
 import ReceptionScanner  from './pages/partner/ReceptionScanner';
@@ -89,8 +91,13 @@ const router = createBrowserRouter([
       { path: 'activity',              element: <Activity /> },
       { path: 'membership',            element: <Membership /> },
       { path: 'profile',               element: <Profile /> },
+      { path: 'checkout',              element: <Checkout /> },
+      { path: 'payment/verify',        element: <PaymentVerification /> },
     ],
   },
+
+  // ── Sandbox Payment Provider (no layout) ──
+  { path: '/sandbox/checkout', element: <SandboxCheckout /> },
 
   // ── Partner routes ──
   {

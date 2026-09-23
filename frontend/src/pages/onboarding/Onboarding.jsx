@@ -27,8 +27,7 @@ export default function Onboarding() {
 
   const handleActivate = async () => {
     try {
-      await activateMembership(activePlan.id);
-      navigate('/member');
+      navigate(`/member/checkout?planId=${activePlan.id}`);
     } catch (e) {
       console.error(e);
     }

@@ -8,6 +8,7 @@ import membersRoutes from './routes/members.routes.js';
 import membershipsRoutes from './routes/memberships.routes.js';
 import checkInsRoutes from './routes/checkIns.routes.js';
 import plansRoutes from './routes/plans.routes.js';
+import paymentRoutes from './routes/payment.routes.js';
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use('/api/v1/me', membersRoutes);
 app.use('/api/v1/me/membership', membershipsRoutes);
 app.use('/api/v1/check-ins', checkInsRoutes);
 app.use('/api/v1/plans', plansRoutes);
+app.use('/api/v1/payments', paymentRoutes);
 
 // Error handling
 app.use(errorHandler);
