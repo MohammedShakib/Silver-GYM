@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { NotificationService } from '../../services/NotificationService';
 import {
   MapPin,
   CreditCard,
@@ -118,11 +119,24 @@ export default function Profile() {
 
   // Notifications state
   const [notifications, setNotifications] = useState({
-    workoutReminders: true,
-    renewalAlerts: true,
-    crowdAlerts: true,
-    emailReceipts: true,
+    membershipEmail: true,
+    paymentEmail: true,
+    checkInEmail: false,
+    supportEmail: true,
+    inAppEnabled: true,
   });
+
+  useEffect(() => {
+    NotificationService.getPreferences().then(prefs => {
+      setNotifications({
+        membershipEmail: prefs.membershipEmail,
+        paymentEmail: prefs.paymentEmail,
+        checkInEmail: prefs.checkInEmail,
+        supportEmail: prefs.supportEmail,
+        inAppEnabled: prefs.inAppEnabled,
+      });
+    }).catch(console.error);
+  }, []);
 
   const toggleLocationDefault = (id) => {
     setSavedLocations(prev =>
@@ -142,8 +156,15 @@ export default function Profile() {
     }
   };
 
-  const toggleNotification = (key) => {
-    setNotifications(prev => ({ ...prev, [key]: !prev[key] }));
+  const toggleNotification = async (key) => {
+    const newVal = !notifications[key];
+    setNotifications(prev => ({ ...prev, [key]: newVal }));
+    try {
+      await NotificationService.updatePreferences({ [key]: newVal });
+    } catch (err) {
+      console.error(err);
+      setNotifications(prev => ({ ...prev, [key]: !newVal })); // revert
+    }
   };
 
   const handleSaveInfo = (e) => {

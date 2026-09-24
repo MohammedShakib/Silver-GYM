@@ -1,4 +1,5 @@
 import prisma from '../utils/prisma.js';
+import EventService from './event.service.js';
 
 export const payoutService = {
   /**
@@ -107,6 +108,27 @@ export const payoutService = {
           metadata: { providerTransferId }
         }
       });
+
+      // Find Gym Owner to notify
+      const gymOwner = await tx.gymStaff.findFirst({
+        where: { gymId: payout.gymId, role: 'OWNER' },
+        include: { gym: true }
+      });
+
+      if (gymOwner) {
+        await EventService.publishEvent({
+          eventType: 'PAYOUT_PAID',
+          aggregateType: 'Payout',
+          aggregateId: payoutId,
+          dedupKey: `payout_paid_${payoutId}`,
+          payload: {
+            userId: gymOwner.memberId,
+            amount: updatedPayout.amount,
+            gymName: gymOwner.gym.name,
+            reference: updatedPayout.reference
+          }
+        }, tx);
+      }
 
       return updatedPayout;
     });

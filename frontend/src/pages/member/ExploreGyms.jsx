@@ -237,12 +237,6 @@ export default function ExploreGyms() {
       }));
   }, [mockGyms]);
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const initialQuery = searchParams.get('q') || '';
-  const initialFilter = searchParams.get('filter');
-
-  const [searchQuery, setSearchQuery] = useState(initialQuery);
-  const [activeFilters, setActiveFilters] = useState(initialFilter ? [initialFilter] : ['Near Me']);
   const [selectedGymId, setSelectedGymId] = useState(null);
   const [hoveredGymId, setHoveredGymId] = useState(null);
   const [sortLabel, setSortLabel] = useState('Recommended');

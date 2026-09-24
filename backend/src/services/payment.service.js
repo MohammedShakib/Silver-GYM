@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import DemoPaymentProvider from '../providers/DemoPaymentProvider.js';
 import * as membershipService from './memberships.service.js';
+import EventService from './event.service.js';
 
 const prisma = new PrismaClient();
 
@@ -116,7 +117,7 @@ export const processPaymentResult = async (paymentId, providerTransactionId, sta
 
   if (status !== 'PAID') {
     // Mark as failed/expired
-    return await prisma.payment.update({
+    const updated = await prisma.payment.update({
       where: { id: paymentId },
       data: {
         status,
@@ -124,6 +125,20 @@ export const processPaymentResult = async (paymentId, providerTransactionId, sta
         failedAt: new Date()
       }
     });
+
+    await EventService.publishEvent({
+      eventType: 'PAYMENT_FAILED',
+      aggregateType: 'Payment',
+      aggregateId: paymentId,
+      dedupKey: `payment_failed_${paymentId}`,
+      payload: {
+        userId: payment.memberId,
+        amount: payment.amount,
+        planName: payment.plan.name
+      }
+    });
+
+    return updated;
   }
 
   // Verify amount matches!
@@ -137,6 +152,19 @@ export const processPaymentResult = async (paymentId, providerTransactionId, sta
         failedAt: new Date()
       }
     });
+
+    await EventService.publishEvent({
+      eventType: 'PAYMENT_FAILED',
+      aggregateType: 'Payment',
+      aggregateId: paymentId,
+      dedupKey: `payment_failed_${paymentId}`,
+      payload: {
+        userId: payment.memberId,
+        amount: payment.amount,
+        planName: payment.plan.name
+      }
+    });
+
     throw new Error('PAYMENT_AMOUNT_MISMATCH');
   }
 
@@ -180,6 +208,34 @@ export const processPaymentResult = async (paymentId, providerTransactionId, sta
         paidAt: new Date()
       }
     });
+
+    // Publish PAYMENT_SUCCESSFUL
+    await EventService.publishEvent({
+      eventType: 'PAYMENT_SUCCESSFUL',
+      aggregateType: 'Payment',
+      aggregateId: paymentId,
+      dedupKey: `payment_success_${paymentId}`,
+      payload: {
+        userId: payment.memberId,
+        amount: payment.amount,
+        reference: providerTransactionId,
+        planName: payment.plan.name,
+        date: new Date().toISOString()
+      }
+    }, tx);
+
+    // Publish MEMBERSHIP_ACTIVATED
+    await EventService.publishEvent({
+      eventType: 'MEMBERSHIP_ACTIVATED',
+      aggregateType: 'Membership',
+      aggregateId: membership.id,
+      dedupKey: `membership_activated_${membership.id}_${paymentId}`,
+      payload: {
+        userId: payment.memberId,
+        planName: payment.plan.name,
+        renewalDate: membership.renewsAt ? membership.renewsAt.toISOString().split('T')[0] : 'N/A'
+      }
+    }, tx);
 
     return updatedPayment;
   });

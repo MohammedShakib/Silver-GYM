@@ -11,6 +11,7 @@ import plansRoutes from './routes/plans.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
 import passRoutes from './routes/pass.routes.js';
 import partnerRoutes from './routes/partner.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use('/api/v1/plans', plansRoutes);
 app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1/pass', passRoutes);
 app.use('/api/v1/partner', partnerRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
 
 // Error handling
 app.use(errorHandler);

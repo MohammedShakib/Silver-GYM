@@ -27,6 +27,7 @@ import MyPass        from './pages/member/MyPass';
 import Activity      from './pages/member/Activity';
 import Membership    from './pages/member/Membership';
 import Profile       from './pages/member/Profile';
+import Notifications from './pages/member/Notifications';
 import Checkout      from './pages/member/Checkout';
 import PaymentVerification from './pages/member/PaymentVerification';
 import SandboxCheckout from './pages/member/SandboxCheckout';
@@ -107,6 +108,7 @@ const router = createBrowserRouter([
       { path: 'activity',              element: <Activity /> },
       { path: 'membership',            element: <Membership /> },
       { path: 'profile',               element: <Profile /> },
+      { path: 'notifications',         element: <Notifications /> },
       { path: 'checkout',              element: <Checkout /> },
       { path: 'payment/verify',        element: <PaymentVerification /> },
     ],

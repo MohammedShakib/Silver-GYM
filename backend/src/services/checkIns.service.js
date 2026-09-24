@@ -1,6 +1,7 @@
 import prisma from '../utils/prisma.js';
 import { ApiError, ErrorCodes } from '../utils/errors.js';
 import { markPassTokenUsed } from './pass.service.js';
+import EventService from './event.service.js';
 
 const TIER_LEVELS = {
   'STANDARD': 1,
@@ -120,6 +121,19 @@ export const processCheckIn = async ({ memberId, gymId, method, idempotencyKey, 
         idempotencyKey
       }
     });
+
+    await EventService.publishEvent({
+      eventType: 'CHECKIN_SUCCESSFUL',
+      aggregateType: 'CheckIn',
+      aggregateId: checkIn.id,
+      dedupKey: `checkin_success_${checkIn.id}`,
+      payload: {
+        userId: memberId,
+        gymName: gym.name,
+        time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+        visitsRemaining: updatedCycle.visitLimit ? updatedCycle.visitLimit - updatedCycle.visitsUsed : 'Unlimited'
+      }
+    }, tx);
 
     return {
       checkIn,

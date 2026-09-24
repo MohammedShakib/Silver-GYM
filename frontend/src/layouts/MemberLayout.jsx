@@ -4,6 +4,8 @@ import { Home, Compass, Activity, CreditCard, User, Bell, MapPin, QrCode, X, Ref
 import { mockUser } from '../services/mockData';
 import BrandLogo from '../components/brand/BrandLogo';
 import DigitalPassCard from '../components/pass/DigitalPassCard';
+import NotificationDropdown from '../components/common/NotificationDropdown';
+import { NotificationService } from '../services/NotificationService';
 
 const TOP_NAV = [
   { to: '/member', label: 'Home', icon: Home, exact: true },
@@ -24,6 +26,23 @@ export default function MemberLayout() {
   const { pathname, hash } = useLocation();
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   const [seconds, setSeconds] = useState(30);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const fetchUnread = async () => {
+      try {
+        const count = await NotificationService.getUnreadCount();
+        setUnreadCount(count);
+      } catch (err) {
+        console.error('Failed to fetch unread notifications count', err);
+      }
+    };
+    
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const isActive = (to, exact = false) => {
     if (exact || to === '/member') {
@@ -160,36 +179,56 @@ export default function MemberLayout() {
               <span>My Pass</span>
             </button>
 
-            <Link
-              to="/member/activity"
-              title="Recent alerts & activity"
-              style={{
-                background: 'none',
-                border: '1px solid var(--border-subtle)',
-                cursor: 'pointer',
-                position: 'relative',
-                width: 36,
-                height: 36,
-                borderRadius: 'var(--r-full)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--text-secondary)',
-                transition: 'background .15s',
-              }}
-            >
-              <Bell size={16} />
-              <span style={{
-                position: 'absolute',
-                top: 7,
-                right: 7,
-                width: 7,
-                height: 7,
-                background: 'var(--status-error)',
-                borderRadius: '50%',
-                border: '1.5px solid white',
-              }} />
-            </Link>
+            <div style={{ position: 'relative' }}>
+              <button
+                type="button"
+                onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                title="Notifications"
+                style={{
+                  background: isNotificationOpen ? 'var(--bg-subtle)' : 'none',
+                  border: '1px solid var(--border-subtle)',
+                  cursor: 'pointer',
+                  width: 36,
+                  height: 36,
+                  borderRadius: 'var(--r-full)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: isNotificationOpen ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  transition: 'background .15s, color .15s',
+                }}
+              >
+                <Bell size={16} />
+                {unreadCount > 0 && (
+                  <span style={{
+                    position: 'absolute',
+                    top: -2,
+                    right: -2,
+                    background: 'var(--status-error)',
+                    color: 'white',
+                    fontSize: '10px',
+                    fontWeight: 800,
+                    minWidth: 16,
+                    height: 16,
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0 4px',
+                    border: '1.5px solid var(--bg-surface)',
+                  }}>
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {isNotificationOpen && (
+                <NotificationDropdown onClose={() => {
+                  setIsNotificationOpen(false);
+                  NotificationService.getUnreadCount().then(setUnreadCount).catch(console.error);
+                }} />
+              )}
+            </div>
 
             <Link to="/member/profile" title="My Account" style={{ display: 'flex', alignItems: 'center' }}>
               <img
