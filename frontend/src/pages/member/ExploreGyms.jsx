@@ -476,7 +476,12 @@ export default function ExploreGyms() {
 
     mapRef.current = map;
 
+    // Force map to recalculate size after first render when container dimensions may have settled
+    const raf = requestAnimationFrame(() => {
+      if (mapRef.current) mapRef.current.resize();
+    });
     return () => {
+      cancelAnimationFrame(raf);
       clearHoverReset();
       Object.values(markerRefs.current).forEach(({ marker }) => marker.remove());
       markerRefs.current = {};
@@ -520,7 +525,7 @@ export default function ExploreGyms() {
   }
 
   return (
-    <div style={{ display: 'flex', height: 'calc(100vh - var(--header-h))', overflow: 'hidden', position: 'relative' }} className="anim-fade explore-container">
+    <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative', minHeight: 0 }} className="anim-fade explore-container">
       <div className="show-mobile" style={{
         position: 'absolute',
         top: 14,
@@ -815,7 +820,7 @@ export default function ExploreGyms() {
         style={{ flex: 1, position: 'relative', overflow: 'hidden', height: '100%' }}
       >
         <div className="map-surface map-live-surface" style={{ width: '100%', height: '100%' }}>
-          <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
+          <div ref={mapContainerRef} style={{ width: '100%', height: '100%', minHeight: 400 }} />
 
           {showSearchArea && (
             <div style={{ position: 'absolute', top: 18, left: '50%', transform: 'translateX(-50%)', zIndex: 8 }}>

@@ -99,7 +99,7 @@ export default function MemberLayout() {
   }, [isPassModalOpen]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-base)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', background: 'var(--bg-base)', overflow: 'hidden' }}>
       <header style={{
         position: 'sticky',
         top: 0,
@@ -248,7 +248,7 @@ export default function MemberLayout() {
         </div>
       </header>
 
-      <main style={{ flex: 1, paddingBottom: 80 }}>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
         <Outlet />
       </main>
 
