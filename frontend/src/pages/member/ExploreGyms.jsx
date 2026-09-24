@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo, useContext } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, SlidersHorizontal, MapPin, ChevronDown, Check, LocateFixed, Navigation, Star, Map, List, RotateCcw } from 'lucide-react';
 import * as maplibregl from 'maplibre-gl';
@@ -9,6 +9,7 @@ import { openDirections } from '../../utils/browserActions';
 import { useGyms } from '../../hooks/useGyms';
 import { useCurrentMember } from '../../hooks/useCurrentMember';
 import { useMembership } from '../../hooks/useMembership';
+import { LocationContext } from '../../context/LocationContext';
 
 const PRIMARY_FILTERS = ['Near Me', 'Open Now', 'Within 2 km', 'Low Crowd', 'Included In My Plan', '4.5+'];
 const EXTRA_FILTERS = ['Women Friendly', 'Pool', 'Trainer'];
@@ -160,10 +161,8 @@ function MapGymPreview({ gym }) {
   );
 }
 
-import { LocationContext } from '../../context/LocationContext';
-
 export default function ExploreGyms() {
-  const { location } = React.useContext(LocationContext);
+  const { location } = useContext(LocationContext);
   const [mapBounds, setMapBounds] = useState(null);
   
   const [searchParams, setSearchParams] = useSearchParams();

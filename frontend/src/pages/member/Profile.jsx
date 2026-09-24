@@ -94,13 +94,10 @@ export default function Profile() {
   const navigate = useNavigate();
   const [feedbackNotice, setFeedbackNotice] = useState('');
 
-  if (isLoading) return <div style={{ padding: 'var(--sp-12)', textAlign: 'center' }}>Loading profile...</div>;
-  if (!mockUser) return null;
-
   // Editable personal info state
   const [isEditingInfo, setIsEditingInfo] = useState(false);
   const [personalInfo, setPersonalInfo] = useState({
-    name: mockUser.name,
+    name: mockUser?.name || '',
     email: 'alex.rahman@example.com',
     phone: '+880 1712-345678',
     emergencyContact: 'Fatima Rahman (+880 1819-876543)',
@@ -137,6 +134,9 @@ export default function Profile() {
       });
     }).catch(console.error);
   }, []);
+
+  if (isLoading) return <div style={{ padding: 'var(--sp-12)', textAlign: 'center' }}>Loading profile...</div>;
+  if (!mockUser) return null;
 
   const toggleLocationDefault = (id) => {
     setSavedLocations(prev =>
