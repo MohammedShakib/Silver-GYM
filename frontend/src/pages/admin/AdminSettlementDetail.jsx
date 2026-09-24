@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { adminApi } from '../../../services/adminApi';
-import Skeleton from '../../ui/Skeleton';
+import { adminApi } from '../../services/adminApi';
+import Skeleton from '../../components/ui/Skeleton';
 import { ArrowLeft, Check, Plus, AlertTriangle, CreditCard } from 'lucide-react';
 
 export default function AdminSettlementDetail() {

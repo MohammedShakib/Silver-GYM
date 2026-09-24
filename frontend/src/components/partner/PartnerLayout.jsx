@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { usePartnerGym } from '../../context/PartnerGymContext';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../contexts/AuthContext';
 import { LayoutDashboard, Users, Scan, BarChart2, DollarSign, Settings, Star, UserPlus, LogOut, ChevronDown } from 'lucide-react';
 import Skeleton from '../ui/Skeleton';
 

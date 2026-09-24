@@ -239,7 +239,7 @@ export default function ExploreGyms() {
 
   const [selectedGymId, setSelectedGymId] = useState(null);
   const [hoveredGymId, setHoveredGymId] = useState(null);
-  const [sortLabel, setSortLabel] = useState('Recommended');
+
   const [showExtraFilters, setShowExtraFilters] = useState(false);
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [showSearchArea, setShowSearchArea] = useState(false);

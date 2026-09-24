@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { adminApi } from '../../../services/adminApi';
-import Skeleton from '../../ui/Skeleton';
+import { adminApi } from '../../services/adminApi';
+import Skeleton from '../../components/ui/Skeleton';
 
 export default function AdminPayouts() {
   const [payouts, setPayouts] = useState([]);

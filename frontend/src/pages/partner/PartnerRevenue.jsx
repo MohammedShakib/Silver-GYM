@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePartnerGym } from '../../context/PartnerGymContext';
 import { partnerApi } from '../../services/partnerApi';
-import Skeleton from '../ui/Skeleton';
+import Skeleton from '../../components/ui/Skeleton';
 import { DollarSign, FileText, CheckCircle, Clock } from 'lucide-react';
 
 export default function PartnerRevenue() {

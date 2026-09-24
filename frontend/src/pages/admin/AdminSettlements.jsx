@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { adminApi } from '../../../services/adminApi';
-import Skeleton from '../../ui/Skeleton';
+import { adminApi } from '../../services/adminApi';
+import Skeleton from '../../components/ui/Skeleton';
 import { FileText, Plus, CheckCircle, Search } from 'lucide-react';
 
 export default function AdminSettlements() {

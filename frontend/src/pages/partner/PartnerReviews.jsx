@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { usePartnerGym } from '../../context/PartnerGymContext';
 import { partnerApi } from '../../services/partnerApi';
-import Skeleton from '../ui/Skeleton';
+import Skeleton from '../../components/ui/Skeleton';
 import { Star, MessageSquare } from 'lucide-react';
 
 export default function PartnerReviews() {
