@@ -5,7 +5,7 @@ import { ApiError } from '../utils/errors.js';
 export const createCheckIn = async (req, res, next) => {
   try {
     const { token, idempotencyKey } = req.body;
-    const memberId = req.memberId;
+    const memberId = req.auth.userId;
     
     if (!token) throw new ApiError(400, 'MISSING_TOKEN', 'Gym QR token is required');
 
@@ -29,7 +29,7 @@ import prisma from '../utils/prisma.js';
 
 export const getHistory = async (req, res, next) => {
   try {
-    const memberId = req.memberId;
+    const memberId = req.auth.userId;
     const checkIns = await prisma.checkIn.findMany({
       where: { memberId },
       include: { gym: { select: { name: true, logoUrl: true } } },

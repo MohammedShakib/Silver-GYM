@@ -2,7 +2,7 @@ import { getMemberProfile, getMemberActivity, getMemberSavedGyms, saveGym, unsav
 
 export const getMe = async (req, res, next) => {
   try {
-    const profile = await getMemberProfile(req.memberId);
+    const profile = await getMemberProfile(req.auth.userId);
     res.json(profile);
   } catch (error) {
     next(error);
@@ -11,7 +11,7 @@ export const getMe = async (req, res, next) => {
 
 export const getMyActivity = async (req, res, next) => {
   try {
-    const activity = await getMemberActivity(req.memberId);
+    const activity = await getMemberActivity(req.auth.userId);
     res.json(activity);
   } catch (error) {
     next(error);
@@ -20,7 +20,7 @@ export const getMyActivity = async (req, res, next) => {
 
 export const getSavedGyms = async (req, res, next) => {
   try {
-    const savedGyms = await getMemberSavedGyms(req.memberId);
+    const savedGyms = await getMemberSavedGyms(req.auth.userId);
     res.json(savedGyms);
   } catch (error) {
     next(error);
@@ -31,10 +31,10 @@ export const toggleSavedGym = async (req, res, next) => {
   try {
     const { gymId } = req.params;
     if (req.method === 'POST') {
-      const saved = await saveGym(req.memberId, gymId);
+      const saved = await saveGym(req.auth.userId, gymId);
       res.json(saved);
     } else {
-      await unsaveGym(req.memberId, gymId);
+      await unsaveGym(req.auth.userId, gymId);
       res.status(204).send();
     }
   } catch (error) {

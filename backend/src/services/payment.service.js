@@ -5,8 +5,17 @@ import EventService from './event.service.js';
 
 const prisma = new PrismaClient();
 
-// In a real app, you'd instantiate based on config/env
-const provider = new DemoPaymentProvider();
+let provider;
+if (process.env.PAYMENT_PROVIDER === 'DEMO' || process.env.PAYMENT_PROVIDER === 'SANDBOX' || process.env.NODE_ENV !== 'production') {
+  provider = new DemoPaymentProvider();
+} else {
+  // In a real app, instantiate the actual production provider here (e.g. Stripe, SSLCommerz)
+  // For now, fail fast if it's not configured correctly
+  provider = {
+    createPayment: () => { throw new Error('Real payment provider not implemented yet'); },
+    handleWebhook: () => { throw new Error('Real payment provider not implemented yet'); }
+  };
+}
 
 /**
  * Initiate a checkout session for a membership plan

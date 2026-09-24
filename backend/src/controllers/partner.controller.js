@@ -7,7 +7,7 @@ export const verifyMemberPass = async (req, res, next) => {
   try {
     const { gymId } = req.params;
     const { token, idempotencyKey } = req.body;
-    const staffId = req.memberId;
+    const staffId = req.auth.userId;
 
     if (!token) throw new ApiError(400, 'MISSING_TOKEN', 'Pass token is required');
 
