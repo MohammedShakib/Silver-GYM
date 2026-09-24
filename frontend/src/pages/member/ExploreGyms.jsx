@@ -15,7 +15,7 @@ const PRIMARY_FILTERS = ['Near Me', 'Open Now', 'Within 2 km', 'Low Crowd', 'Inc
 const EXTRA_FILTERS = ['Women Friendly', 'Pool', 'Trainer'];
 const SORT_OPTIONS = ['Recommended', 'Nearest', 'Highest Rated', 'Least Crowded'];
 
-const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
+const MAP_STYLE_URL = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 const DEFAULT_MAP_CENTER = [90.4125, 23.8103]; // Dhaka
 
 
