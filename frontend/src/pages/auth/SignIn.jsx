@@ -14,6 +14,19 @@ export default function SignIn() {
   const location = useLocation();
   const { login } = useAuth();
 
+  const handleLoginSuccess = (user) => {
+    const from = location.state?.from?.pathname;
+    if (from) {
+      navigate(from, { replace: true });
+    } else if (user.role === 'ADMIN') {
+      navigate('/admin', { replace: true });
+    } else if (user.role === 'GYM_OWNER') {
+      navigate('/partner', { replace: true });
+    } else {
+      navigate('/member', { replace: true });
+    }
+  };
+
   const handleSignIn = async (e) => {
     e.preventDefault();
     setError('');
@@ -22,16 +35,22 @@ export default function SignIn() {
     const res = await login(email, password);
     
     if (res.success) {
-      const from = location.state?.from?.pathname;
-      if (from) {
-        navigate(from, { replace: true });
-      } else if (res.user.role === 'ADMIN') {
-        navigate('/admin', { replace: true });
-      } else if (res.user.role === 'GYM_OWNER') {
-        navigate('/partner', { replace: true });
-      } else {
-        navigate('/member', { replace: true });
-      }
+      handleLoginSuccess(res.user);
+    } else {
+      setError(res.error || 'Invalid credentials');
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDemoSignIn = async (demoEmail) => {
+    setError('');
+    setIsSubmitting(true);
+    setEmail(demoEmail);
+    setPassword('password123');
+    
+    const res = await login(demoEmail, 'password123');
+    if (res.success) {
+      handleLoginSuccess(res.user);
     } else {
       setError(res.error || 'Invalid credentials');
       setIsSubmitting(false);
@@ -99,6 +118,22 @@ export default function SignIn() {
           Don't have an account?{' '}
           <Link to="/join" style={{ color: 'var(--sg-green)', fontWeight: 600 }}>Join Silver GYM</Link>
         </p>
+
+        {/* Demo Login Buttons */}
+        <div style={{ marginTop: '32px', padding: '16px', background: '#161B22', borderRadius: '12px', border: '1px solid #30363D' }}>
+          <p style={{ fontSize: '13px', color: '#8B949E', marginBottom: '12px', textAlign: 'center', fontWeight: 600 }}>QUICK DEMO ACCESS</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <button type="button" onClick={() => handleDemoSignIn('alex@example.com')} className="btn btn-secondary btn-full" style={{ justifyContent: 'center' }} disabled={isSubmitting}>
+              Login as Member
+            </button>
+            <button type="button" onClick={() => handleDemoSignIn('owner@silvergym.test')} className="btn btn-secondary btn-full" style={{ justifyContent: 'center' }} disabled={isSubmitting}>
+              Login as Partner
+            </button>
+            <button type="button" onClick={() => handleDemoSignIn('admin@silvergym.test')} className="btn btn-secondary btn-full" style={{ justifyContent: 'center' }} disabled={isSubmitting}>
+              Login as Admin
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Right - Visual */}
