@@ -19,7 +19,7 @@ Silver GYM is a full-stack platform that allows members to access multiple premi
 
 ## ✨ Features
 
-- **Multi-Gym Access:** Browse, filter, and explore partner gyms included in your active plan.
+- **Multi-Gym Access:** Browse, filter, and explore 150+ verified partner gyms included in your active plan.
 - **Dynamic Check-in Flow:** QR-code-based digital pass and a beautifully animated check-in simulation.
 - **Activity & Analytics:** Track your weekly workouts, streaks, and gym visits with visual charts.
 - **Modern UI/UX:** Built with a custom design system, glassmorphism elements, CSS variables, and Lucide React icons.

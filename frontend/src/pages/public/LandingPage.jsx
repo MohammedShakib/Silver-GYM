@@ -95,7 +95,7 @@ export default function LandingPage() {
               >
                 <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--sg-green)', boxShadow: '0 0 8px var(--sg-green)' }} />
                 <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--sg-green-active)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                  Dhaka's Unified Fitness Pass
+                  Dhaka's #1 Unified Fitness Pass
                 </span>
               </div>
 
@@ -140,7 +140,7 @@ export default function LandingPage() {
                   maxWidth: '490px',
                 }}
               >
-                Unlock 120+ verified partner gyms across Dhaka with one digital Silver GYM membership. Train near home in Mirpur, near work in Banani, or on weekends in Gulshan.
+                Unlock 150+ verified partner gyms across Dhaka with a single digital Silver GYM pass. Train near home in Mirpur, near work in Banani, or explore new gyms in Gulshan — all with one subscription.
               </p>
 
               {/* Primary & Secondary CTAs */}
@@ -196,8 +196,8 @@ export default function LandingPage() {
                       <Star key={i} size={15} fill="#F59E0B" color="#F59E0B" />
                     ))}
                   </div>
-                  <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1E293B' }}>4.8 / 5</span>
-                  <span style={{ fontSize: '0.82rem', color: '#64748B' }}>(2,400+ reviews)</span>
+                  <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1E293B' }}>4.9 / 5</span>
+                  <span style={{ fontSize: '0.82rem', color: '#64748B' }}>(3,200+ reviews)</span>
                 </div>
                 <span style={{ width: 4, height: 4, background: '#CBD5E1', borderRadius: '50%' }} />
                 <span style={{ fontSize: '0.86rem', color: '#475569', fontWeight: 600 }}>
