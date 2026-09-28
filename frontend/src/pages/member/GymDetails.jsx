@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Heart, Share, MapPin, Clock, Users, Star, CheckCircle, Navigation, ChevronRight } from 'lucide-react';
 import { useGym } from '../../hooks/useGym';
@@ -7,7 +7,6 @@ import { useMembership } from '../../hooks/useMembership';
 import { EligibilityService } from '../../services/EligibilityService';
 import { useSavedGyms } from '../../hooks/useSavedGyms';
 import { openDirections, sharePage } from '../../utils/browserActions';
-import React, { useContext } from 'react';
 import { LocationContext } from '../../context/LocationContext';
 import { calculateDistanceKm, estimateTravelTime } from '../../utils/geo';
 
@@ -26,6 +25,7 @@ export default function GymDetails() {
   const [activeTab, setActiveTab] = useState('about');
   const [shareFeedback, setShareFeedback] = useState('');
   const { isSaved, toggleSavedGym } = useSavedGyms();
+  const { location } = useContext(LocationContext);
 
   if (gymLoading || memberLoading) {
     return <div style={{ padding: 'var(--sp-12)', textAlign: 'center' }}>Loading gym details...</div>;
@@ -42,7 +42,6 @@ export default function GymDetails() {
   const currentHour = new Date().getHours();
   const todayHour = Math.min(currentHour - 6, 23);
 
-  const { location } = useContext(LocationContext);
   const distanceRaw = gym.latitude && gym.longitude && location
     ? calculateDistanceKm(location.latitude, location.longitude, gym.latitude, gym.longitude)
     : gym.distance;
